@@ -1,5 +1,5 @@
 *.csv
 *.npy
 .DS_Store
-.ipynb_checkpoints/*
-.ipynb_checkpoints
+.ipynb_checkpoints/StandardizingAKIDefinition-checkpoint.ipynb
+.ipynb_checkpoints/ValidatingAKIFlagger-checkpoint.ipynb
