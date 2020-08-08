@@ -5,36 +5,56 @@ def returnAKIpatients(df,
                       aki_calc_type = 'both', keep_extra_cols = True, 
                       cond1time = '48hours', cond2time = '168hours', eGFR_impute = False, add_stages=True):
     '''
-    Example function with types documented in the docstring.
+    Returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
 
-    `PEP 484`_ type annotations are supported. If attribute, parameter, and
-    return types are annotated according to `PEP 484`_, they do not need to be
-    included in the docstring:
+    * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
+    * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 48 hours
+    * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 48 hours
 
-    Parameters
-    ----------
-    param1 : int
-        The first parameter.
-    param2 : str
-        The second parameter.
+    Args: 
 
-    Returns
-    -------
-    df
-        dataframe with AKI patients added in 
+        df (pd.DataFrame): Patient dataframe, should include some sort of patient and encounter identifier(s) and age, sex, race, serum creatinine and timestamps.
+        aki_calc_type (str): string, "rolling_window", "back_calculate", and "both" are the acceptable values, corresponding to the desired AKI calculation type to be returned.
+        keep_extra_cols (bool): boolean, default True. 
+            Choose whether or not to keep the extra columns added in the calculation process. The extra columns added throughout the process are:
+            (1) the minimum creatinine in the 48 hour rolling window period
+            (2) the minimum creatinine in the 7 day rolling window period
+            (3) the change in creatinine between the creatinine at the given timestamp and the minimum of the previous 48 hours
+            (4) the change in creatinine between the creatinine at the given timestamp and the minimum of the previous 7 days
+            (5) The imputed baseline creatinine value
 
-    .. _PEP 484:
-        https://www.python.org/dev/peps/pep-0484/
+        cond1time (str): string, default '48hours'. 
+            The amount of time for the rolling-window according to the first criterion; i.e. 0.3 increase in creatinine in *cond1time* hours. 
+        cond2time (str): string, default '168hours'. 
+            The amount of time for the rolling-window according to the second criterion; i.e. 50% increase in creatinine in *cond2time* hours.
+        eGFR_impute (bool): boolean, default False. 
+            Choose whether or not to impute baseline creatinine values for those who have no outpatient creatinine values from 365 - 7 days prior to admission.
+        add_stages (bool): boolean, default True. 
+            Choose whether or not to break the rolling-window AKI into the three stages as defined above.
 
+    Returns:
+        df (pd.DataFrame): Patient dataframe with AKI patients identified. 
+
+    Raises:
+        AssertionError: If the dataframe is missing an expected column; e.g. if there is no age/sex/race and eGFR_impute is True.
 
     '''
     
     #First, check if column names (mrn, enc, creatinine, admission & time) are as we want it
     assert ('mrn' or 'MRN' or 'pat_mrn_id' or 'PAT_MRN_ID') in df.columns
-    #assert ('enc' or 'ENC' or 'pat_enc_csn_id' or 'PAT_ENC_CSN_ID') in df.columns
+    assert ('enc' or 'ENC' or 'pat_enc_csn_id' or 'PAT_ENC_CSN_ID') in df.columns
+
+    assert ('creat' or 'creatinine') in df.columns
+    assert 'time' in df.columns
+    assert 'admission' in df.columns
+
+    #Also, if eGFR_impute is True, then we need sex age and race
+    if eGFR_impute:
+        assert ('age' and 'race' and 'sex') in df.columns
+    
     
     if aki_calc_type == 'both': 
-        df = df.groupby('mrn', sort=False).apply(lambda d: addRollingWindowAKI(d,#enc vs mrn
+        df = df.groupby('mrn', sort=False).apply(lambda d: addRollingWindowAKI(d,
                                                                               cond1time = cond1time,
                                                                               cond2time = cond2time))
         df = df.reset_index('mrn', drop=True).reset_index()
@@ -67,10 +87,15 @@ def returnAKIpatients(df,
 def addBaselineCreat(df, eGFR_impute = False):
     '''
     Adds the baseline creatinine to a dataframe. The baseline creatinine is defined as the median of the outpatient 
-     creatinine values from 365 to 7 days prior to admission.
+    creatinine values from 365 to 7 days prior to admission.
     
-    Input: dataframe (typically of a single patient)
-    Output: dataframe with baseline creatinine column added in
+    Args: 
+        df (pd.DataFrame): dataframe, typically of a single patient.
+        eGFR_impute (bool): boolean, whether or not to impute the null baseline creatinines with the age/sex/race and eGFR of 75
+        
+    Returns: 
+        df (pd.DataFrame): dataframe with baseline creatinine values added in
+
     '''
     split_dfs = list()
     for adm in df.admission.unique():
@@ -89,13 +114,14 @@ def addBackCalcAKI(df,
                    cond2time = '168hours'):
     '''
     Adds the back-calculated AKI conditions, the KDIGO standards on the outpatient values;
-    i.e. a 50% increase from baseline creatinine in <7 days
+    i.e. a 50% increase from baseline creatinine in <7 days. Back-calculated AKI is based on the baseline creatinine, defined in the addBaselineCreat() function.
     
-    Input: dataframe (typically of a single encounter)
-    Output: dataframe with back-calculated aki values added in
+    Args: 
+        df (pd.DataFrame): dataframe, typically of a single encounter. 
+
+    Returns: 
+        df (pd.DataFrame): dataframe with back-calculated aki values added in
     '''
-    #backcalc_aki = np.empty(df.shape[0])
-    #backcalc_aki[:] = np.nan
     
     df = df.reset_index(drop=True).set_index('time')
     df = df[~df.index.duplicated()]
@@ -107,12 +133,24 @@ def addBackCalcAKI(df,
 def addRollingWindowAKI(df, add_stages = True,
                         cond1time = '48hours', cond2time = '168hours'):
     '''
-    Adds the AKI conditions based on rolling window definition: 0.3 creat increase in < 48 hrs OR 50% increase in < 7 days
+    Adds the AKI conditions based on rolling window definition: 
+
+    * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
+    * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 48 hours
+    * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 48 hours
     
-    Input: dataframe (typically of a single encounter)
-    Output: dataframe with rolling-window aki values added in
+    Args: 
+        df (pd.DataFrame): dataframe, typically of a single encounter.
+        add_stages (bool): boolean, default **True**. 
+            Choose whether or not to delineate the rolling-window AKI into the three stages (if False it will just lump Stage 1/2/3 into a boolean True/False)
+        cond1time (str): string, default **'48hours'**. 
+            The amount of time for the rolling-window according to the first criterion; i.e. 0.3 increase in creatinine in ``cond1time`` hours. 
+        cond2time (str): string, default **'168hours'**. 
+            The amount of time for the rolling-window according to the second criterion; i.e. 50% increase in creatinine in ``cond2time`` hours.
+            
+    Returns: 
+        df (pd.DataFrame): dataframe with rolling-window aki values added in
     '''
-    #df = df[~df.duplicated()]
     df = df.set_index('time').sort_index()
     #df = df[~df.duplicated()]
     df_rw = df.loc[df.admission[0] - pd.Timedelta(hours=172):]
@@ -131,31 +169,63 @@ def addRollingWindowAKI(df, add_stages = True,
     
     if add_stages:
         df['stage1'] = (df.deltacreat_48hr >= 0.3) | (df.deltacreat_7day >= 0.5*df.mincreat_7day)
-        df['stage2'] = df.deltacreat_48hr >= 2*df.deltacreat_48hr
-        df['stage3'] = df.deltacreat_48hr >= 3*df.deltacreat_48hr
+        df['stage2'] = df.deltacreat_48hr >= 2*df.mincreat_48hr
+        df['stage3'] = df.deltacreat_48hr >= 3*df.mincreat_48hr
     return df
 
 def eGFRbasedCreatImputation(age, sex, race):
+    '''
+    Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admisison.
+    The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ 
+    from the paper *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)* linked below. 
+
+    We assume a GFR of 75 (mL/min/1.73 m^2) and then estimate a creatinine value based on the patient demographics.
+
+    Equation: https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating
+    
+    Full paper: https://pubmed.ncbi.nlm.nih.gov/19414839/
+
+    Args:
+        age (float or array of floats): the age(s) of the patient(s).
+        sex (bool or array of bools): whether or not the patient is female (female is True).
+        race (bool or array of bools): whether or not the patient is black (black is True).
+
+    Returns:
+        creat (float or array of floats): the imputed creatinine value(s) of the patient(s).
+    '''
+    #The constants kappa and alpha correspond to those used by the authors and the CKD-EPI equation, linked in the docstrings
     kappa  = (0.9 - 0.2*sex)
     alpha  = (-0.411+0.082*sex)
     creat_over_kappa = 75/(141*(1 + 0.018*sex)*(1 + 0.159*race)*0.993**age)
     
+    #Note that if creat/kappa is < 1 then the equation simplifies to creat_over_kappa = (creat/kappa)**(-1.209)
+    # and if creat/kappa is > 1 then the equation simplifies to (creat/kappa)**alpha. Thus, we can replace the min(~)max(~)
+    #statements with the following check to define the creatinine.
     if creat_over_kappa < 1:
         creat = kappa*creat_over_kappa**(-1/1.209)
     elif creat_over_kappa >= 1:
         creat = kappa*creat_over_kappa**(1/alpha)
     return creat
 
-def eGFR(creat, age, female, black):
+def eGFR(creat, age, female, black): 
     '''
-    Calculates the estimated glomerular filtration rate based on the serum creatinine levels, age, sex, and race (black or not black);
-    Based on the formula in the paper A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009) linked below
+    Calculates the estimated glomerular filtration rate based on the serum creatinine levels, age, sex, and race.
+    Based on the formula in the paper A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009) linked below.
     
     Equation: https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating
+    
     Full paper: https://pubmed.ncbi.nlm.nih.gov/19414839/
     
-    
+    Args:
+        creat (float or array of floats): the creatinine value(s) of the patient(s).
+        age (float or array of floats): the age(s) of the patient(s).
+        female (bool or array of bools): whether or not the patient is female (female is True).
+        black (bool or array of bools): whether or not the patient is black (black is True).
+
+    Returns:
+        egfr (float or array of floats):
     '''
+    
     min_ck = np.clip(creat/(0.9-0.2*female), a_min=None, a_max=1) #Equivalent to min(cr/k, 1)
     max_ck = np.clip(creat/(0.9-0.2*female), a_min=1, a_max=None) #Equivalent to max(cr/k, 1)
     
@@ -163,4 +233,4 @@ def eGFR(creat, age, female, black):
     
     egfr = 141*(0.993**age)*(min_ck**alpha)*(max_ck**-1.209)*(1+female*0.018)*(1+black*0.159)
     
-    return np.round(egfr, decimals=5) #Helper function to ensure eGFRBasedImputation() works as expected
+    return np.round(egfr, decimals=5) 
