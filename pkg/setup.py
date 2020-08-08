@@ -4,7 +4,7 @@ with open('README.md', 'r') as f:
       long_description = f.read() 
 setup(
       name = 'akiFlagger',
-      version = '0.0.1',
+      version = '0.0.2',
       description = 'Flagger to detect patients with acute kidney injury (AKI).',
       py_modules = ['akiFlagger'],
       package_dir = {'':'src'},
@@ -21,7 +21,5 @@ setup(
             "numpy",
             "pandas"
       ],
-      url = 'https://github.com/isaranwrap/StandardizingAKI',
-      author = 'Ishan Saran',
-      author_email = 'isaranwrap@gmail.com',   
+      url = 'https://github.com/isaranwrap/StandardizingAKI'
 )

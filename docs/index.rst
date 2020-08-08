@@ -13,6 +13,8 @@ Welcome to the akiFlagger documentation!
    
    usage/installation
    usage/quickstart
+   license
+   help
 
 Introduction
 ------------

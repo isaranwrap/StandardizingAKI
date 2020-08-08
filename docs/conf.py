@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'akiFlagger'
-copyright = 'Creative Commons' 
+copyright = 'MIT License' 
 author = 'Ishan Saran'
 
 # The full version, including alpha/beta/rc tags

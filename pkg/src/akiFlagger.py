@@ -7,24 +7,30 @@ def returnAKIpatients(df,
     '''
     Returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
 
-    ~KDIGO guidelines will go here~ & any additional information
+    * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
+    * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 48 hours
+    * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 48 hours
 
     Args: 
+
         df (pd.DataFrame): Patient dataframe, should include some sort of patient and encounter identifier(s) and age, sex, race, serum creatinine and timestamps.
         aki_calc_type (str): string, "rolling_window", "back_calculate", and "both" are the acceptable values, corresponding to the desired AKI calculation type to be returned.
-        keep_extra_cols (bool): boolean, default True. Choose whether or not to keep the extra columns added in the calculation process. The extra columns added throughout the process are:
-            Rolling-window AKI
-            ------------------
-            (1) the minimum creatinine in the two specified rolling-window periods (48 hours and 7 days, by default)
-            (2) the change in creatinine between the creatinine at the given timestamp and the minimum of the previous 48 hours and 7 days
-            
-            Back-calculated
-            ---------------
-            (1) The imputed baseline creatinine value
-        cond1time (str): string, default '48hours'. The amount of time for the rolling-window according to the first criterion; i.e. 0.3 increase in creatinine in *cond1time* hours. 
-        cond2time (str): string, default '168hours'. The amount of time for the rolling-window according to the second criterion; i.e. 50% increase in creatinine in *cond2time* hours.
-        eGFR_impute (bool): boolean, default False. Choose whether or not to impute baseline creatinine values for those who have no outpatient creatinine values from 365 - 7 days prior to admission.
-        add_stages (bool): boolean, default True. Choose whether or not to break the rolling-window AKI into the three stages as defined above.
+        keep_extra_cols (bool): boolean, default True. 
+            Choose whether or not to keep the extra columns added in the calculation process. The extra columns added throughout the process are:
+            (1) the minimum creatinine in the 48 hour rolling window period
+            (2) the minimum creatinine in the 7 day rolling window period
+            (3) the change in creatinine between the creatinine at the given timestamp and the minimum of the previous 48 hours
+            (4) the change in creatinine between the creatinine at the given timestamp and the minimum of the previous 7 days
+            (5) The imputed baseline creatinine value
+
+        cond1time (str): string, default '48hours'. 
+            The amount of time for the rolling-window according to the first criterion; i.e. 0.3 increase in creatinine in *cond1time* hours. 
+        cond2time (str): string, default '168hours'. 
+            The amount of time for the rolling-window according to the second criterion; i.e. 50% increase in creatinine in *cond2time* hours.
+        eGFR_impute (bool): boolean, default False. 
+            Choose whether or not to impute baseline creatinine values for those who have no outpatient creatinine values from 365 - 7 days prior to admission.
+        add_stages (bool): boolean, default True. 
+            Choose whether or not to break the rolling-window AKI into the three stages as defined above.
 
     Returns:
         df (pd.DataFrame): Patient dataframe with AKI patients identified. 
@@ -88,8 +94,8 @@ def addBaselineCreat(df, eGFR_impute = False):
     creatinine values from 365 to 7 days prior to admission.
     
     Args: 
-        df (pd.DataFrame): dataframe, typically of a single patient)
-        eGFR_impute (bool): boolean, whether or not to impute the null baseline creaitnines with the age/sex/race and eGFR of 75
+        df (pd.DataFrame): dataframe, typically of a single patient.
+        eGFR_impute (bool): boolean, whether or not to impute the null baseline creatinines with the age/sex/race and eGFR of 75
         
     Returns: 
         df (pd.DataFrame): dataframe with baseline creatinine values added in
@@ -112,10 +118,13 @@ def addBackCalcAKI(df,
                    cond2time = '168hours'):
     '''
     Adds the back-calculated AKI conditions, the KDIGO standards on the outpatient values;
-    i.e. a 50% increase from baseline creatinine in <7 days
+    i.e. a 50% increase from baseline creatinine in <7 days. Back-calculated AKI is based on the baseline creatinine, defined in the addBaselineCreat() function.
     
-    Input: dataframe (typically of a single encounter)
-    Output: dataframe with back-calculated aki values added in
+    Args: 
+        df (pd.DataFrame): dataframe, typically of a single encounter. 
+
+    Returns: 
+        df (pd.DataFrame): dataframe with back-calculated aki values added in
     '''
     #backcalc_aki = np.empty(df.shape[0])
     #backcalc_aki[:] = np.nan
@@ -130,10 +139,23 @@ def addBackCalcAKI(df,
 def addRollingWindowAKI(df, add_stages = True,
                         cond1time = '48hours', cond2time = '168hours'):
     '''
-    Adds the AKI conditions based on rolling window definition: 0.3 creat increase in < 48 hrs OR 50% increase in < 7 days
+    Adds the AKI conditions based on rolling window definition: 
+
+    * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
+    * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 48 hours
+    * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 48 hours
     
-    Input: dataframe (typically of a single encounter)
-    Output: dataframe with rolling-window aki values added in
+    Args: 
+        df (pd.DataFrame): dataframe, typically of a single encounter.
+        add_stages (bool): boolean, default **True**. 
+            Choose whether or not to delineate the rolling-window AKI into the three stages (if False it will just lump Stage 1/2/3 into a boolean True/False)
+        cond1time (str): string, default **'48hours'**. 
+            The amount of time for the rolling-window according to the first criterion; i.e. 0.3 increase in creatinine in ``cond1time`` hours. 
+        cond2time (str): string, default **'168hours'**. 
+            The amount of time for the rolling-window according to the second criterion; i.e. 50% increase in creatinine in ``cond2time`` hours.
+            
+    Returns: 
+        df (pd.DataFrame): dataframe with rolling-window aki values added in
     '''
     #df = df[~df.duplicated()]
     df = df.set_index('time').sort_index()
@@ -175,9 +197,11 @@ def eGFR(creat, age, female, black):
     Based on the formula in the paper A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009) linked below
     
     Equation: https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating
+    
     Full paper: https://pubmed.ncbi.nlm.nih.gov/19414839/
     
-    
+    Args:
+        creat
     '''
     min_ck = np.clip(creat/(0.9-0.2*female), a_min=None, a_max=1) #Equivalent to min(cr/k, 1)
     max_ck = np.clip(creat/(0.9-0.2*female), a_min=1, a_max=None) #Equivalent to max(cr/k, 1)
