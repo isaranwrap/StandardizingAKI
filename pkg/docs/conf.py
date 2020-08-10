@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
+
 project = 'akiFlagger'
 copyright = 'MIT License' 
 author = 'Ishan Saran'

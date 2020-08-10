@@ -21,5 +21,8 @@ setup(
             "numpy",
             "pandas",
       ],
-      url = 'https://github.com/isaranwrap/StandardizingAKI'
+      url = 'https://github.com/isaranwrap/StandardizingAKI',
+      project_urls = {
+            'Documentation': 'https://akiflagger.readthedocs.io/en/latest/',
+      },
 )
