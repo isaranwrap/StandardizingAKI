@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+__version__ = '0.0.3'
+
 def returnAKIpatients(df, 
                       aki_calc_type = 'both', keep_extra_cols = True, 
                       cond1time = '48hours', cond2time = '168hours', eGFR_impute = False, add_stages=True):
