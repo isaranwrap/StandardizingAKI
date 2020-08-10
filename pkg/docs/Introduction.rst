@@ -1,19 +1,4 @@
-.. akiFlagger documentation master file, created by
-   Ishan Saran on Thu Aug  6 07:44:21 2020.
-
-========================================
-Welcome to the akiFlagger documentation!
-========================================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents
-
-   Introduction
-   Installation
-   GettingStarted
-   
-
+============
 Introduction
 ============
 
@@ -25,36 +10,13 @@ of AKI:
 * *Stage 2:* 100% increase in (or doubling of) creatinine in < 48 hours
 * *Stage 3:* 200% increase in (or tripling of) creatinine in < 48 hours
 
-This package contains a flagger to determine if a patient has developed AKI based on the criterion above.
-More information about the specific data input format and examples can be found in the `Getting started` section. 
-
-Installation
-============
-
-You can install the flagger with ``pip``. Simply type the following into command line and the 
-package should install properly.
-
-.. code-block:: python
-
-   pip install akiFlagger
-
-To ensure that it is working properly, you can open a Python session and test it with.
-
-.. code-block:: python
-
-   import akiFlagger
-
-   akiFlagger.__version__
-
-   >> '0.0.3'
-
-Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
-
+This package contains a flagger to determine if a patient has developed AKI based on longitudinal data of serum creatinine measurements.
+More information about the specific data input format can be found in the `Getting started` section. 
 
 Methods of Calculating AKI
 ==========================
 
-There are two methods to retroactively determine if a patient has developed AKI: ``rolling-window`` and ``back-calculation``. 
+There are two methods to retroactively determine if a patient developed AKI: ``rolling-window`` and ``back-calculation``. 
 
 .. option:: Rolling Window 
 
@@ -69,10 +31,3 @@ There are two methods to retroactively determine if a patient has developed AKI:
 
    If there are no outpatient creatinine values measured for the patient from 365 to 7 days prior to admission, it is possible to still impute a
    baseline creatinine value based on the patients demographics: namely their age, sex, and race. 
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
