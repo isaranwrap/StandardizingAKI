@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import random 
+
+__version__ = '0.0.3'
 
 def returnAKIpatients(df, 
                       aki_calc_type = 'both', keep_extra_cols = True, 
@@ -223,7 +226,7 @@ def eGFR(creat, age, female, black):
         black (bool or array of bools): whether or not the patient is black (black is True).
 
     Returns:
-        egfr (float or array of floats):
+        egfr (float or array of floats): the estimated glomerular filtration rate based on the CKD-EPI equation.
     '''
     
     min_ck = np.clip(creat/(0.9-0.2*female), a_min=None, a_max=1) #Equivalent to min(cr/k, 1)
@@ -234,3 +237,69 @@ def eGFR(creat, age, female, black):
     egfr = 141*(0.993**age)*(min_ck**alpha)*(max_ck**-1.209)*(1+female*0.018)*(1+black*0.159)
     
     return np.round(egfr, decimals=5) 
+
+def generate_toy_data(num_patients = 100, num_encounters_range = (3, 10), include_demographic_info = False):
+    '''
+    Generates toy data for demonstrating how the flagger works.
+
+    Args:
+        num_patients (int): integer, default 100.
+            Number of patients to generate
+        num_encounters_range (tuple): tuple, default (3, 10).
+            Number of encounters per patient will be randomly selected from a range between this tuple.
+        include_demographic_info (bool): boolean, default False. 
+            Whether or not to include the demographic information in the generated dataset
+
+
+    Returns:
+        df (pd.DataFrame): dataframe with toy numbers to work with.
+
+    '''
+    np.random.seed(0) #seed for reproducibility
+
+    #pick admission dates from Jan 1, 2020 to July 1, 2020 (6 month period) and generate time deltas from +- 5 days
+    date_range = (pd.to_datetime('2020-01-01').value // 10**9, pd.to_datetime('2020-07-01').value // 10**9) 
+    time_deltas = pd.timedelta_range(start='-5 days', end='5 days', freq='6H')
+
+    #Generate random MRN #s, admission dates, and encounters
+    #Generate between 3 and 10 encounters for each patient
+    mrns = np.random.randint(10000, 20000, num_patients)
+    admns = pd.to_datetime(np.random.randint(date_range[0], date_range[1], num_patients), unit = 's')
+    encs = [np.random.randint(10000, 99999, np.random.randint(num_encounters_range[0],num_encounters_range[1])) for mrn, admn in zip(mrns, admns)]
+    creats = np.clip(np.random.normal(loc = 1, scale = 0.3, size=num_patients), a_min = 0, a_max = None)
+
+        
+    #Combine the two dataframes
+    d1 = pd.DataFrame([mrns, admns, creats]).T
+    d2 = pd.DataFrame(encs)
+    
+    d1.columns = ['mrn', 'admission', 'base_creat']
+    d2 = d2.add_prefix('enc_')
+    
+    if include_demographic_info:
+        ages = np.random.normal(loc = 60, scale = 5, size=num_patients)
+        race = np.random.rand(num_patients) > 0.85
+        sex = np.random.rand(num_patients) > 0.5
+    
+        d1 = pd.DataFrame([mrns, admns, creats, ages, race, sex]).T
+        d1.columns = ['mrn', 'admission', 'base_creat', 'age', 'black', 'female']
+
+    df = pd.concat([d1, d2], axis=1)
+    df = pd.melt(df, id_vars = d1.columns, value_name = 'enc').drop('variable', axis=1)
+
+    #Remove the duplicated & null values and reset the index
+    df = df[np.logical_and(~df.enc.isnull(), ~df.enc.duplicated())].reset_index(drop=True) 
+
+    df['creat'] = np.clip(df.base_creat + np.random.normal(loc = 0, scale = 0.25, size = df.shape[0]), a_min = 0.1, a_max = None).astype('float')
+    df['time'] = df.admission + np.array([random.choice(time_deltas) for i in range(df.shape[0])])
+    
+    df['mrn'] = df.mrn.astype('int')
+    df['enc'] = df.enc.astype('int')
+    
+    if include_demographic_info:
+        df = df[['mrn', 'enc', 'age', 'black', 'female', 'admission', 'time', 'creat']]
+        print('Successfully generated toy data!')
+        return df
+    df = df[['mrn', 'enc', 'admission', 'time', 'creat']]
+    print('Successfully generated toy data!')
+    return df

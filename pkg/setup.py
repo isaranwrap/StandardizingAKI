@@ -4,7 +4,7 @@ with open('README.md', 'r') as f:
       long_description = f.read() 
 setup(
       name = 'akiFlagger',
-      version = '0.0.2',
+      version = '0.0.3',
       description = 'Flagger to detect patients with acute kidney injury (AKI).',
       py_modules = ['akiFlagger'],
       package_dir = {'':'src'},
@@ -19,7 +19,7 @@ setup(
       long_description_content_type = 'text/markdown',
       install_requires=[
             "numpy",
-            "pandas"
+            "pandas",
       ],
       url = 'https://github.com/isaranwrap/StandardizingAKI'
 )
