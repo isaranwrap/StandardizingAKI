@@ -16,7 +16,7 @@ To begin with, we'll import the ``akiFlagger`` module as well as the trifecta ``
 
     import akiFlagger
     print(akiFlagger.__version__)
-    >> '0.0.3'
+    >> '0.0.4'
 
 .. admonition:: Tip!
 

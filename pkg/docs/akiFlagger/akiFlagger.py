@@ -49,12 +49,37 @@ def returnAKIpatients(df,
 
     assert ('creat' or 'creatinine') in df.columns
     assert 'time' in df.columns
-    assert 'admission' in df.columns
+    assert ('admission' or 'admn' or 'adm') in df.columns
 
     #Also, if eGFR_impute is True, then we need sex age and race
     if eGFR_impute:
         assert ('age' and 'race' and 'sex') in df.columns
     
+    #enc checks
+    if 'PAT_ENC_CSN_ID' in df.columns:
+        df.rename(columns = {'PAT_ENC_CSN_ID': 'enc'})
+    elif 'pat_enc_csn_id' in df.columns:
+        df.rename(columns = {'pat_enc_csn_id': 'enc'})
+    elif 'ENC' in df.columns:
+        df.rename(columns = {'ENC': 'enc'})
+    
+    #mrn checks
+    if 'PAT_MRN_ID' in df.columns:
+        df.rename(columns = {'PAT_MRN_ID': 'mrn'})
+    elif 'pat_mrn_id' in df.columns:
+        df.rename(columns = {'pat_mrn_id': 'mrn'})
+    elif 'MRN' in df.columns:
+        df.rename(columns = {'MRN': 'mrn'})
+
+    #admission checks
+    if 'admn' in df.columns:
+        df.rename(columns = {'admn': 'admission'})
+    if 'adm' in df.columns:
+        df.rename(columns = {'adm': 'admission'})
+    
+    #creat check
+    if 'creatinine' in df.columns:
+        df.rename(columns = {'creatinine': 'creat'})
     
     if aki_calc_type == 'both': 
         df = df.groupby('mrn', sort=False).apply(lambda d: addRollingWindowAKI(d,

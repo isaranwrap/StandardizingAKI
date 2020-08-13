@@ -4,7 +4,7 @@ with open('README.md', 'r') as f:
       long_description = f.read() 
 setup(
       name = 'akiFlagger',
-      version = '0.0.3',
+      version = '0.0.5',
       description = 'Flagger to detect patients with acute kidney injury (AKI).',
       py_modules = ['akiFlagger'],
       package_dir = {'':'src'},
