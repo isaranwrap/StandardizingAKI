@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-class AKIFlagger2:
+class AKIFlagger:
     def __init__(self, patient_id = 'mrn', creatinine='creatinine', time = 'time', inpatient = 'inpatient', 
                  aki_calc_type=None, keep_extra_cols = False, eGFR_impute = False, add_stages = False,
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', 
