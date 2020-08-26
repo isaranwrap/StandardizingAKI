@@ -189,7 +189,7 @@ class AKIFlagger:
         mask = np.logical_and(bc_tz, ~tmp[self.inpatient])
         
         #Finally, add the median creat values to the dataframe, forward-fill, and return
-        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True).creat.transform('median')
+        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')
         tmp[self.baseline_creat] = tmp.groupby(self.encounter_id)[self.baseline_creat].ffill()
         
         #Still need to figure out the eGFR_impute conditional ~ ~ ~ ~ ~ that will go here ~ ~ ~ ~ ~ ~ ~ ~
@@ -238,8 +238,8 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         np.random.seed(0) #seed for reproducibility
 
         #To explicitly demonstrate that race and sex variables only care about black/female distinction
-        race = 'black'
-        sex = 'female'
+        black = 'black'
+        female = 'female'
         age = 'age'
         
         #pick admission dates from Jan 1, 2020 to July 1, 2020 (6 month period) and generate time deltas from +- 5 days
@@ -269,7 +269,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
             sex = np.random.rand(num_patients) > 0.5
 
             d1 = pd.DataFrame([mrns, admns, creats, ages, race, sex]).T
-            d1.columns = [patient_id, admission, baseline_creat, age, 'black', 'female']
+            d1.columns = [patient_id, admission, baseline_creat, age, black, female]
 
         df1 = pd.concat([d1, d2], axis=1)
         df1 = pd.melt(df1, id_vars = d1.columns, value_name = 'enc').drop('variable', axis=1)
@@ -293,10 +293,10 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
 
         
         if include_demographic_info:
-            df = df.loc[:,[patient_id, encounter_id, age, race, sex, inpatient, admission, time, creatinine]]
-            print('Successfully generated toy data!')
+            df = df.loc[:,[patient_id, encounter_id, age, black, female, inpatient, admission, time, creatinine]]
+            print('Successfully generated toy data!\n')
             return df
         
         df = df.loc[:,[patient_id, encounter_id, inpatient, admission, time, creatinine]]
-        print('Successfully generated toy data!')
+        print('Successfully generated toy data!\n')
         return df
