@@ -23,8 +23,8 @@ Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked 
 of AKI:
 
 * *Stage 1:* 50% increase in creatinine in < 7 days or 0.3 increase in creatinine in < 48 hours
-* *Stage 2:* 100% increase in (or doubling of) creatinine in < 48 hours
-* *Stage 3:* 200% increase in (or tripling of) creatinine in < 48 hours
+* *Stage 2:* 100% increase in (or doubling of) creatinine in < 7 days
+* *Stage 3:* 200% increase in (or tripling of) creatinine in < 7 days
 
 This package contains a flagger to determine if a patient has developed AKI based on the criterion above.
 More information about the specific data input format and examples can be found in the `Getting started` section. 

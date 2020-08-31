@@ -147,6 +147,9 @@ class TestFlagger(unittest.TestCase):
         self.assertTrue(np.all(~out.bc))
         print('Success!\n')
 
+    def test_eGFRimpute(self):
+        print('Testing eGFR-based imputation...')
+        
 if __name__ == '__main__':
     unittest.main()
 

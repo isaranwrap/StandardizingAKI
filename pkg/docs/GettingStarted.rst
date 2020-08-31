@@ -16,7 +16,7 @@ To begin with, we'll import the ``akiFlagger`` module as well as the trifecta ``
 
     import akiFlagger
     print(akiFlagger.__version__)
-    >> '0.0.4'
+    >> '0.1.0'
 
 .. admonition:: Tip!
 
@@ -24,8 +24,8 @@ To begin with, we'll import the ``akiFlagger`` module as well as the trifecta ``
     Some pre-processing may be necessary. Here are the required columns depending on which calculation methods
     you are interested in:
     
-    * *Rolling-window*: **mrn**, **enc**, **admission**, **creatinine**, and **time**. 
-    * *Back-calculation*: **mrn**, **enc**, **admission**, and **time**. 
+    * *Rolling-window*: **mrn**, **inpatient/outpatient**, **creatinine**, and **time**. 
+    * *Back-calculation*: **mrn**, **inpatient/outpatient**, **creatinine**, and **time**. 
     * *eGFR-imputed baseline creatinine*: **age**, **sex** (female or not), and **race** (black or not).
 
 Example: Rolling-window

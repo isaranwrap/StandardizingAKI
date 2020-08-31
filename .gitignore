@@ -5,6 +5,7 @@
 .ipynb_checkpoints/ValidatingAKIFlagger-checkpoint.ipynb
 .RData
 .RHistory
+.vscode/
 
 #From gitignore.io, commonly used files which ought to be ignored
 ### Python ###
