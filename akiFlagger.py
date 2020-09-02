@@ -2,54 +2,95 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.1.0'
+__version__ = '0.1.0' # master file
 
 class AKIFlagger:
-    def __init__(self, patient_id = 'mrn', creatinine='creatinine', time = 'time', inpatient = 'inpatient', 
-                 aki_calc_type=None, keep_extra_cols = False, eGFR_impute = False, add_stages = True,
+    ''' Main flagger to detect patients with acute kidney injury (AKI).
+    This flagger returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
+
+        * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
+        * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
+        * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 7 days (168 hours)
+
+        More information can be found in the documentation at akiflagger.readthedocs.io
+        
+    Attributes:
+        patient_id (string): **default 'mrn'.** Name of the column used to identify patients; e.g. 'PAT_MRN_ID'
+        encounter_id (string): **default 'enc'.** Name of the column used to identify encounters; e.g. 'PAT_ENC_CSN_ID'
+        
+        time (string): **default 'time'.** Name of the column containing time stamps; e.g. 'time'
+        inpatient (string): **default 'inpatient'.** Name of the column containing inpatient/outpatient identifier; e.g. 'inpatient'
+        admission (string): **default 'admission'.** Name of the column containing the admission dates; e.g. 'admission'
+        creatinine (string): **default 'creatinine'.** Name of the column containing creatinine values; e.g. 'creatinine'
+        baseline_creat (string): **default 'baseline_creat'.** Name of the column containint baseline creatinine values; e.g 'baseline_creat'
+        
+        age (string): **default 'age'.** Name of the column containing the age values; e.g. 'age'
+        sex (string): **default 'sex'.** Name of the column containing the age values; e.g. 'age'
+        race (string): **default 'race'.** Name of the column containing the age values; e.g. 'age'
+        
+        aki_calc_type (string): **defaults to None.** Name of the AKI-calculation method the flagger should perform.
+            Possible values are "rolling_window", "back_calculate", or "both".
+        rolling_window (boolean): **default True.** Whether to perform rolling-window AKI calculation.
+        back_calculate (boolean): **default False.** Whether to perform back-calculate AKI calculation.
+        
+        eGFR_impute (boolean): **default False.** Whether or not to impute the missing baseline creatinine values with the
+            eGFR-imputation method; i.e. assuming an eGFR of 75 estimate baseline creatinine based on age, sex, and race.
+        add_stages (boolean): **default True.** Whether or not to have rolling-window AKI delineated into stages.
+            If add_stages is True, the generated `rw` column dtype is *int64* otherwise the `rw` column dtypes is *bool*.
+        
+        cond1time (string): **default '48hours'.** The rolling-window time of the first KDIGO criterion condition.
+            This string gets passed to pd.Timedelta(cond1time), so any acceptable time format for that function will work.
+        cond2time (string): **default '168hours'.** The rolling-window time of the second KDIGO criterion condition.
+            This string gets passed to pd.Timedelta(cond2time), so any acceptable time format for that function will work.
+        pad1time (string): **default '0hours'.** Padding to add to the first KDIGO criterion condition.
+            This string gets passed to pd.Timedelta(pad1time), so any acceptable time format for that function will work.
+        pad2time (string): **default '0hours'.** Padding to add to the second KDIGO criterion condition.
+            This string gets passed to pd.Timedelta(pad2time), so any acceptable time format for that function will work.
+        
+        sort_values (boolean): **default True.** Whether or not to sort the values within each encounter based on `time`.
+        remove_bc_na (boolean): **default True.** Whether or not to convert the back-calculated NaNs to Falses.
+        add_baseline_creat (boolean): **default False.** Whether or not to add the baseline creatinine column from back-calculate method.
+        add_min_creat (boolean): **default False.** Whether or not to add the minimum creatinine column from rolling-window method.
+        
+    '''
+    def __init__(self, patient_id = 'mrn', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', 
+                 aki_calc_type = None, eGFR_impute = False, add_stages = True,
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', 
-                 rolling_window = False, back_calculate = False,
+                 rolling_window = True, back_calculate = False,
                  admission = 'admission', age = 'age', sex = 'sex', race = 'race', encounter_id = 'enc',
                  baseline_creat = 'baseline_creat', sort_values = True, remove_bc_na = True, add_baseline_creat = False, add_min_creat = False):
         
-        self.aki_calc_type = aki_calc_type
-        self.patient_id = patient_id
-        self.creatinine = creatinine
-        self.time = time
-        self.inpatient = inpatient
-        
-        #Identifiers
+        # Identifiers
         self.patient_id = patient_id
         self.encounter_id = encounter_id
         
-        #Columns necessary for calculation (if admission not included it will be imputed)
+        # Columns necessary for calculation (if admission not included it will be imputed)
         self.creatinine = creatinine
         self.time = time
         self.inpatient = inpatient
         self.admission = admission
         
-        #Demographic variables
+        # Demographic variables
         self.age = age
         self.sex = sex
         self.race = race
         
-        #Rolling-window variables
+        # Rolling-window variables
         self.cond1time = pd.Timedelta(cond1time) + pd.Timedelta(pad1time)
         self.cond2time = pd.Timedelta(cond2time) + pd.Timedelta(pad2time)
         
-        #Back-calculate variables
+        # Back-calculate variables
         self.baseline_creat = baseline_creat
         
-        #Extra options to specify what is included in the output
+        # Extra options to specify what is included in the output
         self.eGFR_impute = eGFR_impute
         self.add_stages = add_stages
-        self.keep_extra_cols = keep_extra_cols
         self.remove_bc_na = remove_bc_na
         self.add_baseline_creat = add_baseline_creat
         self.add_min_creat = add_min_creat
         
-        #Specifying the calculation type wanted in the flagger
-        self.aki_calc_type = aki_calc_type
+        # Specifying the calculation type wanted in the flagger
+        self.aki_calc_type = aki_calc_type 
         self.rolling_window = rolling_window
         self.back_calculate = back_calculate
         
@@ -133,9 +174,9 @@ class AKIFlagger:
             bc = self.addBackCalcAKI(df, baseline_creat = baseline_creat)
         
         if self.aki_calc_type == 'both':
-            if self.add_baseline_creat and self.add_min_creat:
+            if self.add_baseline_creat and self.add_min_creat: 
                 return pd.concat([df, rw[0], rw[1], bc[0], bc[1]], axis=1).reset_index()
-            elif self.add_baseline_creat:
+            elif self.add_baseline_creat: 
                 return pd.concat([df, rw, bc[0], bc[1]], axis=1).reset_index() 
             elif self.add_min_creat:
                 return pd.concat([df, rw[0], rw[1], bc], axis=1).reset_index()
@@ -174,6 +215,7 @@ class AKIFlagger:
         
         # Set the index to just time 
         tmp = df[self.creatinine].reset_index(self.encounter_id) 
+        
         # Groupby on encounter then apply conditions for rolling-window AKI
         gb = tmp.groupby(self.encounter_id, as_index = True, sort = False)
         gb_indx = gb[self.creatinine].rolling(self.cond1time).min().index
