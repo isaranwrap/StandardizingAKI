@@ -1,76 +1,3 @@
-.. akiFlagger documentation master file, created by
-   Ishan Saran on Thu Aug 6 07:44:21 2020.
-
-========================================
-Welcome to the akiFlagger documentation!
-========================================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents
-
-   Introduction
-   Installation
-   GettingStarted
-   MoreInformation
-   
-
-Introduction
-============
-
-Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked by an increase in the serum creatinine levels
-(amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of guidelines and standard definitions 
-of AKI:
-
-* *Stage 1:* 50% increase in creatinine in < 7 days or 0.3 increase in creatinine in < 48 hours
-* *Stage 2:* 100% increase in (or doubling of) creatinine in < 7 days
-* *Stage 3:* 200% increase in (or tripling of) creatinine in < 7 days
-
-This package contains a flagger to determine if a patient has developed AKI based on the criterion above.
-More information about the specific data input format and examples can be found in the `Getting started` section. 
-
-Installation
-============
-
-You can install the flagger with ``pip``. Simply type the following into command line and the 
-package should install properly.
-
-.. code-block:: python
-
-   pip install akiFlagger
-
-To ensure that it is working properly, you can open a Python session and test it with.
-
-.. code-block:: python
-
-   import akiFlagger
-
-   akiFlagger.__version__
-
-   >> '0.0.3'
-
-Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
-
-
-Methods of Calculating AKI
-==========================
-
-There are two methods to retroactively determine if a patient has developed AKI: ``rolling-window`` and ``back-calculation``. 
-
-.. option:: Rolling Window 
-
-   The rolling window definition of AKI is based on the change in creatinine in a 48 hour or 7 day `rolling window <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_ period.
-   These are the stages mentioned in the KDIGO guidelines in the `Introduction`. 
-
-.. option:: Back-calculation
-
-   The back-calculated definition of AKI is based on retroactively imputing baseline creatinine values. This is done by taking the *median*
-   of the patient's outpatient creatinine values from 365 to 7 days prior to admission and setting that as the baseline creatinine. Then, the 
-   first KDIGO criterion for *Stage 1* is applied (the 50% increase in creatinine in < 7 days). If the condition is satisfied, the patient is considered to have AKI.
-
-   If there are no outpatient creatinine values measured for the patient from 365 to 7 days prior to admission, it is possible to still impute a
-   baseline creatinine value based on the patients demographics: namely their age, sex, and race. 
-
 Getting started
 ===============
 
@@ -89,7 +16,7 @@ To begin with, we'll import the ``akiFlagger`` module as well as the trifecta ``
 
     import akiFlagger
     print(akiFlagger.__version__)
-    >> '0.0.3'
+    >> '0.1.0'
 
 .. admonition:: Tip!
 
@@ -97,8 +24,8 @@ To begin with, we'll import the ``akiFlagger`` module as well as the trifecta ``
     Some pre-processing may be necessary. Here are the required columns depending on which calculation methods
     you are interested in:
     
-    * *Rolling-window*: **mrn**, **enc**, **admission**, **creatinine**, and **time**. 
-    * *Back-calculation*: **mrn**, **enc**, **admission**, and **time**. 
+    * *Rolling-window*: **mrn**, **inpatient/outpatient**, **creatinine**, and **time**. 
+    * *Back-calculation*: **mrn**, **inpatient/outpatient**, **creatinine**, and **time**. 
     * *eGFR-imputed baseline creatinine*: **age**, **sex** (female or not), and **race** (black or not).
 
 Example: Rolling-window
@@ -189,10 +116,3 @@ age, sex, and race of the patient. The built-in generator has an option to inclu
     df = akiFlagger.generate_toy_data(include_demographic_info = True)
 
     >> Successfully generated toy data!
-    
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
