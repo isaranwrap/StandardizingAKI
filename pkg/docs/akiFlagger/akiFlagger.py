@@ -2,12 +2,11 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.1.0' 
+__version__ = '0.1.0'
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
-
-    This flagger returns patients with AKI according to the KDIGO guidelines as follows:
+    This flagger returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
 
         * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
         * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
@@ -26,8 +25,8 @@ class AKIFlagger:
         baseline_creat (string): **default 'baseline_creat'.** Name of the column containint baseline creatinine values; e.g 'baseline_creat'
         
         age (string): **default 'age'.** Name of the column containing the age values; e.g. 'age'
-        sex (string): **default 'sex'.** Name of the column containing the age values; e.g. 'female'
-        race (string): **default 'race'.** Name of the column containing the age values; e.g. 'black'
+        sex (string): **default 'sex'.** Name of the column containing the age values; e.g. 'age'
+        race (string): **default 'race'.** Name of the column containing the age values; e.g. 'age'
         
         aki_calc_type (string): **defaults to None.** Name of the AKI-calculation method the flagger should perform.
             Possible values are "rolling_window", "back_calculate", or "both".
@@ -192,17 +191,7 @@ class AKIFlagger:
             return pd.concat([df, bc], axis=1).reset_index()
     
     def addAdmissionColumn(self, df, add_encounter_col = None):
-        '''
-        Adds the admission column if not present in the dataframe by grouping the inpatient clumps in the sea of outpatient measured values
-        and identifying the first measurement of those groups as the admission column.
 
-        Args:
-            df (pd.DataFrame): Patient dataframe, should include inpatient/outpatient column to identify admission date from.
-            add_encounter_col (boolean): **default None**. Whether to add the encounter column as well as the admission column (based similarly on the inpatient groups)
-
-        Returns:
-            df (pd.DataFrame): Patient dataframe with admission (and encounter if `add_encounter_col = True`) column(s) added in 
-        '''
         pat_gb = df.groupby(self.patient_id, sort = False)
 
         #Check for those rows which are all inpatient; e.g. a hospital visit
