@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.1.0' # master file
+__version__ = '0.1.3' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
@@ -137,6 +137,7 @@ class AKIFlagger:
         assert (self.time in dataframe.columns), "Time column missing!"
         assert (self.inpatient in dataframe.columns), "Inpatient/outpatient column missing!"
         
+        assert not np.any(dataframe[self.creatinine].isnull()), "Get rid of any null creatinine values before running the flagger!"
         if self.eGFR_impute:
             assert (self.age in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
             assert (self.sex in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
@@ -415,7 +416,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
 
         
         if include_demographic_info:
-            df = df.loc[:,[patient_id, encounter_id, age, black, female, inpatient, admission, time, creatinine]]
+            df = df.loc[:,[patient_id, encounter_id, age, female, black, inpatient, admission, time, creatinine]]
             print('Successfully generated toy data!\n')
             return df
         

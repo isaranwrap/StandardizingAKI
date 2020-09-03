@@ -2,19 +2,13 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.1.0'
+__version__ = '0.1.3' 
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
-<<<<<<< HEAD
     This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 
         * *Stage 1:* 0.3 mg/dL increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
-=======
-    This flagger returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
-
-        * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
->>>>>>> a724295c89e8b9bf10c4c73a9a05aaa9402ee770
         * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
         * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 7 days (168 hours)
 
@@ -143,6 +137,7 @@ class AKIFlagger:
         assert (self.time in dataframe.columns), "Time column missing!"
         assert (self.inpatient in dataframe.columns), "Inpatient/outpatient column missing!"
         
+        assert not np.any(dataframe[self.creatinine].isnull()), "Get rid of any null creatinine values before running the flagger!"
         if self.eGFR_impute:
             assert (self.age in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
             assert (self.sex in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
@@ -200,13 +195,9 @@ class AKIFlagger:
             return pd.concat([df, bc], axis=1).reset_index()
     
     def addAdmissionColumn(self, df, add_encounter_col = None):
-<<<<<<< HEAD
         '''
         Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.
         '''
-=======
-
->>>>>>> a724295c89e8b9bf10c4c73a9a05aaa9402ee770
         pat_gb = df.groupby(self.patient_id, sort = False)
 
         #Check for those rows which are all inpatient; e.g. a hospital visit
@@ -425,7 +416,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
 
         
         if include_demographic_info:
-            df = df.loc[:,[patient_id, encounter_id, age, black, female, inpatient, admission, time, creatinine]]
+            df = df.loc[:,[patient_id, encounter_id, age, female, black, inpatient, admission, time, creatinine]]
             print('Successfully generated toy data!\n')
             return df
         

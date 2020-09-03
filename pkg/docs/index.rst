@@ -47,7 +47,7 @@ To ensure that it is working properly, you can open a Python session and test it
 
    akiFlagger.__version__
 
-   >> '0.0.3'
+   >> '0.1.3'
 
 Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
 
@@ -78,34 +78,90 @@ This package is meant to handle patient data. Let's walk through an example of h
 with some toy data since real patient data is probably protected health information.
 
 Once you've installed the package following the instructions in `Installation`, you're ready to get started.
-To begin with, we'll import the ``akiFlagger`` module as well as the trifecta ``pandas``, ``numpy``, and ``matplotlib``.
+To begin with, we'll import the ``akiFlagger`` module.
 
 
 .. code-block:: python
 
-    import pandas as pd
-    import numpy as np
-    import matplotlib.pyplot as pyplot
-
     import akiFlagger
+
     print(akiFlagger.__version__)
-    >> '0.0.3'
+
+    from akiFlagger import AKIFlagger, generate_toy_data
+    
+    >> '0.1.3'
+
+Let's start off by creating some toy data.
+------------------------------------------
+
+The flagger comes with a built-in generator of a toy dataset to demonstrate how it works. Simply call the `generate_toy_data()` function. By default, the toy dataset has 100 patients, but let's initialize ours with 1000 patients.
+
+.. code-block:: python
+
+    toy = generate_toy_data(num_patients=100)
+
+    print('Toy dataset shape: {}'.format(toy.shape))
+
+    toy.head()
+
+    >> Successfully generated toy data!
+
 
 .. admonition:: Tip!
 
-    The input dataframe needs to contain the correct columns in order for the flagger to recognize and deal with the proper variables.
-    Some pre-processing may be necessary. Here are the required columns depending on which calculation methods
-    you are interested in:
-    
-    * *Rolling-window*: **mrn**, **enc**, **admission**, **creatinine**, and **time**. 
-    * *Back-calculation*: **mrn**, **enc**, **admission**, and **time**. 
+    In order to calculate AKI, the flagger expects a dataset with certain columns in it. Depending on the type of computation you are interested in, your dataset will need to have different columns. Here's a brief rundown of the necessary columns. 
+
+    * *Rolling-window*: **patient_id**, **inpatient/outpatient**, **time**, and **creatinine** 
+
+    * *Back-calculate*: **patient_id**, **inpatient/outpatient**, **time**, and **creatinine**
+
     * *eGFR-imputed baseline creatinine*: **age**, **sex** (female or not), and **race** (black or not).
+
+    ------------
+
+    By default, the naming system is as follows:
+
+    <h3 align='center'>
+        <span style="color:#eb726f">
+
+    **patient_id &#8594; 'mrn'** <p>
+        
+    **encounter_id &#8594; 'enc'** <p>
+
+    **inpatient/outpatient &#8594; 'inpatient'** <p>
+        
+    **admission &#8594; 'admission'** <p>
+
+    **creatinine &#8594; 'creatinine'** <p>
+        
+    **time &#8594; 'time'** <p>
+        </span>
+        <hr>
+    </h3> 
+
+    If you have different names for your columns, you **_must_ specify them.** The toy dataset's name for `creatinine` is *'creat'* so you can see where in the flagger the alternate name is specified.
 
 Example: Rolling-window
 -----------------------
 
-Generally speaking, real patient data will be protected health information, so this walkthrough will use toy data. 
-The flagger comes with a built-in generator for toy data, which we can call with the following command.
+The next code block runs the flagger and returns those patients who satisfy the AKI conditions according to the [KDIGO guidelines](https://kdigo.org/guidelines/) for change in creatinine values<font color = 'purple'>*</font> by the rolling-window definition, categorized as follows:
+
+
+*Stage 1:* $(1)$ $50\% \uparrow$ in creatinine in $ < 7 $ days OR $(2)$ $0.3 mg/dL \uparrow $  in creatinine in $ < 48$ hours
+
+*Stage 2:* $100\% \uparrow$ (or doubling of) in creatinine in $ < 7 $ days
+
+*Stage 3:* $200\% \uparrow$ (or tripling of) in creatinine in $ < 7 $ days
+
+.. code-block:: python
+
+    flagger = AKIFlagger(rolling_window = True, creatinine = 'creat')
+
+    out = flagger.returnAKIpatients(toy)
+
+    out = out[['mrn', 'enc', 'inpatient', 'admission', 'time', 'creat', 'rw']] # This just orders the columns to match the initial order
+    
+    out.head()
 
 .. code-block:: python
 
