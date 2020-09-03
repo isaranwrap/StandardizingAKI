@@ -6,13 +6,16 @@ __version__ = '0.1.0' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
-    This flagger returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
+    This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 
-        * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
+        * *Stage 1:* 0.3 mg/dL increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
         * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
         * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 7 days (168 hours)
 
-        More information can be found in the documentation at akiflagger.readthedocs.io
+        \*Except for the stage 3 condition of a creatinine value larger than 4.0 mg/dL. This `paper <http://www.european-renal-best-practice.org/sites/default/files/u33/ndt.gfs375.full_.pdf>`_ has the full specifications including
+        inclusion criterion based on urinary output and renal replacement therapy.
+
+        More information can be found in the documentation at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
         
     Attributes:
         patient_id (string): **default 'mrn'.** Name of the column used to identify patients; e.g. 'PAT_MRN_ID'
@@ -56,7 +59,7 @@ class AKIFlagger:
     def __init__(self, patient_id = 'mrn', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', 
                  aki_calc_type = None, eGFR_impute = False, add_stages = True,
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', 
-                 rolling_window = True, back_calculate = False,
+                 rolling_window = False, back_calculate = False,
                  admission = 'admission', age = 'age', sex = 'sex', race = 'race', encounter_id = 'enc',
                  baseline_creat = 'baseline_creat', sort_values = True, remove_bc_na = True, add_baseline_creat = False, add_min_creat = False):
         
@@ -112,13 +115,13 @@ class AKIFlagger:
     def returnAKIpatients(self, dataframe, add_stages = None, 
                           cond1time = None, cond2time = None, pad1time = None, pad2time = None):
         '''
-        Returns patients with AKI according to the KDIGO guidelines. The KDIGO guidelines are as follows:
+        Returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 
         * *Stage 1:* 0.3 increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
         * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
         * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 7 days (168 hours)
 
-        More information can be found in the documentation at akiflagger.readthedocs.io
+        More information can be found in the documentation at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
         Args: 
             df (pd.DataFrame): Patient dataframe, should include some sort of patient and encounter identifier(s) and age, sex, race, serum creatinine and timestamps.
         Returns:
@@ -191,7 +194,9 @@ class AKIFlagger:
             return pd.concat([df, bc], axis=1).reset_index()
     
     def addAdmissionColumn(self, df, add_encounter_col = None):
-
+        '''
+        Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.
+        '''
         pat_gb = df.groupby(self.patient_id, sort = False)
 
         #Check for those rows which are all inpatient; e.g. a hospital visit
@@ -212,7 +217,16 @@ class AKIFlagger:
         return df   
     
     def addRollingWindowAKI(self, df):
-        
+        '''Returns the AKI conditions based on rolling window definition.
+        Returns the rolling-window as a pandas series (and possibly the minimum creatinine values, if `add_min_creat=True`). 
+
+        Args: 
+            df (pd.DataFrame): patient dataframe, with encounet & time as the indices.
+
+        Returns:
+            rw (pd.Series): calculated rolling-window series. If `add_stages=True` then the series returned is of type *int64* otherwise it is of type *bool*.
+            min_creat (pd.Series): potentially returns min_creat if `add_min_creat` flag is set to `True`. 
+        '''
         # Set the index to just time 
         tmp = df[self.creatinine].reset_index(self.encounter_id) 
         
@@ -252,8 +266,8 @@ class AKIFlagger:
     
     def eGFRbasedCreatImputation(self, age, female, black):
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
-        The imputation is based on the `CKD-EPI equation <https://niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimateing>`_ from the paper
-        *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)* linked below.
+        The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
+        *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)*.
         '''
 
         kappa = (0.9 - 0.2*female)
@@ -271,7 +285,9 @@ class AKIFlagger:
         return creat
 
     def addBaselineCreat(self, df):
-    
+        '''
+        Returns baseline creatinine used in intermediate calculation for back-calculated AKI.
+        '''
         # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT values from 365 to 7 days prior to admission
 
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
@@ -301,7 +317,9 @@ class AKIFlagger:
         return tmp.baseline_creat
     
     def addBackCalcAKI(self, df, baseline_creat=None):
-        
+        '''
+        Returns aki based on back-calculation method. Requires `baseline_creat` from *`addBaselineCreat()`* function as an intermediate to calculate aki.
+        '''
         # Subset on necessary cols: creat + admn
         tmp = df.loc[:, [self.creatinine, self.admission]]
         
@@ -384,7 +402,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         df = pd.concat([df1, d3], axis=1)
         df = pd.melt(df, id_vars = df1.columns, value_name = 'time').drop('variable', axis=1).dropna().reset_index(drop=True)
 
-        df[creatinine] = np.clip(df[baseline_creat] + np.random.normal(loc = 0, scale = 0.25, size = df.shape[0]), a_min = 0.1, a_max = None).astype('float')
+        df[creatinine] = np.clip(df[baseline_creat] + np.random.normal(loc = 0, scale = 0.25, size = df.shape[0]), a_min = 0.1, a_max = None).astype('float').round(decimals=2)
         df[time] = df[time] + df[admission]
         df[inpatient] = df[time] > df[admission]
         
