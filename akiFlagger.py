@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.1.3' # master file
+__version__ = '0.1.4' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
@@ -179,15 +179,15 @@ class AKIFlagger:
         
         if self.aki_calc_type == 'both':
             if self.add_baseline_creat and self.add_min_creat: 
-                return pd.concat([df, rw[0], rw[1], bc[0], bc[1]], axis=1).reset_index()
+                return pd.concat([df, rw[0], rw[1], rw[2], bc[0], bc[1]], axis=1).reset_index()
             elif self.add_baseline_creat: 
                 return pd.concat([df, rw, bc[0], bc[1]], axis=1).reset_index() 
             elif self.add_min_creat:
-                return pd.concat([df, rw[0], rw[1], bc], axis=1).reset_index()
+                return pd.concat([df, rw[0], rw[1], rw[2], bc], axis=1).reset_index()
             return pd.concat([df, rw, bc], axis=1).reset_index()
         elif self.rolling_window:
             if self.add_min_creat:
-                return pd.concat([df, rw[0], rw[1]], axis=1).reset_index()
+                return pd.concat([df, rw[0], rw[1], rw[2]], axis=1).reset_index()
             return pd.concat([df, rw], axis=1).reset_index()
         elif self.back_calculate:
             if self.add_baseline_creat:
@@ -234,8 +234,8 @@ class AKIFlagger:
         # Groupby on encounter then apply conditions for rolling-window AKI
         gb = tmp.groupby(self.encounter_id, as_index = True, sort = False)
         gb_indx = gb[self.creatinine].rolling(self.cond1time).min().index
-        c1 = tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine] >= 0.3 + gb[self.creatinine].rolling(self.cond1time).min()
-        c2 = tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine] >= 1.5*gb[self.creatinine].rolling(self.cond2time).min()
+        c1 = np.round(tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(0.3 + gb[self.creatinine].rolling(self.cond1time).min(), decimals=4)
+        c2 = np.round(tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(1.5*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
         
         # Stage 1 suffices for rw if add_stages is False
         stage1 = np.logical_or(c1, c2)
@@ -243,8 +243,8 @@ class AKIFlagger:
 
         # Otherwise, create the additional stages & return their row-wise sum
         if self.add_stages:
-            stage2 = tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine] >= 2*gb[self.creatinine].rolling(self.cond2time).min()
-            stage3 = tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine] >= 3*gb[self.creatinine].rolling(self.cond2time).min()
+            stage2 = np.round(tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(2*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
+            stage3 = np.round(tmp.set_index([self.encounter_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(3*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
             
             stage2 = stage2.reindex(df.index)
             stage3 = stage3.reindex(df.index)
@@ -255,9 +255,11 @@ class AKIFlagger:
             assert (np.all(stage3.index == df.index)), 'Index mismatch!'
             
             if self.add_min_creat:
-                min_creat = pd.Series(gb[self.creatinine].rolling(self.cond1time).min(), index = df.index, name = 'min_creat')
-                assert (np.all(min_creat.index == df.index)), 'Index mismatch!'
-                return pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw'), min_creat
+                min_creat48 = pd.Series(gb[self.creatinine].rolling(self.cond1time).min(), index = df.index, name = 'min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600))
+                min_creat172 = pd.Series(gb[self.creatinine].rolling(self.cond2time).min(), index = df.index, name = 'min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600))
+                assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
+                assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
+                return pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw'), min_creat48, min_creat172
             return pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
 
         # One last check on the index before returning 
