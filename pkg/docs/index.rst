@@ -1,6 +1,9 @@
 .. akiFlagger documentation master file, created by
    Ishan Saran on Thu Aug 6 07:44:21 2020.
 
+.. role::  raw-html(raw)
+    :format: html
+    
 ========================================
 Welcome to the akiFlagger documentation!
 ========================================
@@ -121,30 +124,24 @@ The flagger comes with a built-in generator of a toy dataset to demonstrate how 
 
     By default, the naming system is as follows:
 
-    <h3 align='center'>
-        <span style="color:#eb726f">
-
-    **patient_id &#8594; 'mrn'** <p>
+    **patient_id :raw-html:`&rarr;` 'mrn'** 
         
-    **encounter_id &#8594; 'enc'** <p>
+    **encounter_id |rarr| 'enc'** 
 
-    **inpatient/outpatient &#8594; 'inpatient'** <p>
+    **inpatient/outpatient |rarr| 'inpatient'** 
         
-    **admission &#8594; 'admission'** <p>
+    **admission |rarr| 'admission'** 
 
-    **creatinine &#8594; 'creatinine'** <p>
+    **creatinine |rarr| 'creatinine'** 
         
-    **time &#8594; 'time'** <p>
-        </span>
-        <hr>
-    </h3> 
+    **time |rarr| 'time'** 
 
     If you have different names for your columns, you **_must_ specify them.** The toy dataset's name for `creatinine` is *'creat'* so you can see where in the flagger the alternate name is specified.
 
 Example: Rolling-window
 -----------------------
 
-The next code block runs the flagger and returns those patients who satisfy the AKI conditions according to the [KDIGO guidelines](https://kdigo.org/guidelines/) for change in creatinine values<font color = 'purple'>*</font> by the rolling-window definition, categorized as follows:
+The next code block runs the flagger and returns those patients who satisfy the AKI conditions according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ for change in creatinine values by the rolling-window definition, categorized as follows:
 
 
 *Stage 1:* $(1)$ $50\% \uparrow$ in creatinine in $ < 7 $ days OR $(2)$ $0.3 mg/dL \uparrow $  in creatinine in $ < 48$ hours
