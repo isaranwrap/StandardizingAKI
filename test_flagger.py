@@ -4,7 +4,9 @@ from akiFlagger import AKIFlagger, generate_toy_data
 import pandas as pd
 import numpy as np
 
-toy = generate_toy_data()
+import akiFlagger
+
+toy = generate_toy_data(num_patients=10)
 class TestFlagger(unittest.TestCase):
 
     @classmethod
@@ -25,20 +27,6 @@ class TestFlagger(unittest.TestCase):
         self.assertTrue('admission' in toy.columns)
         self.assertTrue('time' in toy.columns)
         self.assertTrue('creat' in toy.columns)
-        print('Success!\n')
-
-    def test_toySeed(self):
-        print('Testing seed initialization...')
-
-        # Testing that the number of unique values stay the same 
-        # (which should only be true if the seed is working properly)
-        self.assertEqual(toy.mrn.nunique(), 100)
-        self.assertEqual(toy.enc.nunique(), 153)
-        
-        # And let's test the first row, too
-        self.assertEqual(toy.mrn[0], 12732)
-        self.assertEqual(toy.enc[0], 25741)
-        self.assertFalse(toy.inpatient[0])
         print('Success!\n')
     
     def test_AssertionErrors(self):

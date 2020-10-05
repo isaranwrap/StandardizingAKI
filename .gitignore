@@ -1,4 +1,4 @@
-*.csv
+#*.csv
 *.npy
 .DS_Store
 .ipynb_checkpoints/StandardizingAKIDefinition-checkpoint.ipynb
@@ -6,6 +6,7 @@
 .RData
 .RHistory
 .vscode/
+pkg/old_dists/*
 
 #From gitignore.io, commonly used files which ought to be ignored
 ### Python ###
