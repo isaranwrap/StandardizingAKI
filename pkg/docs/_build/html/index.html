@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to the akiFlagger documentation! &mdash; akiFlagger 0.2.2 documentation</title>
+  <title>Welcome to the akiFlagger documentation! &mdash; akiFlagger 0.0.3 documentation</title>
   
 
   
@@ -170,14 +170,7 @@
 <li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#example-back-calculation">Example: Back-calculation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="AdditionalFeatures.html">Additional Features / Common Use Cases</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="AdditionalFeatures.html#adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example"><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows, instead, for example)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="AdditionalFeatures.html#working-with-different-column-names"><strong>→ Working with different column names</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="AdditionalFeatures.html#adding-in-rolling-window-minimum-creatinines"><strong>→ Adding in rolling-window minimum creatinines</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="AdditionalFeatures.html#adding-in-baseline-creatinine"><strong>→ Adding in baseline creatinine</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="AdditionalFeatures.html#bare-minimum-input"><strong>→ Bare-minimum input</strong></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="AdditionalFeatures.html">Additional Features / Common Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MoreInformation.html">More information</a></li>
 </ul>
 </div>
@@ -868,8 +861,7 @@ GFR = 141 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)
 <div class="section" id="additional-features-and-common-use-cases">
 <h2>Additional Features and Common Use Cases<a class="headerlink" href="#additional-features-and-common-use-cases" title="Permalink to this headline">¶</a></h2>
 <p>For most use cases, you will just need to specify <cite>rolling-window</cite> or <cite>back-calculate</cite> and the AKI-column will be returned. There are a slew of other features, some of which are listed below. For a full listing of the features and appropriate use cases, see the <cite>Documentation</cite> at <a class="reference external" href="https://akiflagger.readthedocs.io/en/latest/">akiflagger.readthedocs.io</a>.</p>
-<div class="section" id="adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example">
-<h3><strong>Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows, instead, for example)<a class="headerlink" href="#adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example" title="Permalink to this headline">¶</a></h3>
+<p><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows, instead, for example)</p>
 <p>It’s often the case that you want to add some padding to the window to account for variations occurring on the floor. If the amount of padding you would like to add is the same for both the smaller and larger window, simply pass <code class="docutils literal notranslate"><span class="pre">padding='_hours'</span></code> filling the blank with the number of hours to add to the windows.
 If the pad times are different between windows, the parameters <code class="docutils literal notranslate"><span class="pre">pad1time</span></code> and <code class="docutils literal notranslate"><span class="pre">pad2time</span></code> allow you to add just this padding to the initial windows of 48 and 172 hours. In fact, if you wanted a window of 36 hours, you could even set <cite>pad1time = ‘-12hours’</cite>; this is one way in which you could modify the rolling window.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 0: Adding 4-hour padding to windows</span>
@@ -931,9 +923,7 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="working-with-different-column-names">
-<h3><strong>Working with different column names</strong><a class="headerlink" href="#working-with-different-column-names" title="Permalink to this headline">¶</a></h3>
+<p><strong>→ Working with different column names</strong></p>
 <p>As an additional example, the patient identifier will often come in as <em>‘PAT_MRN_ID’</em> or <em>‘PAT_ENC_CSN_ID’</em> (or something of the sort) if it is coming from a typical clinical data warehouse/repository. Accordingly, these should be passed in as options to the flagger.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Working with different column names</span>
 
@@ -1014,9 +1004,7 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="adding-in-rolling-window-minimum-creatinines">
-<h3><strong>Adding in rolling-window minimum creatinines</strong><a class="headerlink" href="#adding-in-rolling-window-minimum-creatinines" title="Permalink to this headline">¶</a></h3>
+<p><strong>→ Adding in rolling-window minimum creatinines</strong></p>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_min_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. This will add in two columns which contain the minimum values in the rolling window, which is an intermediate column generated to calculate AKI; the flag adds in the column which the current creatinine is checked against.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 2: Adding in rolling-window minima</span>
 
@@ -1102,9 +1090,7 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="adding-in-baseline-creatinine">
-<h3><strong>Adding in baseline creatinine</strong><a class="headerlink" href="#adding-in-baseline-creatinine" title="Permalink to this headline">¶</a></h3>
+<p><strong>→ Adding in baseline creatinine</strong></p>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_baseline_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. Note that the baseline creatinine is not defined for outpatient measurements. Baseline creatinine can be thought of as the “resting” creatinine before coming into the hospital, so it doesn’t make much sense to define the baseline creatinine outside of a hospital visit.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 3: Adding in baseline creatinine</span>
 
@@ -1195,9 +1181,7 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="bare-minimum-input">
-<h3><strong>Bare-minimum input</strong><a class="headerlink" href="#bare-minimum-input" title="Permalink to this headline">¶</a></h3>
+<p><strong>→ Bare-bones dataset</strong></p>
 <p>As stated above, the bare minimum columns necessary for the flagger to run are the <strong>patient_id, inpatient/outpatient, time,</strong> and <strong>creatinine</strong>. In this case, any other columns used in intermediate steps will be imputed (admission, for example).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 4: Bare-bones dataset</span>
 
@@ -1262,7 +1246,6 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-</div>
 </div>
 </div>
 <div class="section" id="more-information">
