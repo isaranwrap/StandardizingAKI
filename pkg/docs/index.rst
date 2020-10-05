@@ -259,7 +259,8 @@ Additional Features and Common Use Cases
 For most use cases, you will just need to specify `rolling-window` or `back-calculate` and the AKI-column will be returned. There are a slew of other features, some of which are listed below. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
 
 
-**→ Adding padding to the rolling window** (52 hour & 172 hour windows, instead, for example)
+**Adding padding to the rolling window** (52 hour & 172 hour windows, instead, for example) 
+---------------------------------------------------------------------------------------------
 
 It's often the case that you want to add some padding to the window to account for variations occurring on the floor. If the amount of padding you would like to add is the same for both the smaller and larger window, simply pass ``padding='_hours'`` filling the blank with the number of hours to add to the windows.
 If the pad times are different between windows, the parameters ``pad1time`` and ``pad2time`` allow you to add just this padding to the initial windows of 48 and 172 hours. In fact, if you wanted a window of 36 hours, you could even set `pad1time = '-12hours'`; this is one way in which you could modify the rolling window. 
@@ -277,7 +278,8 @@ If the pad times are different between windows, the parameters ``pad1time`` and 
 .. csv-table::
     :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/example0.csv
 
-**→ Working with different column names**
+**Working with different column names**
+-----------------------------------------
 
 As an additional example, the patient identifier will often come in as *'PAT_MRN_ID'* or *'PAT_ENC_CSN_ID'* (or something of the sort) if it is coming from a typical clinical data warehouse/repository. Accordingly, these should be passed in as options to the flagger. 
 
@@ -299,7 +301,8 @@ As an additional example, the patient identifier will often come in as *'PAT_MRN
 .. csv-table::
     :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/example1.csv
 
-**→ Adding in rolling-window minimum creatinines**
+**Adding in rolling-window minimum creatinines**
+--------------------------------------------------
 
 To add in the baseline creatinine, simply pass the flag ``add_min_creat = True`` to the flagger. This will add in two columns which contain the minimum values in the rolling window, which is an intermediate column generated to calculate AKI; the flag adds in the column which the current creatinine is checked against.
 
@@ -316,7 +319,8 @@ To add in the baseline creatinine, simply pass the flag ``add_min_creat = True``
 .. csv-table::
     :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/example2.csv
 
-**→ Adding in baseline creatinine**
+**Adding in baseline creatinine**
+-----------------------------------
 
 To add in the baseline creatinine, simply pass the flag ``add_baseline_creat = True`` to the flagger. Note that the baseline creatinine is not defined for outpatient measurements. Baseline creatinine can be thought of as the "resting" creatinine before coming into the hospital, so it doesn't make much sense to define the baseline creatinine outside of a hospital visit. 
 
@@ -338,7 +342,8 @@ To add in the baseline creatinine, simply pass the flag ``add_baseline_creat = T
 .. csv-table::
     :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/example3.csv
 
-**→ Bare-bones dataset**
+**Bare-minimum input**
+------------------------
 
 As stated above, the bare minimum columns necessary for the flagger to run are the **patient_id, inpatient/outpatient, time,** and **creatinine**. In this case, any other columns used in intermediate steps will be imputed (admission, for example).
 
