@@ -16,4 +16,4 @@ To ensure that it is working properly, you can open a Python session and test it
 
    akiFlagger.__version__
 
-   >> '0.0.3'
+   >> '1.0.0'
