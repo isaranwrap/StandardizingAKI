@@ -49,7 +49,7 @@ sapply(dt, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIX
 # Add AKI
 aki <- addRollingWindowAKI(addBackCalcAKI(dt))
 
-# Test flagger against Python version
+# Check output against Python version
 py <- fread('~/Desktop/out.csv')
 # Convert time & admission columns to POSIXct format
 py <- transform(py, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'), 
@@ -69,7 +69,3 @@ comb <- merge(py, aki, by=c('mrn','time'))
 mismatch <- which(comb$bc.x != comb$bc.y)
 View(comb[mismatch])
 View(comb)
-
-
-
-
