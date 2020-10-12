@@ -1,83 +1,80 @@
 library(data.table)
-library(stringr)
-library(base)
-library(stats)
-library(dplyr)
-library(shiny)
+library(tidyverse)
+library(zoo)
 
-#Read in the data
-dt <- fread('/Users/saranmedical-smile/Desktop/patr/StandardizingAKI/inpatient 2014-2018 creatinine.csv')
+# User-defined functions
+addRollingWindowAKI <- function(dataframe, window1=as.difftime(2, units='days'), window2=as.difftime(7, units='days')) {
+  #if (missing(window1)) window1 <- as.difftime(2, units='days')
+  #if (missing(window2)) window2 <- as.difftime(7, units='days')
+  df <- dataframe %>% group_by(mrn) %>%
+    mutate(
+      # Find the rolling minimum creats for both rolling windows
+      min_creat48 = sapply(time, function(x) min(creat[between(time, x - window1, x)])), # Find minimum creatinine in the past 2 days
+      min_creat7d = sapply(time, function(x) min(creat[between(time, x - window2, x)])), # Find minimum creatinine in the past 7 days
+      
+      condition1 = creat >= min_creat48 + 0.3, # Check if the creat jumps by 0.3; aka KDIGO criterion 1 
+      condition2 = creat >= 1.5*min_creat7d, # Check if the creat jumps by 50%; aka KDIGO criterion 2
+      
+      stage1 = as.integer(condition1 | condition2), # Stage 1 AKI is either 0.3 OR 50% jump
+      stage2 = as.integer(creat >= 2*min_creat7d), # Check if creat doubles; aka KDIGO Stage 2 AKI 
+      stage3 = as.integer(creat >= 3*min_creat7d), # Check if creat triples; aka KDIGO Stage 3 AKI
+      rw = stage1 + stage2 + stage3, # The resulting rw column; ultimate output we want added in
+    )
+  #df %>% select(-min_creat7d, -min_creat48, -condition1, -condition2, -stage1, -stage2, -stage3)
+}
 
+addBackCalcAKI <- function(dataframe) {
+  df <- dataframe %>% rowwise() %>%
+    mutate(
+      t365_7subset = between(time, admission - as.difftime(365, units = 'days'), admission - as.difftime(7, units = 'days')),
+      ) %>% group_by(enc) %>%
+    mutate(
+      baseline_creatinine = round(median(creat[t365_7subset]), digits=2), 
+      baseline_creat = na.locf(baseline_creatinine),
+      stage1 = as.integer(creat >= 1.5*baseline_creat),
+      stage2 = as.integer(creat >= 2*baseline_creat),
+      stage3 = as.integer(creat >= 3*baseline_creat),
+      bc = stage1 + stage2 + stage3,
+      
+      bc_na = is.na(baseline_creat)
+      ) 
+  df[df$bc_na, 'bc'] = 0
+  df
+  #df %>% select(-t365_7subset, -baseline_creat, -stage1, -stage2, -stage3, -bc_na)
+}
 
-##### -------------------- PRE-PROCESSING ----------------------- #####
+# Read in data frame
+dt <- fread('~/Desktop/toy.csv')#[1:1000] #Grab the first thousand rows
+#dt <- subset(dt, select=-V1) # Drop the redundant index 
 
-#Renaming mrn & enc columns
-colnames(dt)[colnames(dt) %in% c('pat_mrn_id','pat_enc_csn_id')] = c('mrn', 'enc')
-
-
-#Removing 'MR' from mrn #'s since numeric indexing is faster
-dt$mrn <- substr(dt$mrn, 3, nchar(dt$mrn))
-dt <- transform(dt, mrn = as.integer(mrn))
-
-
-#Convert time to datetime POSIXct
-dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%dT%H:%M:%S'))
-sapply(dt, class) #check to make sure that each column is dtype we want
-
-
-#Create change in creatinine var
-dt <- dt[, creat.shift := shift(creatinine, n = -1), by = enc] 
-#data[, lag.value:=c(NA, value[-.N]), by=groups] ... ask Mike what the -.N index is & maybe what := is
-dt$delta.creat <- shift(dt$creat.shift - dt$creatinine, n = 1)
-
-
-#Create change in time var
-dt <- dt[, time.shift := shift(time, n = -1), by = enc]
-dt$delta.time <- shift(difftime(dt$time.shift, dt$time, units='hours'), n = 1)
-
-
-#Removing the creat shifted & time shifted columns
-dt$creat.shift <- NULL
-dt$time.shift <- NULL
-
-
-##### -------------------- Calculating Rolling Window AKI Cases ----------------------- #####
-
-#Calculating those who satisfy condition 1 (more than 0.3 increase in creatinine in less than 48 hours)
-t1 <- '2000-01-01'
-t2 <- '2000-01-03' #Probably a slow and stupid way to see 8 hours but I'll ask Mike if there's a smarter way...
-cond1 <- dt[, delta.creat > 0.3 & delta.time < difftime(t2, t1)]
-
-#And condition 2 (more than 50% increase in creatinine in less than 7 days)
-t3 <- '2000-01-01'
-t4 <- '2000-01-08'
-cond2 <- dt[, delta.creat > 0.5*shift(creatinine, n=1) & delta.time < difftime(t4, t3)]
-
-table(cond1, useNA = 'ifany')
-table(cond2, useNA = 'ifany')
-
-#cond1[is.na(cond1)] <- FALSE
-#cond2[is.na(cond2)] <- FALSE
-
-dt$aki <- cond1 == TRUE | cond2 == TRUE
-table(dt$aki) #matches Python code :)
+# Convert time & admission columns to POSIXct format
+dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'), 
+                admission = as.POSIXct(admission, format='%Y-%m-%d %H:%M:%S'))
+sapply(dt, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
 
 
+# Add in AKI
+#aki <- addBackCalcAKI(addRollingWindowAKI(dt))
+ish <- fread('~/Desktop/out.csv')
 
+tmp <- dt %>% rowwise() %>%
+  mutate(
+    t365_7subset = between(time, admission - as.difftime(365, units = 'days'), admission - as.difftime(7, units = 'days')),
+    #baseline_creatinine = round(median(creat[t365_7subset]), digits=2),
+  ) %>% group_by(enc) %>%
+  mutate(
+    baseline_creatinine = round(median(creat[t365_7subset]), digits=2),
+  ) %>% ungroup(enc) %>% group_by(mrn) %>%
+  mutate(
+    baseline_creat = na.locf(baseline_creatinine),
+    was_na = baseline_creat != baseline_creatinine
+  )
 
+(tmp$baseline_creat == tmp$baseline_creatinine)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+View(AP)
+str(AP)
+AP[1:5]
+head(AP)
+ts(AP, frequency=12, start=c(1946,1))
+plot(speech)
