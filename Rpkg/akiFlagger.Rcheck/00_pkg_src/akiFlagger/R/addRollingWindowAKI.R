@@ -5,18 +5,22 @@
 #' @param window2 The rolling window length of the longer time window; defaults to 162 hours
 #'
 #' @return The patient dataset with the rolling-window AKI column added in
+#'
+#' @import dplyr
+#' @import data.table
+#' @import zoo
+#'
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' addRollingWindowAKI(df)
 #' }
-library(tidyverse)
-library(data.table)
-library(zoo)
-addRollingWindowAKI <- function(dataframe, window1=as.difftime(2, units='days'), window2=as.difftime(7, units='days')) {
 
-  df <- dataframe %>% group_by(mrn) %>%
+addRollingWindowAKI <- function(dataframe, window1=as.difftime(2, units='days'), window2=as.difftime(7, units='days'),
+                                add_min_creat = FALSE, patient_id = "mrn") {
+
+  df <- dataframe %>% group_by_at(patient_id) %>%
     mutate(
       # Find the rolling minimum creats for both rolling windows
       min_creat48 = sapply(time, function(x) min(creat[between(time, x - window1, x)])), # Find minimum creatinine in the past 2 days
@@ -30,5 +34,7 @@ addRollingWindowAKI <- function(dataframe, window1=as.difftime(2, units='days'),
       stage3 = as.integer(creat >= 3*min_creat7d), # Check if creat triples; aka KDIGO Stage 3 AKI
       rw = stage1 + stage2 + stage3, # The resulting rw column; ultimate output we want added in
     )
-  df %>% select(-min_creat7d, -min_creat48, -condition1, -condition2, -stage1, -stage2, -stage3)
+  if (add_min_creat) return(df %>% select(-condition1, -condition2, -stage1, -stage2, -stage3))
+  return(df %>% select(-min_creat7d, -min_creat48, -condition1, -condition2, -stage1, -stage2, -stage3))
 }
+

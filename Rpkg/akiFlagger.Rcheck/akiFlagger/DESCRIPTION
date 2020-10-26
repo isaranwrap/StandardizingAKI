@@ -18,3 +18,4 @@ VignetteBuilder: knitr
 Imports: dplyr, data.table, zoo
 NeedsCompilation: no
 Packaged: 2020-10-14 03:27:30 UTC; Praveens
+Built: R 3.6.3; ; 2020-10-14 03:27:36 UTC; unix

@@ -1,0 +1,128 @@
+---
+title: "Getting Started"
+subtitle: "Estimated completion time: 10 minutes"
+#author: "Ishan Saran"
+date: "`r format(Sys.Date(), format='%B %d, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GettingStarted}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = ""
+)
+```
+Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked by an increase in the serum creatinine levels (amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of [guidelines](https://kdigo.org/guidelines/acute-kidney-injury/) and [standard definitions](http://www.european-renal-best-practice.org/sites/default/files/u33/ndt.gfs375.full_.pdf) of AKI:
+
+* *Stage 1*: 50% increase in creatinine in < 7 days or 0.3 increase in creatinine in < 48 hours
+
+* *Stage 2*: 100% increase in (or doubling of) creatinine in < 7 days
+
+* *Stage 3*: 200% increase in (or tripling of) creatinine in < 7 days
+
+This package contains a flagger to determine if a patient has developed AKI based on longitudinal data of serum creatinine measurements. 
+
+### Installation
+The package can be installed via [CRAN](https://cran.r-project.org/).
+```
+install.packages("akiFlagger") # SOON, NOT YET - AWAITING APPROVAL
+```
+### Imports
+```{r setup, echo=TRUE, message=FALSE}
+library(data.table)
+library(dplyr)
+library(zoo)
+library(akiFlagger)
+```
+
+This package is meant to handle patient data. Let's walk through an example of how to use this package with some toy data since real patient data is probably [protected health information](https://www.hipaajournal.com/what-is-protected-health-information/).
+
+### Reading in the data
+```{r}
+dt <- fread('~/Desktop/toy.csv')
+dt <- subset(dt, select=-V1) # Drop the redundant index
+head(dt)
+```
+
+### Pre-processing 
+Some light pre-processing is required. First, R has a specific data type for times: the [POSIXct format](https://www.rdocumentation.org/packages/tis/versions/1.38/topics/POSIXct) (which stands for the Portable Operating System Interface calendar time format, if you're curious). We need to convert any time columns into the POSIXct format so R can process them properly. This is done as follows:
+
+```{r}
+# Convert time & admission columns to POSIXct format
+time_cols <- c('time', 'admission') 
+dt[, (time_cols) := lapply(.SD, as.POSIXct), .SDcols = time_cols]
+sapply(dt, class) # Ensure proper data types for each column
+```
+
+There's just one more step. The flagger expects the incoming dataset to have certain columns in it: **patient_id, inpatient, creatinine,** and **time** as well as optional columns commonly supplied from data warehouse repositories: **encounter_id** and **admission**. We just need to rename the patient dataset names to match up with the names the flagger is expecting, as the code below shows.
+
+```{r, message=FALSE}
+# Specify the following columns
+patient_id    <- 'mrn'
+encounter_id  <- 'enc' # Optional
+inpatient     <- 'inpatient'
+admission     <- 'admission' # Optional
+creatinine    <- 'creat'
+time          <- 'time'
+
+#Rename the columns 
+dt <- dt %>% rename('patient_id' = patient_id, 'encounter_id' = encounter_id, 'inpatient' = inpatient,
+                    'creatinine' = creatinine, 'admission' = admission, 'time' = time)
+colnames(dt)
+```
+
+### Adding in AKI
+Now, it's as simple as calling whichever AKI calculation method you are interested in. For example, if you were interested in [`rolling-window`](https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html) AKI, you could add it in like this:
+```{r}
+subset <- c('patient_id', 'inpatient', 'time', 'creatinine', 'rw')
+
+out <- addRollingWindowAKI(dt)
+out[, subset] # Subset selects the required columns
+```
+
+Notice how the flagger returns the dataset exactly as that which it was presented with, with the `rw` column added in. We can look at what the flagger is flagging by taking a sample patient where `rw > 0`. 
+
+```{r}
+out[out$rw > 0, subset] # Apparently, patient 13624 is a good candidate to see the flagger in action
+out[out$patient_id == 13264,subset]
+```
+
+Great! Similarly, for `back-calculated` AKI, we simply run the following:
+
+```{r}
+subset <- c('patient_id', 'inpatient', 'time', 'creatinine', 'bc')
+
+out <- addBackCalcAKI(dt)
+out[, ..subset]
+```
+
+### Intermediate columns generated during analysis
+Just as we looked at what the flagger flagged as rolling window AKI, we could do the same for back-calculated AKI. But here's the thing: it would be hard to understand why the flagger is flagging what it is flagging without seeing the imputed baseline creatinine values. For this, there are additional parameters which can be passed to the flagger. For back-calculated AKI, the `add_baseline_creat = TRUE` flag can be passed to add in the baseline creatinine (for rolling-window AKI, the corresponding intermediate column generated during the calculation process would be the minima which the creatinine values are being compared against; `add_min_creat=TRUE` would add these into the output)
+
+```{r}
+subset <- c('patient_id', 'inpatient', 'time', 'creatinine', 'baseline_creat', 'bc')
+out <- addBackCalcAKI(dt, add_baseline_creat = TRUE)
+out[out$patient_id == 12897, ..subset]
+```
+
+If we wanted to perform both calculation methods, that can be accomplished by simply chaining the functions together:
+
+```{r}
+subset <- c('patient_id', 'inpatient', 'time', 'creatinine', 'rw', 'bc') 
+
+aki <- addRollingWindowAKI(addBackCalcAKI(dt))
+aki[, subset]
+```
+
+### Adding in padding 
+The length of the rolling window can be modified. Often, it is the case you would like to add a 4-hour padding to the rolling windows. This can be done by modifying the `window` parameters in the `addRollingWindowAKI()` function. 
+```{r}
+window1 <- as.difftime(48, units='hours')
+window2 <- as.difftime(172, units='hours')
+aki <- addRollingWindowAKI(addBackCalcAKI(dt), window1=window1, window2=window2)
+aki[, subset]
+```

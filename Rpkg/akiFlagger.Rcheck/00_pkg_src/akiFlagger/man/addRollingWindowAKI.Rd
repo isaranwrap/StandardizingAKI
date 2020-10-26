@@ -8,7 +8,8 @@ addRollingWindowAKI(
   dataframe,
   window1 = as.difftime(2, units = "days"),
   window2 = as.difftime(7, units = "days"),
-  add_min_creat = FALSE
+  add_min_creat = FALSE,
+  patient_id = "mrn"
 )
 }
 \arguments{

@@ -1,10 +1,22 @@
 * installing *source* package ‘akiFlagger’ ...
 ** using staged installation
 ** R
+** inst
 ** byte-compile and prepare package for lazy loading
-Error : package or namespace load failed for ‘zoo’ in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]):
- there is no package called ‘lattice’
-Error: unable to load R code in package ‘akiFlagger’
-Execution halted
-ERROR: lazy loading failed for package ‘akiFlagger’
-* removing ‘/Users/Praveens/Desktop/ishan/StandardizingAKI/Rpkg/akiFlagger.Rcheck/akiFlagger’
+Warning: replacing previous import ‘data.table::last’ by ‘dplyr::last’ when loading ‘akiFlagger’
+Warning: replacing previous import ‘data.table::first’ by ‘dplyr::first’ when loading ‘akiFlagger’
+Warning: replacing previous import ‘data.table::between’ by ‘dplyr::between’ when loading ‘akiFlagger’
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+Warning: replacing previous import ‘data.table::last’ by ‘dplyr::last’ when loading ‘akiFlagger’
+Warning: replacing previous import ‘data.table::first’ by ‘dplyr::first’ when loading ‘akiFlagger’
+Warning: replacing previous import ‘data.table::between’ by ‘dplyr::between’ when loading ‘akiFlagger’
+** testing if installed package can be loaded from final location
+Warning: replacing previous import ‘data.table::last’ by ‘dplyr::last’ when loading ‘akiFlagger’
+Warning: replacing previous import ‘data.table::first’ by ‘dplyr::first’ when loading ‘akiFlagger’
+Warning: replacing previous import ‘data.table::between’ by ‘dplyr::between’ when loading ‘akiFlagger’
+** testing if installed package keeps a record of temporary installation path
+* DONE (akiFlagger)
