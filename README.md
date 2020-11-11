@@ -28,7 +28,7 @@ import akiFlagger
 
 print(akiFlagger.__version__)
 
->> '0.1.3'
+>> '1.0.0'
 ```
 
 Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
