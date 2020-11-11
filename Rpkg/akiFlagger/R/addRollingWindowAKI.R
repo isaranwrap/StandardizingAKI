@@ -1,14 +1,29 @@
-#' Rolling Window AKI
+#' Add in rolling-window AKI
 #'
-#' @param dataframe The patient dataset
-#' @param window1 The rolling window length of the shorter time window; defaults to 48 hours
-#' @param window2 The rolling window length of the longer time window; defaults to 162 hours
+#' Add in the AKI column in a patient dataframe according to the rolling-window KDIGO criterion
 #'
-#' @return The patient dataset with the rolling-window AKI column added in
+#' @param dataframe patient dataset
+#' @param window1 rolling window length of the shorter time window; defaults to 48 hours
+#' @param window2 rolling window length of the longer time window; defaults to 162 hours
+#' @param add_min_creat boolean to add the intermediate columns generated during calculation
 #'
-#' @import data.table
-#' @import dplyr
+#'
+#' @return patient dataset with the rolling-window AKI column added in
+#'
+#' #Imports
 #' @import zoo
+#' @importFrom dplyr select
+#' @importFrom dplyr group_by
+#' @importFrom dplyr between
+#' @importFrom dplyr mutate
+#' @importFrom dplyr %>%
+#'
+#' @importFrom data.table fread
+#' @importFrom data.table first
+#' @importFrom data.table last
+#' @importFrom data.table copy
+#' @importFrom data.table :=
+#' @importFrom data.table .SD
 #'
 #' @export
 #'
@@ -19,6 +34,12 @@
 
 addRollingWindowAKI <- function(dataframe, window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
                                 add_min_creat = FALSE) {
+  # TEMP RETURN TO CHECK FUNCTION WORKS PROPERLY
+  #return(paste0(getwd()))
+  patient_id <- encounter_id <- time <- creatinine <- NULL
+  condition1 <- condition2 <- stage1 <- stage2 <- stage3 <- NULL
+  min_creat48 <- min_creat7d <- NULL
+
   df <- dataframe %>% group_by(patient_id) %>%
     mutate(
       min_creat48 = sapply(time, function(x) min(creatinine[between(time, x - window1, x)])), # Find minimum creatinine in the past 2 days
@@ -35,4 +56,3 @@ addRollingWindowAKI <- function(dataframe, window1 = as.difftime(2, units='days'
   if (add_min_creat) return(df %>% select(-condition1, -condition2, -stage1, -stage2, -stage3))
   return(df %>% select(-min_creat7d, -min_creat48, -condition1, -condition2, -stage1, -stage2, -stage3))
 }
-

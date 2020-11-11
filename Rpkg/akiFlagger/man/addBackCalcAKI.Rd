@@ -11,12 +11,14 @@ addBackCalcAKI(
 )
 }
 \arguments{
-\item{dataframe}{The patient dataset}
+\item{dataframe}{patient dataset}
 
-\item{lookforward}{The amount of time to look forward after admission before the back-calculation method no longer applies}
+\item{lookforward}{amount of time to look forward after admission before the back-calculation method no longer applies}
+
+\item{add_baseline_creat}{boolean to add the intermediate column generated during calculation}
 }
 \value{
-The patient dataset with the back-calculation AKI column added in
+patient dataset with the back-calculation AKI column added in
 }
 \description{
 Back Calculation AKI

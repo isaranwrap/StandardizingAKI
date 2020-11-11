@@ -1,9 +1,11 @@
 #' Back Calculation AKI
 #'
-#' @param dataframe The patient dataset
-#' @param lookforward The amount of time to look forward after admission before the back-calculation method no longer applies
+#' @param dataframe patient dataset
+#' @param lookforward amount of time to look forward after admission before the back-calculation method no longer applies
+#' @param add_baseline_creat boolean to add the intermediate column generated during calculation
 #'
-#' @return The patient dataset with the back-calculation AKI column added in
+#' @return patient dataset with the back-calculation AKI column added in
+#' @importFrom stats median
 #' @export
 #'
 #' @examples
@@ -12,6 +14,8 @@
 #' }
 
 addBackCalcAKI <- function(dataframe, lookforward=as.difftime(7, units='days'), add_baseline_creat = FALSE) {
+  patient_id <- encounter_id <- time <- admission <- creatinine <- inpatient <- NULL
+  baseline_creat <- stage1 <- stage2 <- stage3 <- bc <- NULL
   df <- copy(dataframe)
   # Take the MEDIAN OUTPATIENT creatinine values from 365 to 7 days prior to admission
   df[, baseline_creat := .SD[time >= admission - as.difftime(365, units='days') & time <= admission - as.difftime(7, units='days') & inpatient == F, round(median(creatinine), 4)], by = patient_id]

@@ -2,7 +2,7 @@
 % Please edit documentation in R/addRollingWindowAKI.R
 \name{addRollingWindowAKI}
 \alias{addRollingWindowAKI}
-\title{Rolling Window AKI}
+\title{Add in rolling-window AKI}
 \usage{
 addRollingWindowAKI(
   dataframe,
@@ -12,17 +12,21 @@ addRollingWindowAKI(
 )
 }
 \arguments{
-\item{dataframe}{The patient dataset}
+\item{dataframe}{patient dataset}
 
-\item{window1}{The rolling window length of the shorter time window; defaults to 48 hours}
+\item{window1}{rolling window length of the shorter time window; defaults to 48 hours}
 
-\item{window2}{The rolling window length of the longer time window; defaults to 162 hours}
+\item{window2}{rolling window length of the longer time window; defaults to 162 hours}
+
+\item{add_min_creat}{boolean to add the intermediate columns generated during calculation}
 }
 \value{
-The patient dataset with the rolling-window AKI column added in
+patient dataset with the rolling-window AKI column added in
+
+#Imports
 }
 \description{
-Rolling Window AKI
+Add in the AKI column in a patient dataframe according to the rolling-window KDIGO criterion
 }
 \examples{
 \dontrun{
