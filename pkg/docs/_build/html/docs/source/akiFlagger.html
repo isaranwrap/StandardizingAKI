@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../GettingStarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../AdditionalFeatures.html">Additional Features / Common Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../MoreInformation.html">More information</a></li>
 </ul>
 
@@ -157,11 +158,14 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-akiFlagger.akiFlagger">
-<span id="akiflagger-akiflagger-module"></span><h2>akiFlagger.akiFlagger module<a class="headerlink" href="#module-akiFlagger.akiFlagger" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="akiflagger-akiflagger-module">
+<h2>akiFlagger.akiFlagger module<a class="headerlink" href="#akiflagger-akiflagger-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-akiFlagger">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-akiFlagger" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="akiFlagger.akiFlagger.AKIFlagger">
-<em class="property">class </em><code class="sig-prename descclassname">akiFlagger.akiFlagger.</code><code class="sig-name descname">AKIFlagger</code><span class="sig-paren">(</span><em class="sig-param">patient_id='mrn'</em>, <em class="sig-param">creatinine='creatinine'</em>, <em class="sig-param">time='time'</em>, <em class="sig-param">inpatient='inpatient'</em>, <em class="sig-param">aki_calc_type=None</em>, <em class="sig-param">eGFR_impute=False</em>, <em class="sig-param">add_stages=True</em>, <em class="sig-param">cond1time='48hours'</em>, <em class="sig-param">cond2time='168hours'</em>, <em class="sig-param">pad1time='0hours'</em>, <em class="sig-param">pad2time='0hours'</em>, <em class="sig-param">padding=None</em>, <em class="sig-param">rolling_window=False</em>, <em class="sig-param">back_calculate=False</em>, <em class="sig-param">admission='admission'</em>, <em class="sig-param">age='age'</em>, <em class="sig-param">sex='sex'</em>, <em class="sig-param">race='race'</em>, <em class="sig-param">encounter_id='enc'</em>, <em class="sig-param">baseline_creat='baseline_creat'</em>, <em class="sig-param">sort_values=True</em>, <em class="sig-param">remove_bc_na=True</em>, <em class="sig-param">add_baseline_creat=False</em>, <em class="sig-param">add_min_creat=False</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger">
+<em class="property">class </em><code class="sig-prename descclassname">akiFlagger.</code><code class="sig-name descname">AKIFlagger</code><span class="sig-paren">(</span><em class="sig-param">patient_id='mrn'</em>, <em class="sig-param">creatinine='creatinine'</em>, <em class="sig-param">time='time'</em>, <em class="sig-param">inpatient='inpatient'</em>, <em class="sig-param">aki_calc_type=None</em>, <em class="sig-param">eGFR_impute=False</em>, <em class="sig-param">add_stages=True</em>, <em class="sig-param">cond1time='48hours'</em>, <em class="sig-param">cond2time='168hours'</em>, <em class="sig-param">pad1time='0hours'</em>, <em class="sig-param">pad2time='0hours'</em>, <em class="sig-param">padding=None</em>, <em class="sig-param">rolling_window=False</em>, <em class="sig-param">back_calculate=False</em>, <em class="sig-param">admission='admission'</em>, <em class="sig-param">age='age'</em>, <em class="sig-param">sex='sex'</em>, <em class="sig-param">race='race'</em>, <em class="sig-param">encounter_id='enc'</em>, <em class="sig-param">baseline_creat='baseline_creat'</em>, <em class="sig-param">sort_values=True</em>, <em class="sig-param">remove_bc_na=True</em>, <em class="sig-param">add_baseline_creat=False</em>, <em class="sig-param">add_min_creat=False</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Main flagger to detect patients with acute kidney injury (AKI).
 This flagger returns patients with AKI according to the <a class="reference external" href="https://kdigo.org/guidelines/">KDIGO guidelines</a> on changes in creatinine*. The KDIGO guidelines are as follows:</p>
@@ -176,8 +180,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 <p>More information can be found in the documentation at <a class="reference external" href="https://akiflagger.readthedocs.io/en/latest/">akiflagger.readthedocs.io</a>.</p>
 </div></blockquote>
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.patient_id">
-<code class="sig-name descname">patient_id</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.patient_id" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.patient_id">
+<code class="sig-name descname">patient_id</code><a class="headerlink" href="#akiFlagger.AKIFlagger.patient_id" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘mrn’.</strong> Name of the column used to identify patients; e.g. ‘PAT_MRN_ID’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -187,8 +191,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.encounter_id">
-<code class="sig-name descname">encounter_id</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.encounter_id" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.encounter_id">
+<code class="sig-name descname">encounter_id</code><a class="headerlink" href="#akiFlagger.AKIFlagger.encounter_id" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘enc’.</strong> Name of the column used to identify encounters; e.g. ‘PAT_ENC_CSN_ID’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -198,8 +202,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.time">
-<code class="sig-name descname">time</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.time" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.time">
+<code class="sig-name descname">time</code><a class="headerlink" href="#akiFlagger.AKIFlagger.time" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘time’.</strong> Name of the column containing time stamps; e.g. ‘time’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -209,8 +213,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.inpatient">
-<code class="sig-name descname">inpatient</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.inpatient" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.inpatient">
+<code class="sig-name descname">inpatient</code><a class="headerlink" href="#akiFlagger.AKIFlagger.inpatient" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘inpatient’.</strong> Name of the column containing inpatient/outpatient identifier; e.g. ‘inpatient’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -220,8 +224,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.admission">
-<code class="sig-name descname">admission</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.admission" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.admission">
+<code class="sig-name descname">admission</code><a class="headerlink" href="#akiFlagger.AKIFlagger.admission" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘admission’.</strong> Name of the column containing the admission dates; e.g. ‘admission’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -231,8 +235,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.creatinine">
-<code class="sig-name descname">creatinine</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.creatinine" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.creatinine">
+<code class="sig-name descname">creatinine</code><a class="headerlink" href="#akiFlagger.AKIFlagger.creatinine" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘creatinine’.</strong> Name of the column containing creatinine values; e.g. ‘creatinine’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -242,8 +246,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.baseline_creat">
-<code class="sig-name descname">baseline_creat</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.baseline_creat" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.baseline_creat">
+<code class="sig-name descname">baseline_creat</code><a class="headerlink" href="#akiFlagger.AKIFlagger.baseline_creat" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘baseline_creat’.</strong> Name of the column containint baseline creatinine values; e.g ‘baseline_creat’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -253,8 +257,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.age">
-<code class="sig-name descname">age</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.age" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.age">
+<code class="sig-name descname">age</code><a class="headerlink" href="#akiFlagger.AKIFlagger.age" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘age’.</strong> Name of the column containing the age values; e.g. ‘age’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -264,8 +268,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.sex">
-<code class="sig-name descname">sex</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.sex" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.sex">
+<code class="sig-name descname">sex</code><a class="headerlink" href="#akiFlagger.AKIFlagger.sex" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘sex’.</strong> Name of the column containing the age values; e.g. ‘age’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -275,8 +279,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.race">
-<code class="sig-name descname">race</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.race" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.race">
+<code class="sig-name descname">race</code><a class="headerlink" href="#akiFlagger.AKIFlagger.race" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘race’.</strong> Name of the column containing the age values; e.g. ‘age’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -286,8 +290,8 @@ inclusion criterion based on urinary output and renal replacement therapy.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.aki_calc_type">
-<code class="sig-name descname">aki_calc_type</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.aki_calc_type" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.aki_calc_type">
+<code class="sig-name descname">aki_calc_type</code><a class="headerlink" href="#akiFlagger.AKIFlagger.aki_calc_type" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>defaults to None.</strong> Name of the AKI-calculation method the flagger should perform.
 Possible values are “rolling_window”, “back_calculate”, or “both”.</p>
 <dl class="field-list simple">
@@ -298,8 +302,8 @@ Possible values are “rolling_window”, “back_calculate”, or “both”.</
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.rolling_window">
-<code class="sig-name descname">rolling_window</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.rolling_window" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.rolling_window">
+<code class="sig-name descname">rolling_window</code><a class="headerlink" href="#akiFlagger.AKIFlagger.rolling_window" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default True.</strong> Whether to perform rolling-window AKI calculation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -309,8 +313,8 @@ Possible values are “rolling_window”, “back_calculate”, or “both”.</
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.back_calculate">
-<code class="sig-name descname">back_calculate</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.back_calculate" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.back_calculate">
+<code class="sig-name descname">back_calculate</code><a class="headerlink" href="#akiFlagger.AKIFlagger.back_calculate" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default False.</strong> Whether to perform back-calculate AKI calculation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -320,8 +324,8 @@ Possible values are “rolling_window”, “back_calculate”, or “both”.</
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.eGFR_impute">
-<code class="sig-name descname">eGFR_impute</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.eGFR_impute" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.eGFR_impute">
+<code class="sig-name descname">eGFR_impute</code><a class="headerlink" href="#akiFlagger.AKIFlagger.eGFR_impute" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default False.</strong> Whether or not to impute the missing baseline creatinine values with the
 eGFR-imputation method; i.e. assuming an eGFR of 75 estimate baseline creatinine based on age, sex, and race.</p>
 <dl class="field-list simple">
@@ -332,8 +336,8 @@ eGFR-imputation method; i.e. assuming an eGFR of 75 estimate baseline creatinine
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.add_stages">
-<code class="sig-name descname">add_stages</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.add_stages" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.add_stages">
+<code class="sig-name descname">add_stages</code><a class="headerlink" href="#akiFlagger.AKIFlagger.add_stages" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default True.</strong> Whether or not to have rolling-window AKI delineated into stages.
 If add_stages is True, the generated <cite>rw</cite> column dtype is <em>int64</em> otherwise the <cite>rw</cite> column dtypes is <em>bool</em>.</p>
 <dl class="field-list simple">
@@ -344,8 +348,8 @@ If add_stages is True, the generated <cite>rw</cite> column dtype is <em>int64</
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.cond1time">
-<code class="sig-name descname">cond1time</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.cond1time" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.cond1time">
+<code class="sig-name descname">cond1time</code><a class="headerlink" href="#akiFlagger.AKIFlagger.cond1time" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘48hours’.</strong> The rolling-window time of the first KDIGO criterion condition.
 This string gets passed to pd.Timedelta(cond1time), so any acceptable time format for that function will work.</p>
 <dl class="field-list simple">
@@ -356,8 +360,8 @@ This string gets passed to pd.Timedelta(cond1time), so any acceptable time forma
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.cond2time">
-<code class="sig-name descname">cond2time</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.cond2time" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.cond2time">
+<code class="sig-name descname">cond2time</code><a class="headerlink" href="#akiFlagger.AKIFlagger.cond2time" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘168hours’.</strong> The rolling-window time of the second KDIGO criterion condition.
 This string gets passed to pd.Timedelta(cond2time), so any acceptable time format for that function will work.</p>
 <dl class="field-list simple">
@@ -368,8 +372,8 @@ This string gets passed to pd.Timedelta(cond2time), so any acceptable time forma
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.pad1time">
-<code class="sig-name descname">pad1time</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.pad1time" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.pad1time">
+<code class="sig-name descname">pad1time</code><a class="headerlink" href="#akiFlagger.AKIFlagger.pad1time" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘0hours’.</strong> Padding to add to the first KDIGO criterion condition.
 This string gets passed to pd.Timedelta(pad1time), so any acceptable time format for that function will work.</p>
 <dl class="field-list simple">
@@ -380,8 +384,8 @@ This string gets passed to pd.Timedelta(pad1time), so any acceptable time format
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.pad2time">
-<code class="sig-name descname">pad2time</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.pad2time" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.pad2time">
+<code class="sig-name descname">pad2time</code><a class="headerlink" href="#akiFlagger.AKIFlagger.pad2time" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default ‘0hours’.</strong> Padding to add to the second KDIGO criterion condition.
 This string gets passed to pd.Timedelta(pad2time), so any acceptable time format for that function will work.</p>
 <dl class="field-list simple">
@@ -392,8 +396,8 @@ This string gets passed to pd.Timedelta(pad2time), so any acceptable time format
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.sort_values">
-<code class="sig-name descname">sort_values</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.sort_values" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.sort_values">
+<code class="sig-name descname">sort_values</code><a class="headerlink" href="#akiFlagger.AKIFlagger.sort_values" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default True.</strong> Whether or not to sort the values within each encounter based on <cite>time</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -403,8 +407,8 @@ This string gets passed to pd.Timedelta(pad2time), so any acceptable time format
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.remove_bc_na">
-<code class="sig-name descname">remove_bc_na</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.remove_bc_na" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.remove_bc_na">
+<code class="sig-name descname">remove_bc_na</code><a class="headerlink" href="#akiFlagger.AKIFlagger.remove_bc_na" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default True.</strong> Whether or not to convert the back-calculated NaNs to Falses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -414,8 +418,8 @@ This string gets passed to pd.Timedelta(pad2time), so any acceptable time format
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.add_baseline_creat">
-<code class="sig-name descname">add_baseline_creat</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.add_baseline_creat" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.add_baseline_creat">
+<code class="sig-name descname">add_baseline_creat</code><a class="headerlink" href="#akiFlagger.AKIFlagger.add_baseline_creat" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default False.</strong> Whether or not to add the baseline creatinine column from back-calculate method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -425,8 +429,8 @@ This string gets passed to pd.Timedelta(pad2time), so any acceptable time format
 </dd></dl>
 
 <dl class="attribute">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.add_min_creat">
-<code class="sig-name descname">add_min_creat</code><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.add_min_creat" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.add_min_creat">
+<code class="sig-name descname">add_min_creat</code><a class="headerlink" href="#akiFlagger.AKIFlagger.add_min_creat" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>default False.</strong> Whether or not to add the minimum creatinine column from rolling-window method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -436,26 +440,26 @@ This string gets passed to pd.Timedelta(pad2time), so any acceptable time format
 </dd></dl>
 
 <dl class="method">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.addAdmissionColumn">
-<code class="sig-name descname">addAdmissionColumn</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">add_encounter_col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.addAdmissionColumn" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.addAdmissionColumn">
+<code class="sig-name descname">addAdmissionColumn</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">add_encounter_col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger.addAdmissionColumn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.addBackCalcAKI">
-<code class="sig-name descname">addBackCalcAKI</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">baseline_creat=None</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.addBackCalcAKI" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.addBackCalcAKI">
+<code class="sig-name descname">addBackCalcAKI</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">baseline_creat=None</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger.addBackCalcAKI" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns aki based on back-calculation method. Requires <cite>baseline_creat</cite> from <em>`addBaselineCreat()`</em> function as an intermediate to calculate aki.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.addBaselineCreat">
-<code class="sig-name descname">addBaselineCreat</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.addBaselineCreat" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.addBaselineCreat">
+<code class="sig-name descname">addBaselineCreat</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger.addBaselineCreat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns baseline creatinine used in intermediate calculation for back-calculating AKI.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.addRollingWindowAKI">
-<code class="sig-name descname">addRollingWindowAKI</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.addRollingWindowAKI" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.addRollingWindowAKI">
+<code class="sig-name descname">addRollingWindowAKI</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger.addRollingWindowAKI" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the AKI conditions based on rolling window definition.
 Returns the rolling-window as a pandas series (and possibly the minimum creatinine values, if <cite>add_min_creat=True</cite>).</p>
 <dl class="field-list simple">
@@ -473,16 +477,16 @@ min_creat (pd.Series): potentially returns min_creat if <cite>add_min_creat</cit
 </dd></dl>
 
 <dl class="method">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.eGFRbasedCreatImputation">
-<code class="sig-name descname">eGFRbasedCreatImputation</code><span class="sig-paren">(</span><em class="sig-param">age</em>, <em class="sig-param">female</em>, <em class="sig-param">black</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.eGFRbasedCreatImputation" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.eGFRbasedCreatImputation">
+<code class="sig-name descname">eGFRbasedCreatImputation</code><span class="sig-paren">(</span><em class="sig-param">age</em>, <em class="sig-param">female</em>, <em class="sig-param">black</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger.eGFRbasedCreatImputation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
 The imputation is based on the <a class="reference external" href="https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating">CKD-EPI equation</a> from the paper
 <em>A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)</em>.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="akiFlagger.akiFlagger.AKIFlagger.returnAKIpatients">
-<code class="sig-name descname">returnAKIpatients</code><span class="sig-paren">(</span><em class="sig-param">dataframe</em>, <em class="sig-param">add_stages=None</em>, <em class="sig-param">cond1time=None</em>, <em class="sig-param">cond2time=None</em>, <em class="sig-param">pad1time=None</em>, <em class="sig-param">pad2time=None</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.AKIFlagger.returnAKIpatients" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.AKIFlagger.returnAKIpatients">
+<code class="sig-name descname">returnAKIpatients</code><span class="sig-paren">(</span><em class="sig-param">dataframe</em>, <em class="sig-param">add_stages=None</em>, <em class="sig-param">cond1time=None</em>, <em class="sig-param">cond2time=None</em>, <em class="sig-param">pad1time=None</em>, <em class="sig-param">pad2time=None</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.AKIFlagger.returnAKIpatients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns patients with AKI according to the <a class="reference external" href="https://kdigo.org/guidelines/">KDIGO guidelines</a> on changes in creatinine*. The KDIGO guidelines are as follows:</p>
 <ul class="simple">
 <li><p><em>Stage 1:</em> 0.3 increase in serum creatinine in &lt; 48 hours OR 50% increase in serum creatinine in &lt; 7 days (168 hours)</p></li>
@@ -508,8 +512,8 @@ The imputation is based on the <a class="reference external" href="https://www.n
 </dd></dl>
 
 <dl class="function">
-<dt id="akiFlagger.akiFlagger.generate_toy_data">
-<code class="sig-prename descclassname">akiFlagger.akiFlagger.</code><code class="sig-name descname">generate_toy_data</code><span class="sig-paren">(</span><em class="sig-param">num_patients=100</em>, <em class="sig-param">num_encounters_range=(1</em>, <em class="sig-param">3)</em>, <em class="sig-param">num_time_range=(5</em>, <em class="sig-param">10)</em>, <em class="sig-param">include_demographic_info=False</em>, <em class="sig-param">date_range=None</em>, <em class="sig-param">time_delta_range=None</em>, <em class="sig-param">creat_scale=0.3</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.akiFlagger.generate_toy_data" title="Permalink to this definition">¶</a></dt>
+<dt id="akiFlagger.generate_toy_data">
+<code class="sig-prename descclassname">akiFlagger.</code><code class="sig-name descname">generate_toy_data</code><span class="sig-paren">(</span><em class="sig-param">num_patients=100</em>, <em class="sig-param">num_encounters_range=(1</em>, <em class="sig-param">3)</em>, <em class="sig-param">num_time_range=(5</em>, <em class="sig-param">10)</em>, <em class="sig-param">include_demographic_info=False</em>, <em class="sig-param">date_range=None</em>, <em class="sig-param">time_delta_range=None</em>, <em class="sig-param">creat_scale=0.3</em><span class="sig-paren">)</span><a class="headerlink" href="#akiFlagger.generate_toy_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates toy data for demonstrating how the flagger works.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -529,9 +533,6 @@ Whether or not to include the demographic information in the generated dataset</
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-akiFlagger">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-akiFlagger" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

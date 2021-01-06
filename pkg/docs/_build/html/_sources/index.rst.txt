@@ -23,7 +23,7 @@ Introduction
 ============
 
 Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked by an increase in the serum creatinine levels
-(amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of `guidelines <https://kdigo.org/guidelines/acute-kidney-injury/>`_ and `standard definitions <http://www.european-renal-best-practice.org/sites/default/files/u33/ndt.gfs375.full_.pdf>`_
+(amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of `guidelines <https://kdigo.org/guidelines/acute-kidney-injury/>`_ and `standard definitions <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3520085/>`_
 of AKI:
 
 * *Stage 1:* 50% increase in creatinine in < 7 days or 0.3 increase in creatinine in < 48 hours

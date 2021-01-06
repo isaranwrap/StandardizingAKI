@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.2.2' 
+__version__ = '0.2.2' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).

@@ -170,56 +170,6 @@ If the pad times are different between windows, the parameters <code class="docu
 <span class="n">example0</span><span class="p">[</span><span class="n">example0</span><span class="o">.</span><span class="n">rw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td></td>
-<td><p>enc</p></td>
-<td><p>time</p></td>
-<td><p>mrn</p></td>
-<td><p>inpatient</p></td>
-<td><p>admission</p></td>
-<td><p>creat</p></td>
-<td><p>rw</p></td>
-</tr>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-24 23:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>False</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.06</p></td>
-<td><p>0</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-25 17:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>False</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.61</p></td>
-<td><p>1</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-29 23:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>True</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.05</p></td>
-<td><p>0</p></td>
-</tr>
-</tbody>
-</table>
 <p><strong>→ Working with different column names</strong></p>
 <p>As an additional example, the patient identifier will often come in as <em>‘PAT_MRN_ID’</em> or <em>‘PAT_ENC_CSN_ID’</em> (or something of the sort) if it is coming from a typical clinical data warehouse/repository. Accordingly, these should be passed in as options to the flagger.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Working with different column names</span>
@@ -236,71 +186,6 @@ If the pad times are different between windows, the parameters <code class="docu
 <span class="n">example1</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td></td>
-<td><p>PAT_ENC_CSN_ID</p></td>
-<td><p>TIME</p></td>
-<td><p>PAT_MRN_ID</p></td>
-<td><p>AGE</p></td>
-<td><p>SEX</p></td>
-<td><p>RACE</p></td>
-<td><p>INPATIENT</p></td>
-<td><p>ADMISSION</p></td>
-<td><p>CREATININE</p></td>
-<td><p>rw</p></td>
-</tr>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-25 11:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>64.50025771948415</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>False</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.45</p></td>
-<td><p>0</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-25 23:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>64.50025771948415</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>False</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.52</p></td>
-<td><p>0</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-27 23:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>64.50025771948415</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.59</p></td>
-<td><p>0</p></td>
-</tr>
-</tbody>
-</table>
 <p><strong>→ Adding in rolling-window minimum creatinines</strong></p>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_min_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. This will add in two columns which contain the minimum values in the rolling window, which is an intermediate column generated to calculate AKI; the flag adds in the column which the current creatinine is checked against.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 2: Adding in rolling-window minima</span>
@@ -312,81 +197,6 @@ If the pad times are different between windows, the parameters <code class="docu
 <span class="n">example2</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td></td>
-<td><p>enc</p></td>
-<td><p>time</p></td>
-<td><p>mrn</p></td>
-<td><p>age</p></td>
-<td><p>female</p></td>
-<td><p>black</p></td>
-<td><p>inpatient</p></td>
-<td><p>admission</p></td>
-<td><p>creat</p></td>
-<td><p>rw</p></td>
-<td><p>min_creat48</p></td>
-<td><p>min_creat168</p></td>
-</tr>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-25 11:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>64.50025771948415</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>False</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.45</p></td>
-<td><p>0</p></td>
-<td><p>1.45</p></td>
-<td><p>1.45</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-25 23:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>64.50025771948415</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>False</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.52</p></td>
-<td><p>0</p></td>
-<td><p>1.45</p></td>
-<td><p>1.45</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>25741</p></td>
-<td><p>2020-02-27 23:42:42</p></td>
-<td><p>12732</p></td>
-<td><p>64.50025771948415</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>2020-02-27 11:42:42</p></td>
-<td><p>1.59</p></td>
-<td><p>0</p></td>
-<td><p>1.59</p></td>
-<td><p>1.45</p></td>
-</tr>
-</tbody>
-</table>
 <p><strong>→ Adding in baseline creatinine</strong></p>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_baseline_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. Note that the baseline creatinine is not defined for outpatient measurements. Baseline creatinine can be thought of as the “resting” creatinine before coming into the hospital, so it doesn’t make much sense to define the baseline creatinine outside of a hospital visit.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 3: Adding in baseline creatinine</span>
@@ -403,81 +213,6 @@ If the pad times are different between windows, the parameters <code class="docu
 <span class="n">example3</span><span class="p">[</span><span class="o">~</span><span class="n">example3</span><span class="o">.</span><span class="n">baseline_creat</span><span class="o">.</span><span class="n">isnull</span><span class="p">()]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td></td>
-<td><p>PAT_MRN_ID</p></td>
-<td><p>PAT_ENC_CSN_ID</p></td>
-<td><p>INPATIENT</p></td>
-<td><p>AGE</p></td>
-<td><p>SEX</p></td>
-<td><p>RACE</p></td>
-<td><p>ADMISSION</p></td>
-<td><p>TIME</p></td>
-<td><p>CREATININE</p></td>
-<td><p>baseline_creat</p></td>
-<td><p>rw</p></td>
-<td><p>bc</p></td>
-</tr>
-<tr class="row-even"><td><p>8</p></td>
-<td><p>10537</p></td>
-<td><p>13886</p></td>
-<td><p>False</p></td>
-<td><p>59.57195151841545</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>2020-01-18 01:55:12</p></td>
-<td><p>2020-01-17 19:55:12</p></td>
-<td><p>1.25</p></td>
-<td><p>0.9570926677869859</p></td>
-<td><p>1</p></td>
-<td><p>0</p></td>
-</tr>
-<tr class="row-odd"><td><p>9</p></td>
-<td><p>10537</p></td>
-<td><p>99987</p></td>
-<td><p>False</p></td>
-<td><p>59.57195151841545</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>2020-01-18 01:55:12</p></td>
-<td><p>2020-01-18 01:55:12</p></td>
-<td><p>1.04</p></td>
-<td><p>0.9570926677869859</p></td>
-<td><p>0</p></td>
-<td><p>0</p></td>
-</tr>
-<tr class="row-even"><td><p>10</p></td>
-<td><p>10537</p></td>
-<td><p>99987</p></td>
-<td><p>True</p></td>
-<td><p>59.57195151841545</p></td>
-<td><p>True</p></td>
-<td><p>True</p></td>
-<td><p>2020-01-18 01:55:12</p></td>
-<td><p>2020-01-21 01:55:12</p></td>
-<td><p>1.33</p></td>
-<td><p>0.9570926677869859</p></td>
-<td><p>0</p></td>
-<td><p>0</p></td>
-</tr>
-</tbody>
-</table>
 <p><strong>→ Bare-bones dataset</strong></p>
 <p>As stated above, the bare minimum columns necessary for the flagger to run are the <strong>patient_id, inpatient/outpatient, time,</strong> and <strong>creatinine</strong>. In this case, any other columns used in intermediate steps will be imputed (admission, for example).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 4: Bare-bones dataset</span>
@@ -503,46 +238,6 @@ If the pad times are different between windows, the parameters <code class="docu
 <span class="mi">4</span>  <span class="mi">12732</span>       <span class="kc">True</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">28</span> <span class="mi">17</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">42</span>   <span class="mf">1.51</span>
 </pre></div>
 </div>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td></td>
-<td><p>mrn</p></td>
-<td><p>time</p></td>
-<td><p>inpatient</p></td>
-<td><p>creat</p></td>
-<td><p>rw</p></td>
-</tr>
-<tr class="row-even"><td><p>16</p></td>
-<td><p>13264</p></td>
-<td><p>2020-01-06 11:16:57</p></td>
-<td><p>False</p></td>
-<td><p>0.89</p></td>
-<td><p>2</p></td>
-</tr>
-<tr class="row-odd"><td><p>21</p></td>
-<td><p>13264</p></td>
-<td><p>2020-01-09 23:16:57</p></td>
-<td><p>False</p></td>
-<td><p>0.71</p></td>
-<td><p>2</p></td>
-</tr>
-<tr class="row-even"><td><p>23</p></td>
-<td><p>13264</p></td>
-<td><p>2020-01-10 17:16:57</p></td>
-<td><p>True</p></td>
-<td><p>0.65</p></td>
-<td><p>2</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 
 
