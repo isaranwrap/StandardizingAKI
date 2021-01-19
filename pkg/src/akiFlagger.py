@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.2.2' # master file
+__version__ = '0.3.0' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
@@ -256,15 +256,15 @@ class AKIFlagger:
                 assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
                 assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
                 
-                df['min_creat48'] = min_creat48
-                df['min_creat172'] = min_creat172
+                df['min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600)] = min_creat48
+                df['min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600)] = min_creat172
                 rw = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
                 return rw
             
             if self.specify_rw:
-                rw1 = pd.Series(stage3.add(stage2.add(c1)), name = 'rw')
-                rw2 = pd.Series(stage3.add(stage2.add(c2)), name = 'rw')
-                return rw1, rw2
+                rw1 = pd.Series(stage3.add(stage2.add(c1)), name = 'rw-c1')
+                rw2 = pd.Series(stage3.add(stage2.add(c2)), name = 'rw-c2')
+                return pd.concat([rw1, rw2], axis=1)
             rw = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
             return rw
 
