@@ -132,7 +132,6 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.rw[2])
         self.assertTrue(out.rw[3])
         self.assertTrue(out.rw[4])
-        self.assertTrue(np.all(~out.bc))
         print('Success!\n')
 
     def test_eGFRimpute(self):

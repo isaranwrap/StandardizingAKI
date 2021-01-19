@@ -61,7 +61,8 @@ class AKIFlagger:
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', padding = None,
                  rolling_window = False, back_calculate = False,
                  admission = 'admission', age = 'age', sex = 'sex', race = 'race', encounter_id = 'enc',
-                 baseline_creat = 'baseline_creat', sort_values = True, remove_bc_na = True, add_baseline_creat = False, add_min_creat = False):
+                 baseline_creat = 'baseline_creat', sort_values = True, remove_bc_na = True, 
+                 add_baseline_creat = False, add_min_creat = False, specify_rw = False):
         
         # Identifiers
         self.patient_id = patient_id
@@ -94,6 +95,7 @@ class AKIFlagger:
         # Extra options to specify what is included in the output
         self.eGFR_impute = eGFR_impute
         self.add_stages = add_stages
+        self.specify_rw = specify_rw
         self.remove_bc_na = remove_bc_na
         self.add_baseline_creat = add_baseline_creat
         self.add_min_creat = add_min_creat
@@ -144,6 +146,9 @@ class AKIFlagger:
         assert (self.inpatient in dataframe.columns), "Inpatient/outpatient column missing!"
         
         assert not np.any(dataframe[self.creatinine].isnull()), "Get rid of any null creatinine values before running the flagger!"
+        
+        # Additional checks if we want to impute with eGFR ~ 75 method
+
         if self.eGFR_impute:
             assert (self.age in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
             assert (self.sex in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
@@ -173,23 +178,12 @@ class AKIFlagger:
             bc = self.addBackCalcAKI(df, baseline_creat = baseline_creat)
         
         if self.aki_calc_type == 'both':
-
-            # If add_baseline_creat or add_min_creat is True, rw and bc are tuples, respectively. So, we want to unpack it as we return it
-            if self.add_baseline_creat and self.add_min_creat: 
-                return pd.concat([df, rw[0], rw[1], rw[2], bc[0], bc[1]], axis=1).reset_index()
-            elif self.add_baseline_creat: 
-                return pd.concat([df, rw, bc[0], bc[1]], axis=1).reset_index() 
-            elif self.add_min_creat:
-                return pd.concat([df, rw[0], rw[1], rw[2], bc], axis=1).reset_index()
-            return pd.concat([df, rw, bc], axis=1).reset_index()
+            out = pd.concat([df, rw, bc], axis=1).reset_index()
         elif self.rolling_window:
-            if self.add_min_creat:
-                return pd.concat([df, rw[0], rw[1], rw[2]], axis=1).reset_index()
-            return pd.concat([df, rw], axis=1).reset_index()
+            out = pd.concat([df, rw], axis=1).reset_index()
         elif self.back_calculate:
-            if self.add_baseline_creat:
-                return pd.concat([df, bc[0], bc[1]], axis=1).reset_index()
-            return pd.concat([df, bc], axis=1).reset_index()
+            out = pd.concat([df, bc], axis=1).reset_index()
+        return out
     
     def addAdmissionColumn(self, df, add_encounter_col = None):
         '''
@@ -234,6 +228,10 @@ class AKIFlagger:
         
         c1 = np.round(tmp.set_index([self.patient_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(0.3 + gb[self.creatinine].rolling(self.cond1time).min(), decimals=4)
         c2 = np.round(tmp.set_index([self.patient_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(1.5*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
+
+        c1.name = 'stage1-1'
+        c2.name = 'stage1-2'
+
         
         # Stage 1 suffices for rw if add_stages is False
         stage1 = np.logical_or(c1, c2)
@@ -257,8 +255,18 @@ class AKIFlagger:
                 min_creat172 = pd.Series(gb[self.creatinine].rolling(self.cond2time).min(), index = df.index, name = 'min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600))
                 assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
                 assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
-                return pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw'), min_creat48, min_creat172
-            return pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
+                
+                df['min_creat48'] = min_creat48
+                df['min_creat172'] = min_creat172
+                rw = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
+                return rw
+            
+            if self.specify_rw:
+                rw1 = pd.Series(stage3.add(stage2.add(c1)), name = 'rw')
+                rw2 = pd.Series(stage3.add(stage2.add(c2)), name = 'rw')
+                return rw1, rw2
+            rw = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
+            return rw
 
         # One last check on the index before returning 
         rw = pd.Series(stage1, index = df.index, name = 'rw')
@@ -319,6 +327,10 @@ class AKIFlagger:
                 tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex], imp[self.race])
             else:
                 tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex], imp[self.race])
+        
+        if self.add_baseline_creat:
+            df['baseline_creat'] = tmp.baseline_creat
+
         return tmp.baseline_creat
     
     def addBackCalcAKI(self, df, baseline_creat=None):
@@ -332,28 +344,17 @@ class AKIFlagger:
         mask = np.logical_and(tmp[self.admission] - pd.Timedelta(hours=6) <= tmp.index.get_level_values(level = self.time),
                               tmp[self.admission] + self.cond2time >= tmp.index.get_level_values(level = self.time))
         
-        # Apply aki definition & return the resulting series (the reason we add it to the data frame is so we can get
-        # the NaNs in the right place without doing much work as a "freebie")
-        
-        #Old implementation where bc was just True/False ... delete commented code if works properly past 0.2.0
-        #tmp.loc[mask, 'bc'] = np.round(tmp[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4) 
-        
-        #stage1 = np.round(tmp[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
+        # Calculate AKI stages
         stage1 = np.round(tmp[mask][self.creatinine].astype('float'), decimals=4) >= np.round(1.5*baseline_creat[mask].astype('float'), decimals=4)
-        #stage2 = np.round(tmp[mask][self.creatinine], decimals=4) >= np.round(2*baseline_creat[mask], decimals=4)
         stage2 = np.round(tmp[mask][self.creatinine].astype('float'), decimals=4) >= np.round(2*baseline_creat[mask].astype('float'), decimals=4)
-        #stage3 = np.round(tmp[mask][self.creatinine], decimals=4) >= np.round(3*baseline_creat[mask], decimals=4)
         stage3 = np.round(tmp[mask][self.creatinine].astype('float'), decimals=4) >= np.round(3*baseline_creat[mask].astype('float'), decimals=4)
-        
-        tmp.loc[mask, 'bc'] = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'bc')
+        tmp.loc[mask, 'bc'] = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'bc').astype('int')
         
         # And by default, I'll replace the null values with False's 
         if self.remove_bc_na:
             #tmp.loc[tmp.bc.isnull(), 'bc'] = False
             tmp.loc[tmp.bc.isnull(), 'bc'] = 0
-        if self.add_baseline_creat:
-            return tmp.bc.astype('int'), baseline_creat[mask]
-        return tmp.bc.astype('int')
+        return tmp.bc
     
     
 def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_time_range = (5,10),
