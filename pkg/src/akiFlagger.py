@@ -50,11 +50,11 @@ class AKIFlagger:
         
     '''
     def __init__(self, patient_id = 'mrn', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', # Required columns
-                 encounter_id = 'enc', admission = 'admission', baseline_creat = 'baseline_creat', # Helpful columns 
+                 encounter_id = 'enc', admission = 'admission', baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
                  age = 'age', sex = 'sex', race = 'race',  # Required if CKD-EPI imputation is wanted
-                 padding = None, HB_trumping = False, eGFR_impute = False, # Main optional parameters
+                 padding = None, HB_trumping = False, eGFR_impute = False, # Main parameters
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', # Rolling window sizes
-                sort_values = True, add_baseline_creat = False, add_min_creat = False): # Ancillary optional parameters (additional output for intermediate calculations)
+                sort_values = True, add_baseline_creat = False, add_min_creat = False): # Ancillary optional parameters (include output for intermediate calculations)
         
         # Identifiers
         self.patient_id = patient_id
@@ -146,6 +146,7 @@ class AKIFlagger:
         gb = df.loc[:, [self.creatinine]].reset_index(self.patient_id).groupby(self.patient_id, sort=False)
         min_creat48 = gb.rolling(self.cond1time).min().reindex(df.index)[self.creatinine]
         min_creat7d = gb.rolling(self.cond2time).min().reindex(df.index)[self.creatinine]
+
         if self.add_min_creat:
             df['min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600)] = min_creat48
             df['min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600)] = min_creat7d
@@ -158,9 +159,12 @@ class AKIFlagger:
                 baseline_creat = self.addBaselineCreat(df)
             else:
                 baseline_creat = df[self.baseline_creat]
+                assert np.all(baseline_creat.index == min_creat48.index)
             
-            mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
+            #mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
             mask7d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond2time)
+            mask_bc = ~baseline_creat.isnull() # Only have baseline TRUMP rolling minimum if it exists
+            mask = np.logical_and(mask7d, mask_bc)
 
             # Calculate rolling minimum conditions 
             c1 = np.round(df[self.creatinine], decimals=4) >= np.round(0.3 + min_creat48, decimals=4)
@@ -171,10 +175,10 @@ class AKIFlagger:
             
             aki = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'aki')
             
-            alt_stage1 = df[mask7d][self.creatinine] >= 1.5*baseline_creat[mask7d]
-            alt_stage2 = df[mask7d][self.creatinine] >= 2*baseline_creat[mask7d]
-            alt_stage3 = df[mask7d][self.creatinine] >= 3*baseline_creat[mask7d]
-            aki[mask7d] = pd.Series(alt_stage3.add(alt_stage2.add(alt_stage1*1)), name = 'aki')
+            stage1hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
+            stage2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(2*baseline_creat[mask], decimals=4)
+            stage3hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(3*baseline_creat[mask], decimals=4)
+            aki[mask]= pd.Series(stage3hb.add(stage2hb.add(stage1hb*1)), name = 'aki')
             
         else: # Vanilla rolling minimum if no HB trumping
             c1 = np.round(df[self.creatinine], decimals=4) >= np.round(0.3 + min_creat48, decimals=4)
@@ -333,7 +337,7 @@ class AKIFlagger:
         if self.add_baseline_creat:
             df['baseline_creat'] = tmp.baseline_creat
 
-        assert df.index == tmp.index
+        assert np.all(df.index == tmp.index)
         return tmp.baseline_creat
     
     def addBackCalcAKI(self, df, baseline_creat=None):
@@ -361,7 +365,7 @@ class AKIFlagger:
     
     
 def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_time_range = (5,10), creat_scale = 0.3,
-                      include_demographic_info = False, date_range = None, time_delta_range = None, set_index = False):
+                      include_demographic_info = False, date_range = None, time_delta_range = None, set_index = False, printMsg=True):
         '''
         Generates toy data for demonstrating how the flagger works.
 
@@ -425,7 +429,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
 
         df[creatinine] = np.clip(df[baseline_creat] + np.random.normal(loc = 0, scale = 0.25, size = df.shape[0]), a_min = 0.1, a_max = None).astype('float').round(decimals=2)
         df[time] = df[time] + df[admission]
-        df[inpatient] = df[time] > df[admission]
+        df[inpatient] = df[time] >= df[admission]
         
         df[patient_id] = df[patient_id].astype('int')
         df[encounter_id] = df[encounter_id].astype('int')
@@ -439,11 +443,13 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
             
         if include_demographic_info:
             df = df.loc[:,[patient_id, encounter_id, age, female, black, inpatient, admission, time, creatinine]]
-            print('Successfully generated toy data!\n')
+            if printMsg:
+                print('Successfully generated toy data!\n')
             return df
         
         df = df.loc[:,[patient_id, encounter_id, inpatient, admission, time, creatinine]]
-        print('Successfully generated toy data!\n')
+        if printMsg:
+            print('Successfully generated toy data!\n')
         return df
     
     
