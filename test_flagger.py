@@ -207,7 +207,7 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki[1])
         self.assertFalse(out.aki[2])
         self.assertFalse(out.aki[3])
-        self.assertTrue(out.aki[4]) # But on the last one, HB should trigger
+        self.assertTrue(out.aki[4]) # But on the last one, RM should trigger
 
     def test_PatientX_RM(self):
         cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']

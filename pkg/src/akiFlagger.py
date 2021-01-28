@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.3.1' # master file
+__version__ = '0.3.2' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI).
@@ -143,52 +143,64 @@ class AKIFlagger:
         ## Step 3: Adding in AKI
         
         # Rolling minimum, first: 
-        gb = df.loc[:, [self.creatinine]].reset_index(self.patient_id).groupby(self.patient_id, sort=False)
-        min_creat48 = gb.rolling(self.cond1time).min().reindex(df.index)[self.creatinine]
-        min_creat7d = gb.rolling(self.cond2time).min().reindex(df.index)[self.creatinine]
+        gb = df.loc[:, [self.creatinine]].reset_index(self.patient_id).groupby(self.patient_id, sort=False) # Groupby on patients
+        min_creat48 = gb.rolling(self.cond1time).min().reindex(df.index)[self.creatinine] # Rolling 48hr minimum creatinine time series 
+        min_creat7d = gb.rolling(self.cond2time).min().reindex(df.index)[self.creatinine] # Rolling 7day minimum creatinine time series
 
-        if self.add_min_creat:
+        if self.add_min_creat: # Add in min creat time series to the dataframe
             df['min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600)] = min_creat48
             df['min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600)] = min_creat7d
         
-        if self.add_baseline_creat:
+        if self.add_baseline_creat: # Add in baseline creatinine time series to the dataframe
             df[self.baseline_creat] = self.addBaselineCreat(df)
 
-        if self.HB_trumping:
+        if self.HB_trumping: # Historical baseline "trumping" local minimum values
             if self.baseline_creat not in df.columns:
                 baseline_creat = self.addBaselineCreat(df)
             else:
                 baseline_creat = df[self.baseline_creat]
                 assert np.all(baseline_creat.index == min_creat48.index)
             
-            #mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
+            # Create masks for selecting admission to +2 days and +7 days in advance, respectively
+            mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
             mask7d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond2time)
             mask_bc = ~baseline_creat.isnull() # Only have baseline TRUMP rolling minimum if it exists
             mask = np.logical_and(mask7d, mask_bc)
 
             # Calculate rolling minimum conditions 
-            c1 = np.round(df[self.creatinine], decimals=4) >= np.round(0.3 + min_creat48, decimals=4)
+            c1 = np.round(df[self.creatinine], decimals=4) >= np.round(0.3 + min_creat48, decimals=4) 
             c2 = np.round(df[self.creatinine], decimals=4) >= np.round(1.5*min_creat7d, decimals=4)
-            stage1 = np.logical_or(c1, c2)
+            
+            stage1 = c2 # Notice now, stage1 is just condition2 ... we will add in condition 1 later so as not to have the HB double-trump
             stage2 = np.round(df[self.creatinine], decimals=4) >= np.round(2*min_creat7d, decimals=4)
             stage3 = np.round(df[self.creatinine], decimals=4) >= np.round(3*min_creat7d, decimals=4)
-            
             aki = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'aki')
             
+            # Calculate historical baseline conditions
             stage1hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
             stage2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(2*baseline_creat[mask], decimals=4)
             stage3hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(3*baseline_creat[mask], decimals=4)
             aki[mask]= pd.Series(stage3hb.add(stage2hb.add(stage1hb*1)), name = 'aki')
-            
+
+            # Add back in the 0.3 bump criterion (separately since the rolling window is of a different size than the other checks)
+            mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
+            mask_empty = aki == 0 # Replace the current value only if the flagger didn't flag as baseline. If it was 1, same result. If it was 2 or 3, we would prioritize those over the 0.3 bump
+            mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), ~mask_bc) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
+            aki[mask_rw] = c1*1
+
         else: # Vanilla rolling minimum if no HB trumping
+
+            # Calculate rolling minimum conditions 
             c1 = np.round(df[self.creatinine], decimals=4) >= np.round(0.3 + min_creat48, decimals=4)
             c2 = np.round(df[self.creatinine], decimals=4) >= np.round(1.5*min_creat7d, decimals=4)
+            
             stage1 = np.logical_or(c1, c2)
             stage2 = np.round(df[self.creatinine], decimals=4) >= np.round(2*min_creat7d, decimals=4)
             stage3 = np.round(df[self.creatinine], decimals=4) >= np.round(3*min_creat7d, decimals=4)
 
             aki = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'aki')
         
+        # Concatenate and return output
         return pd.concat([df, aki], axis=1)
     
     def addAdmissionColumn(self, df, add_encounter_col = None):
@@ -214,71 +226,6 @@ class AKIFlagger:
         
         return df   
     
-    def addRollingWindowAKI(self, df):
-        '''Returns the AKI conditions based on rolling window definition.
-        Returns the rolling-window as a pandas series (and possibly the minimum creatinine values, if `add_min_creat=True`). 
-
-        Args: 
-            df (pd.DataFrame): patient dataframe, with encounet & time as the indices.
-
-        Returns:
-            rw (pd.Series): calculated rolling-window series. If `add_stages=True` then the series returned is of type *int64* otherwise it is of type *bool*.
-            min_creat (pd.Series): potentially returns min_creat if `add_min_creat` flag is set to `True`. 
-        '''
-        # Set the index to just time 
-        tmp = df.loc[:, self.creatinine].reset_index(self.patient_id) 
-        
-        # Groupby on encounter then apply conditions for rolling-window AKI
-        gb = tmp.groupby(self.patient_id, as_index = True, sort = False)
-        gb_indx = gb[self.creatinine].rolling(self.cond1time).min().index
-        
-        c1 = np.round(tmp.set_index([self.patient_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(0.3 + gb[self.creatinine].rolling(self.cond1time).min(), decimals=4)
-        c2 = np.round(tmp.set_index([self.patient_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(1.5*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
-
-        c1.name = 'stage1-1'
-        c2.name = 'stage1-2'
-
-        
-        # Stage 1 suffices for rw if add_stages is False
-        stage1 = np.logical_or(c1, c2)
-        stage1 = stage1.reindex(df.index)
-
-        # Otherwise, create the additional stages & return their row-wise sum
-        if self.add_stages:
-            stage2 = np.round(tmp.set_index([self.patient_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(2*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
-            stage3 = np.round(tmp.set_index([self.patient_id, tmp.index.get_level_values(level=self.time)]).loc[gb_indx][self.creatinine], decimals=4) >= np.round(3*gb[self.creatinine].rolling(self.cond2time).min(), decimals=4)
-            
-            stage2 = stage2.reindex(df.index)
-            stage3 = stage3.reindex(df.index)
-
-            # Last checks on the index before returning 
-            assert (np.all(stage1.index == df.index)), 'Index mismatch!'
-            assert (np.all(stage2.index == df.index)), 'Index mismatch!'
-            assert (np.all(stage3.index == df.index)), 'Index mismatch!'
-            
-            if self.add_min_creat:
-                min_creat48 = pd.Series(gb[self.creatinine].rolling(self.cond1time).min(), index = df.index, name = 'min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600))
-                min_creat172 = pd.Series(gb[self.creatinine].rolling(self.cond2time).min(), index = df.index, name = 'min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600))
-                assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
-                assert (np.all(min_creat48.index == df.index)), 'Index mismatch!'
-                
-                df['min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600)] = min_creat48
-                df['min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600)] = min_creat172
-                rw = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
-                return rw
-            
-            if self.specify_rw:
-                rw1 = pd.Series(stage3.add(stage2.add(c1*1)), name = 'rw-c1')
-                rw2 = pd.Series(stage3.add(stage2.add(c2*1)), name = 'rw-c2')
-                return pd.concat([rw1, rw2], axis=1)
-            rw = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'rw')
-            return rw
-
-        # One last check on the index before returning 
-        rw = pd.Series(stage1, index = df.index, name = 'rw')
-        assert (np.all(rw.index == df.index)), 'Index mismatch!'
-        return rw
-    
     def eGFRbasedCreatImputation(self, age, female, black):
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
         The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
@@ -301,9 +248,9 @@ class AKIFlagger:
 
     def addBaselineCreat(self, df):
         '''
-        Returns baseline creatinine used in intermediate calculation for back-calculating AKI.
+        Returns baseline creatinine used in intermediate calculation for back-calculating AKI. Baseline creatinine is defined as the MEDIAN of OUTPATIENT creatinine values from 365 to 7 days prior to admission.
         '''
-        # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT values from 365 to 7 days prior to admission
+        # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
 
         # If the admission column isn't present, impute it here
         if self.encounter_id not in df.columns or self.admission not in df.columns:
@@ -322,7 +269,7 @@ class AKIFlagger:
         
         # Finally, add the median creat values to the dataframe, forward-fill, and return
         tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')
-        tmp[self.baseline_creat] = tmp.groupby(self.encounter_id)[self.baseline_creat].ffill()
+        tmp[self.baseline_creat] = tmp.groupby(self.encounter_id)[self.baseline_creat].ffill().bfill()
         
         # If we'd like to perform the imputation based on the eGFR of 75
         if self.eGFR_impute:
@@ -335,34 +282,10 @@ class AKIFlagger:
                 tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex], imp[self.race])
         
         if self.add_baseline_creat:
-            df['baseline_creat'] = tmp.baseline_creat
+            df[self.baseline_creat] = tmp.baseline_creat
 
         assert np.all(df.index == tmp.index)
         return tmp.baseline_creat
-    
-    def addBackCalcAKI(self, df, baseline_creat=None):
-        '''
-        Returns aki based on back-calculation method. Requires `baseline_creat` from *`addBaselineCreat()`* function as an intermediate to calculate aki.
-        '''
-        # Subset on necessary cols: creatinine + admission
-        tmp = df.loc[:, [self.creatinine, self.admission, self.encounter_id]]
-        
-        # Look back 6 hours prior to admission until cond2time from admission
-        mask = np.logical_and(tmp[self.admission] - pd.Timedelta(hours=6) <= tmp.index.get_level_values(level = self.time),
-                              tmp[self.admission] + self.cond2time >= tmp.index.get_level_values(level = self.time))
-        
-        # Calculate AKI stages
-        stage1 = np.round(tmp[mask][self.creatinine].astype('float'), decimals=4) >= np.round(1.5*baseline_creat[mask].astype('float'), decimals=4)
-        stage2 = np.round(tmp[mask][self.creatinine].astype('float'), decimals=4) >= np.round(2*baseline_creat[mask].astype('float'), decimals=4)
-        stage3 = np.round(tmp[mask][self.creatinine].astype('float'), decimals=4) >= np.round(3*baseline_creat[mask].astype('float'), decimals=4)
-        tmp.loc[mask, 'bc'] = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'bc').astype('int')
-        
-        # And by default, I'll replace the null values with False's 
-        if self.remove_bc_na:
-            #tmp.loc[tmp.bc.isnull(), 'bc'] = False
-            tmp.loc[tmp.bc.isnull(), 'bc'] = 0
-        return tmp.bc
-    
     
 def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_time_range = (5,10), creat_scale = 0.3,
                       include_demographic_info = False, date_range = None, time_delta_range = None, set_index = False, printMsg=True):
@@ -451,8 +374,3 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         if printMsg:
             print('Successfully generated toy data!\n')
         return df
-    
-    
-df = generate_toy_data(set_index = True, time_delta_range = pd.timedelta_range(start='-10 days', end='10 days', freq='6H'))
-flagger = AKIFlagger(creatinine = 'creat')
-aki = flagger.returnAKIpatients(df)
