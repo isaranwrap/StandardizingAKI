@@ -21,8 +21,8 @@ class TestFlagger(unittest.TestCase):
         print('Testing toy initialization...')
 
         # Testing all the expected columns are in the generated data set
-        self.assertTrue('mrn' in toy.columns)
-        self.assertTrue('enc' in toy.columns)
+        self.assertTrue('patient_id' in toy.columns)
+        self.assertTrue('encounter_id' in toy.columns)
         self.assertTrue('inpatient' in toy.columns)
         self.assertTrue('admission' in toy.columns)
         self.assertTrue('time' in toy.columns)
@@ -33,14 +33,14 @@ class TestFlagger(unittest.TestCase):
         print('Testing Assertion Error checks...')
 
         # Set-up: dataframe + flagger
-        cols= ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols= ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row = [1234, 12345, False, pd.Timestamp('2020-02-27 12:00:01'), pd.Timestamp('2020-02-27 12:00:02'), 1.3]
         df = pd.DataFrame([row], columns=cols)
         flagger = AKIFlagger()
 
         # Now drop the necessary columns and ensure it throws an error
         with self.assertRaises(AssertionError):
-            flagger.returnAKIpatients(df.drop(['mrn', 'enc'], axis = 1))
+            flagger.returnAKIpatients(df.drop(['patient_id', 'encounter_id'], axis = 1))
         with self.assertRaises(AssertionError):
             flagger.returnAKIpatients(df.drop('inpatient', axis = 1))
         with self.assertRaises(AssertionError):
@@ -77,7 +77,7 @@ class TestFlagger(unittest.TestCase):
         print('Testing eGFR-based imputation...')
         
     def test_patientA_RM(self): # Simplest case - both 
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 1.0] # Baseline creatinine
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.0] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-25 12:00:01'), 1.29]
@@ -100,7 +100,7 @@ class TestFlagger(unittest.TestCase):
         print('Sucess!\n')
     
     def test_patientA_HB(self):
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 1.0] # Baseline creatinine
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.0] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-25 12:00:01'), 1.29]
@@ -116,7 +116,7 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki[0])    # 1.0
         self.assertFalse(out.aki[1])    # 1.0
         self.assertFalse(out.aki[2])    # 1.29
-        self.assertFalse(out.aki[3])    # 1.3 --> The only difference between the two is HB doesn't count the 0.3 bump as Stage 1 
+        self.assertTrue(out.aki[3])     # 1.3 --> UPDATED Version 0.3.5+: 0.3 condition is counted in HB_trumping now. 
         self.assertEqual(out.aki[4], 2) # 2
         self.assertEqual(out.aki[5], 3) # 3
 
@@ -124,7 +124,7 @@ class TestFlagger(unittest.TestCase):
     
     
     def test_patientB_HB(self): # Patient B: 
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 1.1] # Baseline creatinine
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.0] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-25 12:00:01'), 1.29]
@@ -149,7 +149,7 @@ class TestFlagger(unittest.TestCase):
         self.assertEqual(out.aki[7], 3) # 3.3 (and it's not until 3.3 that HB should trigger stage3)
 
     def test_patientB_RM(self): # Identical to patientA, except their baseline is now 1.1 instead of 1.0
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 1.1] # Baseline creatinine
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.0] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-25 12:00:01'), 1.29]
@@ -174,7 +174,7 @@ class TestFlagger(unittest.TestCase):
         self.assertEqual(out.aki[7], 3) # 3.3
 
     def test_patientC_RM(self): # Patient C doesn't meet the rolling minimum criterion
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 1.0] # Baseline creatinine
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.1] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-25 12:00:01'), 1.1]
@@ -192,11 +192,11 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki[4])
 
     def test_patientC_HB(self): # Patient C doesn't meet the rolling minimum criterion
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 1.0] # Baseline creatinine
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.1] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-25 12:00:01'), 1.1]
-        row3 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-26 12:00:02'), 1.3]
+        row3 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-26 12:00:04'), 1.3]
         row4 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-28 12:00:02'), 1.5]
         df = pd.DataFrame([row0, row1, row2, row3, row4], columns = cols)
         flagger = AKIFlagger(HB_trumping=True)
@@ -206,11 +206,11 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki[0])
         self.assertFalse(out.aki[1])
         self.assertFalse(out.aki[2])
-        self.assertFalse(out.aki[3])
+        self.assertTrue(out.aki[3])
         self.assertTrue(out.aki[4]) # But on the last one, RM should trigger
 
     def test_PatientX_RM(self):
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 2.0] # Patient X has a baseline creatinine of 2 
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-26 12:00:02'), 1.3]
@@ -226,7 +226,7 @@ class TestFlagger(unittest.TestCase):
         self.assertTrue(out.aki[3])
 
     def test_PatientX_HB(self):
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 2.0] # Patient X has a baseline creatinine of 2 
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1] # Admission creatinine
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-26 12:00:02'), 1.3]
@@ -241,12 +241,12 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki[2])
         self.assertTrue(out.aki[3])
 
-
     def test_HB_notrump(self):
-        cols = ['mrn', 'enc', 'inpatient', 'admission', 'time', 'creatinine']
+        cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-22 12:00:01'), 2.0]
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.0]
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:03'), 1.3]
+
         
 
         df = pd.DataFrame([row0, row1, row2], columns = cols)

@@ -2,11 +2,10 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.3.2' # master file
+__version__ = '0.3.5' # master file
 
 class AKIFlagger:
-    ''' Main flagger to detect patients with acute kidney injury (AKI).
-    This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
+    ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 
         * *Stage 1:* 0.3 mg/dL increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
         * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
@@ -49,8 +48,8 @@ class AKIFlagger:
         add_min_creat (boolean): **default False.** Whether or not to add the minimum creatinine column from rolling-window method.
         
     '''
-    def __init__(self, patient_id = 'mrn', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', # Required columns
-                 encounter_id = 'enc', admission = 'admission', baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
+    def __init__(self, patient_id = 'patient_id', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', # Required columns
+                 encounter_id = 'encounter_id', admission = 'admission', baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
                  age = 'age', sex = 'sex', race = 'race',  # Required if CKD-EPI imputation is wanted
                  padding = None, HB_trumping = False, eGFR_impute = False, # Main parameters
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', # Rolling window sizes
@@ -177,7 +176,9 @@ class AKIFlagger:
             aki = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'aki')
             
             # Calculate historical baseline conditions
-            stage1hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
+            c1hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(0.3 + baseline_creat[mask], decimals=4)
+            c2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
+            stage1hb = np.logical_or(c1hb, c2hb)
             stage2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(2*baseline_creat[mask], decimals=4)
             stage3hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(3*baseline_creat[mask], decimals=4)
             aki[mask]= pd.Series(stage3hb.add(stage2hb.add(stage1hb*1)), name = 'aki')
@@ -253,13 +254,13 @@ class AKIFlagger:
         # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
 
         # If the admission column isn't present, impute it here
-        if self.encounter_id not in df.columns or self.admission not in df.columns:
-            df = self.addAdmissionColumn(df, add_encounter_col=True)
+        if self.admission not in df.columns:
+            df = self.addAdmissionColumn(df, add_encounter_col=self.encounter_id not in df.columns)
 
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
-        tmp = df.loc[:,[self.creatinine, self.admission, self.inpatient, self.encounter_id]]
+        tmp = df.loc[:,[self.creatinine, self.admission, self.inpatient]]#, self.encounter_id]]
         if self.eGFR_impute:
-            tmp = df.loc[:, [self.creatinine, self.admission, self.inpatient, self.encounter_id, self.age, self.race, self.sex]]
+            tmp = df.loc[:, [self.creatinine, self.admission, self.inpatient, self.age, self.race, self.sex]] # Took ENC out
         
 
         # Next, create a T/F mask for the times between 365 & 7 days prior to admission AND outpatient vals 
@@ -268,8 +269,8 @@ class AKIFlagger:
         mask = np.logical_and(bc_tz, ~tmp[self.inpatient])
         
         # Finally, add the median creat values to the dataframe, forward-fill, and return
-        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')
-        tmp[self.baseline_creat] = tmp.groupby(self.encounter_id)[self.baseline_creat].ffill().bfill()
+        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.patient_id, as_index=True)[self.creatinine].transform('median')
+        tmp[self.baseline_creat] = tmp.groupby(self.patient_id)[self.baseline_creat].ffill().bfill()
         
         # If we'd like to perform the imputation based on the eGFR of 75
         if self.eGFR_impute:
@@ -329,7 +330,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         d1 = pd.DataFrame([mrns, admns, creats]).T
         d2 = pd.DataFrame(encs)
 
-        patient_id, encounter_id, time, admission, inpatient, creatinine, baseline_creat = 'mrn','enc','time','admission','inpatient', 'creat', 'baseline_creat'
+        patient_id, encounter_id, time, admission, inpatient, creatinine, baseline_creat = 'patient_id','encounter_id','time','admission','inpatient', 'creat', 'baseline_creat'
         d1.columns = [patient_id, admission, baseline_creat]
         d2 = d2.add_prefix('enc_')
 
@@ -343,6 +344,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
 
         df1 = pd.concat([d1, d2], axis=1)
         df1 = pd.melt(df1, id_vars = d1.columns, value_name = 'enc').drop('variable', axis=1)
+        df1 = df1.rename(columns={'enc': 'encounter_id'})
         df1 = df1[np.logical_and(~df1[encounter_id].isnull(), ~df1[encounter_id].duplicated())].reset_index(drop=True)
         
         time_deltas = [random.choices(time_delta_range, k=np.random.randint(num_time_range[0],num_time_range[1])) for i in range(df1.shape[0])]
