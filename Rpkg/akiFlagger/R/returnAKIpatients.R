@@ -1,12 +1,45 @@
-# Import libraries
-library(tidyverse)
-library(zoo)
+#' Flag patients for AKI
+#'
+#' Add in the AKI column in a patient dataframe according to the  KDIGO criterion
+#'
+#' @param dataframe patient dataset
+#' @param HB_trumping boolean on whether to have historical baseline creatinine values trump the local minimum creatinine values
+#' @param eGFR_impute boolean on whether to impute missing baseline creatinine values with CKD-EPI equation
+#' @param window1 rolling window length of the shorter time window; defaults to 48 hours
+#' @param window2 rolling window length of the longer time window; defaults to 162 hours
+#' @param add_min_creat boolean on whether to add the intermediate columns generated during calculation
+#' @param add_baseline_creat boolean on whether to add the baseline creatinine values in
+#'
+#'
+#' @return patient dataset with AKI column added in
+#'
+#' #Imports
+#' @import zoo
+#' @importFrom dplyr select
+#' @importFrom dplyr group_by
+#' @importFrom dplyr between
+#' @importFrom dplyr mutate
+#' @importFrom dplyr %>%
+#'
+#' @importFrom data.table fread
+#' @importFrom data.table first
+#' @importFrom data.table last
+#' @importFrom data.table copy
+#' @importFrom data.table :=
+#' @importFrom data.table .SD
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' returnAKIpatients(df)
+#' }
 
-# User-defined functions
 returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
                               window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
                               add_min_creat = FALSE, add_baseline_creat = FALSE) {
   patient_id <- encounter_id <- inpatient <- admission <- creatinine <- time <- NULL # Erase any variables in case duplicate variable names coexist
+  min_creat48 <- min_creat7d <- baseline_creat <- aki <- NULL # Also, add a visible binding (even if it's null) so R CMD Check doesn't complain
   df <- copy(dataframe) # Copy the input so it doesn't modify the data frame in place
 
   # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
@@ -66,71 +99,3 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
   if (!add_baseline_creat) df <- df %>% select(-baseline_creat)
   return(df)
 }
-
-patient_id   <- 'mrn'
-encounter_id <- 'enc' #optional
-inpatient    <- 'inpatient'
-admission    <- 'admission' #optional
-creatinine   <- 'creat'
-time         <- 'time'
-
-# Read in data frame
-dt <- fread('~/Desktop/toy.csv')#[1:1000] #Read in dataframe, grab first thousand rows
-dt <- subset(dt, select=-V1) # Drop the redundant index
-
-# Convert time & admission columns to POSIXct format - many ways to do this... here's one:
-dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'),
-                admission = as.POSIXct(admission, format='%Y-%m-%d %H:%M:%S'))
-
-dt <- dt %>% rename('patient_id' = patient_id, 'encounter_id' = encounter_id, 'inpatient' = inpatient,
-                    'creatinine' = creatinine, 'admission' = admission, 'time' = time)
-head(dt)
-# Subsetting with .SD
-#dt[, min_creat := sapply(.SD[, time], function(x) min(creatinine[between(time, x - window1, x)])), by=patient_id]
-dt <- returnAKIpatients(dt, HB_trumping = T)
-View(dt)
-#dt[, mc_48 := min(.SD[time >= (time_cp - as.difftime(2, units = 'days'))]), .SDcols = c('creatinine'), by=patient_id]
-
-
-
-#Here's another:
-time_cols <- c('time', 'admission')
-dt[, (time_cols) := lapply(.SD, as.POSIXct), .SDcols = time_cols]
-sapply(dt, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
-
-# patient_id   <- '__________'
-# encounter_id <- '__________'
-# inpatient    <- '__________'
-# admission    <- '__________'
-# creatinine   <- '__________'
-# time         <- '__________'
-
-patient_id   <- 'mrn'
-encounter_id <- 'enc' #optional
-inpatient    <- 'inpatient'
-admission    <- 'admission' #optional
-creatinine   <- 'creat'
-time         <- 'time'
-
-dt <- dt %>% rename('patient_id' = patient_id, 'encounter_id' = encounter_id, 'inpatient' = inpatient,
-                    'creatinine' = creatinine, 'admission' = admission, 'time' = time)
-# Add AKI
-aki <- returnAKIpatients(dt, HB_trumping = T)
-
-# Check output against Python version
-py <- fread('~/Desktop/out.csv')
-# Convert time & admission columns to POSIXct format
-py <- transform(py, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'),
-                admission = as.POSIXct(admission, format='%Y-%m-%d %H:%M:%S'))
-sapply(py, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
-
-
-
-
-#View(aki)
-# Check the mismatch  (if any, None as of now)
-#comb <- merge(py, aki, by=c('time'))
-#mismatch <- which(comb$bc.x != comb$bc.y)
-#View(comb[mismatch])
-#View(comb)
-

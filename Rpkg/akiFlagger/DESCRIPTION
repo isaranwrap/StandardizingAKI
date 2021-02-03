@@ -1,6 +1,6 @@
 Package: akiFlagger
 Title: Flags Acute Kidney Injury (AKI) 
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person(given = "Ishan",
            family = "Saran",
