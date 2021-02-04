@@ -5,10 +5,14 @@ library(zoo)
 # User-defined functions
 returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
                               window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
-                              add_min_creat = FALSE, add_baseline_creat = FALSE) {
+                              add_min_creat = FALSE, add_baseline_creat = FALSE, padding = NULL) {
   patient_id <- encounter_id <- inpatient <- admission <- creatinine <- time <- NULL # Erase any variables in case duplicate variable names coexist
   df <- copy(dataframe) # Copy the input so it doesn't modify the data frame in place
-
+  
+  if (!is.null(padding)) {
+    window1 <- window1 + padding
+    window2 <- window2 + padding
+    }
   # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
   df[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window1, x)])), by=patient_id]
   df[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window2, x)])), by=patient_id]
@@ -50,7 +54,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
     mask_rw = (!mask_2d & mask_empty) | bc_mask
     df[mask_rw, aki := condition1[mask_rw]]
 
-
+    if (!add_baseline_creat) df <- df %>% select(-baseline_creat)
   } else {
 
     # If HB_trumping is False, just implement the rolling minimum definitions
@@ -63,7 +67,6 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
     df[, aki := stage1 + stage2 + stage3]
   }
   if (!add_min_creat) df <- df %>% select(-min_creat48, -min_creat7d)
-  if (!add_baseline_creat) df <- df %>% select(-baseline_creat)
   return(df)
 }
 
