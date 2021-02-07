@@ -8,7 +8,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
                               add_min_creat = FALSE, add_baseline_creat = FALSE, padding = NULL) {
   patient_id <- encounter_id <- inpatient <- admission <- creatinine <- time <- NULL # Erase any variables in case duplicate variable names coexist
   df <- copy(dataframe) # Copy the input so it doesn't modify the data frame in place
-  
+
   if (!is.null(padding)) {
     window1 <- window1 + padding
     window2 <- window2 + padding
@@ -88,12 +88,6 @@ dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'),
 dt <- dt %>% rename('patient_id' = patient_id, 'encounter_id' = encounter_id, 'inpatient' = inpatient,
                     'creatinine' = creatinine, 'admission' = admission, 'time' = time)
 head(dt)
-# Subsetting with .SD
-#dt[, min_creat := sapply(.SD[, time], function(x) min(creatinine[between(time, x - window1, x)])), by=patient_id]
-dt <- returnAKIpatients(dt, HB_trumping = T)
-View(dt)
-#dt[, mc_48 := min(.SD[time >= (time_cp - as.difftime(2, units = 'days'))]), .SDcols = c('creatinine'), by=patient_id]
-
 
 
 #Here's another:

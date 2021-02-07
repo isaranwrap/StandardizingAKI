@@ -184,10 +184,9 @@ class AKIFlagger:
             aki[mask]= pd.Series(stage3hb.add(stage2hb.add(stage1hb*1)), name = 'aki')
 
             # Add back in the 0.3 bump criterion (separately since the rolling window is of a different size than the other checks)
-            mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
             mask_empty = aki == 0 # Replace the current value only if the flagger didn't flag as baseline. If it was 1, same result. If it was 2 or 3, we would prioritize those over the 0.3 bump
             mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), ~mask_bc) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
-            aki[mask_rw] = c1*1
+            aki[mask_rw] = c1[mask_rw]*1
 
         else: # Vanilla rolling minimum if no HB trumping
 
