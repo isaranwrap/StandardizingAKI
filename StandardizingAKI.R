@@ -1,6 +1,7 @@
 # Import libraries
-library(tidyverse)
 library(zoo)
+library(tidyverse)
+library(data.table)
 
 # User-defined functions
 returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
@@ -95,12 +96,6 @@ time_cols <- c('time', 'admission')
 dt[, (time_cols) := lapply(.SD, as.POSIXct), .SDcols = time_cols]
 sapply(dt, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
 
-# patient_id   <- '__________'
-# encounter_id <- '__________'
-# inpatient    <- '__________'
-# admission    <- '__________'
-# creatinine   <- '__________'
-# time         <- '__________'
 
 patient_id   <- 'mrn'
 encounter_id <- 'enc' #optional
@@ -121,13 +116,4 @@ py <- transform(py, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'),
                 admission = as.POSIXct(admission, format='%Y-%m-%d %H:%M:%S'))
 sapply(py, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
 
-
-
-
-#View(aki)
-# Check the mismatch  (if any, None as of now)
-#comb <- merge(py, aki, by=c('time'))
-#mismatch <- which(comb$bc.x != comb$bc.y)
-#View(comb[mismatch])
-#View(comb)
 
