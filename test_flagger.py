@@ -264,11 +264,10 @@ class TestFlagger(unittest.TestCase):
         row2 = [1234, False, pd.Timestamp('2020-03-24 12:00:02'), 1.0]
         row3 = [1234, True, pd.Timestamp('2020-05-24 12:00:02'), 1.5]
         df = pd.DataFrame([row0, row1, row2, row3], columns = cols)
-        flagger = AKIFlagger()
+        flagger = AKIFlagger(HB_trumping=True)
         out = flagger.returnAKIpatients(df)
-        print(out.head())
         self.assertTrue('imputed_admission' in out.columns.values)
-        
+        self.assertTrue('imputed_encounter_id' in out.columns.values)
 
 
         

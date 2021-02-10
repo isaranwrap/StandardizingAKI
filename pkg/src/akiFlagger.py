@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.3.6' # master file
+__version__ = '0.3.7' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -277,8 +277,8 @@ class AKIFlagger:
         mask = np.logical_and(bc_tz, ~tmp[self.inpatient])
         
         # Finally, add the median creat values to the dataframe, forward-fill, and return
-        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.patient_id, as_index=True)[self.creatinine].transform('median')
-        tmp[self.baseline_creat] = tmp.groupby(self.patient_id)[self.baseline_creat].ffill().bfill()
+        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')
+        tmp[self.baseline_creat] = tmp.groupby(self.encounter_id)[self.baseline_creat].ffill().bfill()
         
         # If we'd like to perform the imputation based on the eGFR of 75
         if self.eGFR_impute:
