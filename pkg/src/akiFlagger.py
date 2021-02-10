@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.3.7' # master file
+__version__ = '0.3.8' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -112,10 +112,13 @@ class AKIFlagger:
 
         '''
         ## Checks: we need to make sure the required columns are in the dataframe
-        assert (self.encounter_id in dataframe.columns or self.patient_id in dataframe.columns), "Patient identifier missing!"
-        assert (self.creatinine in dataframe.columns), "Creatinine column missing!"
-        assert (self.time in dataframe.columns), "Time column missing!"
+        try:
+            assert (self.encounter_id in dataframe.columns or self.patient_id in dataframe.columns), "Patient identifier missing!"
+        except AssertionError:
+            assert (self.encounter_id in dataframe.index.names or self.patient_id in dataframe.index.names), "Patient identifier missing!"
+        assert (self.time in dataframe.columns or self.time in dataframe.index.names), "Time column missing!"
         assert (self.inpatient in dataframe.columns), "Inpatient/outpatient column missing!"
+        assert (self.creatinine in dataframe.columns), "Creatinine column missing!"
         
         assert not np.any(dataframe[self.creatinine].isnull()), "Get rid of any null creatinine values before running the flagger!"
         
@@ -130,7 +133,13 @@ class AKIFlagger:
             dataframe[self.sex] = ~dataframe[self.sex].astype('bool')
 
         ## Step 1: Set the index to patient id & time variables
-        df = dataframe.set_index([self.patient_id, self.time])
+        if dataframe.index.names != [self.patient_id, self.time]:
+            try:
+                df = dataframe.set_index([self.patient_id, self.time])
+            except KeyError:
+                df = dataframe.reset_index().set_index([self.patient_id, self.time])
+        else:
+            df = dataframe.copy()
 
         ## Step 2: Sort based on time and drop any duplicates
         if self.sort_values:
@@ -259,17 +268,18 @@ class AKIFlagger:
         # If the admission column isn't present, impute it here
         if self.admission not in dataframe.columns:
             dataframe = self.addAdmissionColumn(dataframe, add_encounter_col=self.encounter_id not in dataframe.columns)
+        
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
         try:
-            tmp = dataframe.loc[:,[self.inpatient, self.creatinine, self.admission, self.encounter_id]]
-        except KeyError:
+            tmp = dataframe.loc[:,[self.encounter_id, self.inpatient, self.admission, self.creatinine]]
+        except KeyError: # Rare case where the admission column is provided but no encounter id is provided
             dataframe = self.addAdmissionColumn(dataframe, add_admission_col = False, add_encounter_col = True)
-            tmp = dataframe.loc[:,[self.creatinine, self.admission, self.inpatient, self.encounter_id]]
+            tmp = dataframe.loc[:,[self.encounter_id, self.inpatient, self.admission, self.creatinine]]
             
-        
+        # Subset age/sex/race if eGFR_impute flag is set to True
         if self.eGFR_impute:
-            tmp = dataframe.loc[:, [self.creatinine, self.admission, self.inpatient, self.age, self.race, self.sex]] # Took ENC out
-        
+            tmp = dataframe.loc[:, [self.encounter_id, self.inpatient, self.admission, self.creatinine,
+                                    self.age, self.sex, self.race]]
 
         # Next, create a T/F mask for the times between 365 & 7 days prior to admission AND outpatient vals 
         bc_tz = np.logical_and(tmp[self.admission] - pd.Timedelta(days=365) <= tmp.index.get_level_values(level=self.time),
@@ -278,7 +288,9 @@ class AKIFlagger:
         
         # Finally, add the median creat values to the dataframe, forward-fill, and return
         tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')
-        tmp[self.baseline_creat] = tmp.groupby(self.encounter_id)[self.baseline_creat].ffill().bfill()
+        enc_gb = tmp.groupby(self.encounter_id)
+        tmp[self.baseline_creat] = enc_gb[self.baseline_creat].ffill()
+        tmp[self.baseline_creat] = enc_gb[self.baseline_creat].bfill()
         
         # If we'd like to perform the imputation based on the eGFR of 75
         if self.eGFR_impute:
