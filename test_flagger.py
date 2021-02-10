@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 
 import akiFlagger
+print(akiFlagger.__version__)
 
 toy = generate_toy_data(num_patients=10, printMsg=False)
 class TestFlagger(unittest.TestCase):
@@ -66,11 +67,11 @@ class TestFlagger(unittest.TestCase):
         
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])
-        self.assertTrue(out.aki[1])
-        self.assertFalse(out.aki[2])
-        self.assertTrue(out.aki[3])
-        self.assertTrue(out.aki[4])
+        self.assertFalse(out.aki.iloc[0])
+        self.assertTrue(out.aki.iloc[1])
+        self.assertFalse(out.aki.iloc[2])
+        self.assertTrue(out.aki.iloc[3])
+        self.assertTrue(out.aki.iloc[4])
         print('Success!\n')
 
     def test_eGFRimpute(self):
@@ -90,12 +91,12 @@ class TestFlagger(unittest.TestCase):
         
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])    # 1.0
-        self.assertFalse(out.aki[1])    # 1.0
-        self.assertFalse(out.aki[2])    # 1.29
-        self.assertTrue(out.aki[3])     # 1.3
-        self.assertEqual(out.aki[4], 2) # 2
-        self.assertEqual(out.aki[5], 3) # 3
+        self.assertFalse(out.aki.iloc[0])    # 1.0
+        self.assertFalse(out.aki.iloc[1])    # 1.0
+        self.assertFalse(out.aki.iloc[2])    # 1.29
+        self.assertTrue(out.aki.iloc[3])     # 1.3
+        self.assertEqual(out.aki.iloc[4], 2) # 2
+        self.assertEqual(out.aki.iloc[5], 3) # 3
 
         print('Sucess!\n')
     
@@ -113,12 +114,12 @@ class TestFlagger(unittest.TestCase):
 
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])    # 1.0
-        self.assertFalse(out.aki[1])    # 1.0
-        self.assertFalse(out.aki[2])    # 1.29
-        self.assertTrue(out.aki[3])     # 1.3 --> UPDATED Version 0.3.5+: 0.3 condition is counted in HB_trumping now. 
-        self.assertEqual(out.aki[4], 2) # 2
-        self.assertEqual(out.aki[5], 3) # 3
+        self.assertFalse(out.aki.iloc[0])    # 1.0
+        self.assertFalse(out.aki.iloc[1])    # 1.0
+        self.assertFalse(out.aki.iloc[2])    # 1.29
+        self.assertTrue(out.aki.iloc[3])     # 1.3 --> UPDATED Version 0.3.5+: 0.3 condition is counted in HB_trumping now. 
+        self.assertEqual(out.aki.iloc[4], 2) # 2
+        self.assertEqual(out.aki.iloc[5], 3) # 3
 
         print('Sucess!\n')
     
@@ -139,14 +140,14 @@ class TestFlagger(unittest.TestCase):
 
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])    # 1.1
-        self.assertFalse(out.aki[1])    # 1.0
-        self.assertFalse(out.aki[2])    # 1.29
-        self.assertFalse(out.aki[3])    # 1.3  ---> This is the criterion that meets RM but not HB 
-        self.assertEqual(out.aki[4], 1) # 2 
-        self.assertEqual(out.aki[5], 2) # 2.2
-        self.assertEqual(out.aki[6], 2) # 3
-        self.assertEqual(out.aki[7], 3) # 3.3 (and it's not until 3.3 that HB should trigger stage3)
+        self.assertFalse(out.aki.iloc[0])    # 1.1
+        self.assertFalse(out.aki.iloc[1])    # 1.0
+        self.assertFalse(out.aki.iloc[2])    # 1.29
+        self.assertFalse(out.aki.iloc[3])    # 1.3  ---> This is the criterion that meets RM but not HB 
+        self.assertEqual(out.aki.iloc[4], 1) # 2 
+        self.assertEqual(out.aki.iloc[5], 2) # 2.2
+        self.assertEqual(out.aki.iloc[6], 2) # 3
+        self.assertEqual(out.aki.iloc[7], 3) # 3.3 (and it's not until 3.3 that HB should trigger stage3)
 
     def test_patientB_RM(self): # Identical to patientA, except their baseline is now 1.1 instead of 1.0
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
@@ -164,14 +165,14 @@ class TestFlagger(unittest.TestCase):
 
         #Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])    # 1.1
-        self.assertFalse(out.aki[1])    # 1.0
-        self.assertFalse(out.aki[2])    # 1.29
-        self.assertTrue(out.aki[3])     # 1.3  ---> This is the criterion that meets RM but not HB 
-        self.assertEqual(out.aki[4], 2) # 2 
-        self.assertEqual(out.aki[5], 2) # 2.2
-        self.assertEqual(out.aki[6], 3) # 3
-        self.assertEqual(out.aki[7], 3) # 3.3
+        self.assertFalse(out.aki.iloc[0])    # 1.1
+        self.assertFalse(out.aki.iloc[1])    # 1.0
+        self.assertFalse(out.aki.iloc[2])    # 1.29
+        self.assertTrue(out.aki.iloc[3])     # 1.3  ---> This is the criterion that meets RM but not HB 
+        self.assertEqual(out.aki.iloc[4], 2) # 2 
+        self.assertEqual(out.aki.iloc[5], 2) # 2.2
+        self.assertEqual(out.aki.iloc[6], 3) # 3
+        self.assertEqual(out.aki.iloc[7], 3) # 3.3
 
     def test_patientC_RM(self): # Patient C doesn't meet the rolling minimum criterion
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
@@ -185,11 +186,11 @@ class TestFlagger(unittest.TestCase):
 
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])
-        self.assertFalse(out.aki[1])
-        self.assertFalse(out.aki[2])
-        self.assertFalse(out.aki[3])
-        self.assertFalse(out.aki[4])
+        self.assertFalse(out.aki.iloc[0])
+        self.assertFalse(out.aki.iloc[1])
+        self.assertFalse(out.aki.iloc[2])
+        self.assertFalse(out.aki.iloc[3])
+        self.assertFalse(out.aki.iloc[4])
 
     def test_patientC_HB(self): # Patient C doesn't meet the rolling minimum criterion
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
@@ -203,11 +204,11 @@ class TestFlagger(unittest.TestCase):
 
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])
-        self.assertFalse(out.aki[1])
-        self.assertFalse(out.aki[2])
-        self.assertTrue(out.aki[3])
-        self.assertTrue(out.aki[4]) # But on the last one, RM should trigger
+        self.assertFalse(out.aki.iloc[0])
+        self.assertFalse(out.aki.iloc[1])
+        self.assertFalse(out.aki.iloc[2])
+        self.assertTrue(out.aki.iloc[3])
+        self.assertTrue(out.aki.iloc[4]) # But on the last one, RM should trigger
 
     def test_PatientX_RM(self):
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
@@ -220,10 +221,10 @@ class TestFlagger(unittest.TestCase):
 
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])
-        self.assertFalse(out.aki[1])
-        self.assertTrue(out.aki[2])
-        self.assertTrue(out.aki[3])
+        self.assertFalse(out.aki.iloc[0])
+        self.assertFalse(out.aki.iloc[1])
+        self.assertTrue(out.aki.iloc[2])
+        self.assertTrue(out.aki.iloc[3])
 
     def test_PatientX_HB(self):
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
@@ -236,27 +237,37 @@ class TestFlagger(unittest.TestCase):
 
         # Ensure proper output
         out = flagger.returnAKIpatients(df)
-        self.assertFalse(out.aki[0])
-        self.assertFalse(out.aki[1])
-        self.assertFalse(out.aki[2])
-        self.assertTrue(out.aki[3])
+        self.assertFalse(out.aki.iloc[0])
+        self.assertFalse(out.aki.iloc[1])
+        self.assertFalse(out.aki.iloc[2])
+        self.assertTrue(out.aki.iloc[3])
 
     def test_HB_notrump(self):
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-22 12:00:01'), 2.0]
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1.0]
         row2 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:03'), 1.3]
-
-        
-
         df = pd.DataFrame([row0, row1, row2], columns = cols)
         flagger = AKIFlagger(HB_trumping=True, add_baseline_creat = True) #HB_trumping is set to True but there is no baseline value... so it should switch to RM then
+        
+        # Ensure proper output
         out = flagger.returnAKIpatients(df)
         self.assertTrue(np.all(out.baseline_creat.isnull()))
-        self.assertEqual(out.aki[0], 0)
-        self.assertEqual(out.aki[1], 0)
-        self.assertEqual(out.aki[2], 1)
+        self.assertEqual(out.aki.iloc[0], 0)
+        self.assertEqual(out.aki.iloc[1], 0)
+        self.assertEqual(out.aki.iloc[2], 1)
 
+    def test_imputeAdmissionandEncounter(self):
+        cols = ['patient_id', 'inpatient', 'time', 'creatinine']
+        row0 = [1234, False, pd.Timestamp('2020-01-24 12:00:02'), 1.0]
+        row1 = [1234, False, pd.Timestamp('2020-02-24 12:00:02'), 1.0]
+        row2 = [1234, False, pd.Timestamp('2020-03-24 12:00:02'), 1.0]
+        row3 = [1234, True, pd.Timestamp('2020-05-24 12:00:02'), 1.5]
+        df = pd.DataFrame([row0, row1, row2, row3], columns = cols)
+        flagger = AKIFlagger()
+        out = flagger.returnAKIpatients(df)
+        print(out.head())
+        self.assertTrue('imputed_admission' in out.columns.values)
         
 
 

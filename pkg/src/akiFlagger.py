@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.3.5' # master file
+__version__ = '0.3.6' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -127,7 +127,7 @@ class AKIFlagger:
 
         # At this point, just want to make sure that the sex column is female. If sex is specified to be male, then change it 
         if self.sex == 'male' or self.sex == 'MALE': 
-            df[self.sex] = ~df[self.sex].astype('bool')
+            dataframe[self.sex] = ~dataframe[self.sex].astype('bool')
 
         ## Step 1: Set the index to patient id & time variables
         df = dataframe.set_index([self.patient_id, self.time])
@@ -203,28 +203,32 @@ class AKIFlagger:
         # Concatenate and return output
         return pd.concat([df, aki], axis=1)
     
-    def addAdmissionColumn(self, df, add_encounter_col = None):
+    def addAdmissionColumn(self, dataframe, add_encounter_col = None, add_admission_col = True):
         '''
         Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.
         '''
-        pat_gb = df.groupby(self.patient_id, sort = False)
+        if add_admission_col:
+            self.admission = 'imputed_{}'.format(self.admission)
+            pat_gb = dataframe.groupby(self.patient_id, sort = False)
 
-        #Check for those rows which are all inpatient; e.g. a hospital visit
-        df.loc[:, 'all_inp'] = pat_gb[self.inpatient].transform(lambda d: np.all(d))
-        df.loc[:, 'all_inp'] = df.all_inp & ~pat_gb.all_inp.shift(1, fill_value=False)
+            #Check for those rows which are all inpatient; e.g. a hospital visit
+            dataframe.loc[:, 'all_inp'] = pat_gb[self.inpatient].transform(lambda d: np.all(d))
+            dataframe.loc[:, 'all_inp'] = dataframe.all_inp & ~pat_gb.all_inp.shift(1, fill_value=False)
 
-        df.loc[:, self.admission] = df.inpatient & ~pat_gb.inpatient.shift(1, fill_value=False)
-        df.loc[np.logical_or(df[self.admission], df.all_inp), self.admission] = df[np.logical_or(df[self.admission], df.all_inp)].index.get_level_values(level=self.time)
-        df.loc[:, self.admission] = pat_gb[self.admission].apply(lambda s: s.bfill().ffill())
+            dataframe.loc[:, 'admit_tf'] = dataframe.inpatient & ~pat_gb.inpatient.shift(1, fill_value=False)
+            dataframe.loc[np.logical_or(dataframe.admit_tf, dataframe.all_inp), self.admission] = dataframe[np.logical_or(dataframe.admit_tf, dataframe.all_inp)].index.get_level_values(level=self.time)
+            dataframe.loc[:, self.admission] = pat_gb[self.admission].apply(lambda s: s.bfill().ffill())
 
-        if add_encounter_col:
-            df.loc[:, self.encounter_id] = df.inpatient & ~pat_gb.inpatient.shift(1, fill_value=False)
-            df.loc[df[self.encounter_id], self.encounter_id] = np.arange(1, df.enc.sum()+1)
-            df.loc[df[self.encounter_id] == False, self.encounter_id] = np.nan
-            df.loc[:,self.encounter_id] = pat_gb[self.encounter_id].apply(lambda s: s.bfill().ffill())
-        df = df.drop(['all_inp'], axis=1)
+            dataframe.drop(['all_inp', 'admit_tf'], axis=1, inplace=True)
+
+        if add_encounter_col and add_admission_col:
+            self.encounter_id = 'imputed_{}'.format(self.encounter_id)
+            dataframe[self.encounter_id] = dataframe.groupby(self.admission).ngroup()
+        elif add_encounter_col and not add_admission_col:
+            self.encounter_id = 'imputed_{}'.format(self.encounter_id)
+            dataframe[self.encounter_id] = dataframe.groupby(self.admission).ngroup()
         
-        return df   
+        return dataframe   
     
     def eGFRbasedCreatImputation(self, age, female, black):
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
@@ -246,20 +250,25 @@ class AKIFlagger:
 
         return creat
 
-    def addBaselineCreat(self, df):
+    def addBaselineCreat(self, dataframe):
         '''
         Returns baseline creatinine used in intermediate calculation for back-calculating AKI. Baseline creatinine is defined as the MEDIAN of OUTPATIENT creatinine values from 365 to 7 days prior to admission.
         '''
         # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
 
         # If the admission column isn't present, impute it here
-        if self.admission not in df.columns:
-            df = self.addAdmissionColumn(df, add_encounter_col=self.encounter_id not in df.columns)
-
+        if self.admission not in dataframe.columns:
+            dataframe = self.addAdmissionColumn(dataframe, add_encounter_col=self.encounter_id not in dataframe.columns)
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
-        tmp = df.loc[:,[self.creatinine, self.admission, self.inpatient]]#, self.encounter_id]]
+        try:
+            tmp = dataframe.loc[:,[self.inpatient, self.creatinine, self.admission, self.encounter_id]]
+        except KeyError:
+            dataframe = self.addAdmissionColumn(dataframe, add_admission_col = False, add_encounter_col = True)
+            tmp = dataframe.loc[:,[self.creatinine, self.admission, self.inpatient, self.encounter_id]]
+            
+        
         if self.eGFR_impute:
-            tmp = df.loc[:, [self.creatinine, self.admission, self.inpatient, self.age, self.race, self.sex]] # Took ENC out
+            tmp = dataframe.loc[:, [self.creatinine, self.admission, self.inpatient, self.age, self.race, self.sex]] # Took ENC out
         
 
         # Next, create a T/F mask for the times between 365 & 7 days prior to admission AND outpatient vals 
@@ -273,7 +282,7 @@ class AKIFlagger:
         
         # If we'd like to perform the imputation based on the eGFR of 75
         if self.eGFR_impute:
-            imp = df.loc[tmp[self.baseline_creat].isnull()]
+            imp = dataframe.loc[tmp[self.baseline_creat].isnull()]
             if self.sex == 'male':
                 tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], ~imp[self.sex], imp[self.race])
             elif self.sex == 'female':
@@ -282,9 +291,9 @@ class AKIFlagger:
                 tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex], imp[self.race])
         
         if self.add_baseline_creat:
-            df[self.baseline_creat] = tmp.baseline_creat
+            dataframe[self.baseline_creat] = tmp.baseline_creat
 
-        assert np.all(df.index == tmp.index)
+        assert np.all(dataframe.index == tmp.index)
         return tmp.baseline_creat
     
 def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_time_range = (5,10), creat_scale = 0.3,
