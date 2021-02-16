@@ -16,9 +16,7 @@
 #' #Imports
 #' @import zoo
 #' @importFrom dplyr select
-#' @importFrom dplyr group_by
 #' @importFrom dplyr between
-#' @importFrom dplyr mutate
 #' @importFrom dplyr %>%
 #'
 #' @importFrom data.table fread
@@ -28,18 +26,34 @@
 #' @importFrom data.table :=
 #' @importFrom data.table .SD
 #'
+#' @importFrom stats median
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' returnAKIpatients(df)
-#' }
+#' returnAKIpatients(toy)
 
 returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
                               window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
                               add_min_creat = FALSE, add_baseline_creat = FALSE) {
-  patient_id <- encounter_id <- inpatient <- admission <- creatinine <- time <- NULL # Erase any variables in case duplicate variable names coexist
-  min_creat48 <- min_creat7d <- baseline_creat <- aki <- NULL # Also, add a visible binding (even if it's null) so R CMD Check doesn't complain
+  age <- sex <- race <- NULL # Add a visible binding (even if it's null) so R CMD Check doesn't complain
+  patient_id <- encounter_id <- inpatient <- admission <- creatinine <- time <- NULL
+  min_creat48 <- min_creat7d <- baseline_creat <- aki <- NULL # Also, erase any variables in case duplicate variable names coexist
+
+  # Ensure the data frame being fed in contains the patient_id, inpatient, admission, and time columns
+  if (!('patient_id' %in% colnames(dataframe))) return("Sorry! Patient ID not found in dataframe.")
+  if (!('inpatient' %in% colnames(dataframe))) return("Sorry! Inpatient column not found in dataframe.")
+  if (!('admission' %in% colnames(dataframe))) return("Sorry! Admission column not found in dataframe.")
+  if (!('time' %in% colnames(dataframe))) return("Sorry! Time column not found in dataframe.")
+
+  # If eGFR imputation is wanted, additional columns are required.
+  if (eGFR_impute) {
+    if (!('age' %in% colnames(dataframe))) return("The age column is needed for eGFR imputation!")
+    if (!('sex' %in% colnames(dataframe))) return("The sex column is needed for eGFR imputation!")
+    if (!('race' %in% colnames(dataframe))) return("The race column is needed for eGFR imputation!")
+
+  }
+
   df <- copy(dataframe) # Copy the input so it doesn't modify the data frame in place
 
   # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
@@ -48,10 +62,28 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 
   # If HB_trumping is set to True, we want to add condition2, then do RM calcs, then do HB cacls, then add condition1 back in
   if (HB_trumping){
+
     # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
     df[, baseline_creat := .SD[time >= admission - as.difftime(365, units='days') &
                                  time <= admission - as.difftime(7, units='days') & inpatient == F,
                                round(median(creatinine), 4)], by = encounter_id]
+
+    # Imputation of baseline creatinine from CKD-EPI equation; i.e. eGFR-based imputation (assuming an eGFR of 75)
+    if (eGFR_impute) {
+
+      # Only want to apply the eGFR imputation to those who have a missing baseline creatinine
+      null_bc = is.na(df[, baseline_creat])
+
+      # Coefficients used in the CKD-EPI equation (Levey et. Al, 2009)
+      kappa <- 0.9 - 0.2*df[null_bc, sex]
+      alpha <- -0.411 + 0.082*df[null_bc, sex]
+
+      creat_over_kappa <- 75/(141*(1 + 0.018*df[null_bc, sex])*(1 + 0.159*df[null_bc, race])*0.993**df[null_bc, age])
+
+      df[null_bc & creat_over_kappa < 1, baseline_creat] <- kappa*creat_over_kappa**(-1/1.209)
+      df[null_bc & creat_over_kappa >=1, baseline_creat] <- kappa*creat_over_kappa**(1/alpha)
+
+    }
 
     # Two different conditions for how stage 1 can be met (with two distinct rolling window periods)
     condition1 <- round(df[, creatinine], digits=4) >= round(df[, min_creat48] + 0.3, digits=4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1

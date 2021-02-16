@@ -7,13 +7,12 @@
 \format{
 A data frame (1078 x 6) consisting of relevant AKI measurements for patients
 \describe{
-\item{V1}{int, sometimes an extra index which pops up}
 \item{mrn}{int, the patient identifier}
 \item{enc}{int, the encounter identifier}
 \item{inpatient}{boolean, whether or not the creatinine measurement taken was an inpatient measurement}
 \item{admission}{POSIXct, the time the patient was admitted}
 \item{time}{POSIXct, the time at which the creatinine measurement was taken}
-\item{creat}{float, the creatinine value of the measurement taken}
+\item{creatinine}{float, the creatinine value of the measurement taken}
 @source \url{http://akiflagger.readthedocs.io/}
 }
 }
