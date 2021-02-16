@@ -1,6 +1,6 @@
 # Import libraries
 library(zoo)
-library(tidyverse)
+library(dplyr)
 library(data.table)
 
 # User-defined functions
@@ -15,13 +15,14 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
     window1 <- window1 + padding
     window2 <- window2 + padding
   }
-  
+
   # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
   df[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window1, x)])), by=patient_id]
   df[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window2, x)])), by=patient_id]
 
   # If HB_trumping is set to True, we want to add condition2, then do RM calculations, then do HB calculations, then add condition1 back in
   if (HB_trumping){
+
     # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
     df[, baseline_creat := .SD[time >= admission - as.difftime(365, units='days') &
                                  time <= admission - as.difftime(7, units='days') & inpatient == F,

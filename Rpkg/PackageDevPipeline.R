@@ -68,8 +68,6 @@ document() # After filling in the barebones roxygen template, document() builds 
 
 # Step 10 (optional): Add data to package (for akiFlagger, toy.csv & out.csv)
 
-# Step 11: shiny App
-
 
 
 
