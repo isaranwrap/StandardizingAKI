@@ -38,7 +38,5 @@ patient dataset with AKI column added in
 Add in the AKI column in a patient dataframe according to the  KDIGO criterion
 }
 \examples{
-\dontrun{
-returnAKIpatients(df)
-}
+returnAKIpatients(toy)
 }

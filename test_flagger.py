@@ -94,7 +94,7 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki.iloc[0])    # 1.0
         self.assertFalse(out.aki.iloc[1])    # 1.0
         self.assertFalse(out.aki.iloc[2])    # 1.29
-        self.assertTrue(out.aki.iloc[3])     # 1.3
+        self.assertEqual(out.aki.iloc[3], 1)     # 1.3
         self.assertEqual(out.aki.iloc[4], 2) # 2
         self.assertEqual(out.aki.iloc[5], 3) # 3
 
@@ -117,7 +117,7 @@ class TestFlagger(unittest.TestCase):
         self.assertFalse(out.aki.iloc[0])    # 1.0
         self.assertFalse(out.aki.iloc[1])    # 1.0
         self.assertFalse(out.aki.iloc[2])    # 1.29
-        self.assertTrue(out.aki.iloc[3])     # 1.3 --> UPDATED Version 0.3.5+: 0.3 condition is counted in HB_trumping now. 
+        self.assertEqual(out.aki.iloc[3], 1)     # 1.3 --> UPDATED Version 0.3.5+: 0.3 condition is counted in HB_trumping now. 
         self.assertEqual(out.aki.iloc[4], 2) # 2
         self.assertEqual(out.aki.iloc[5], 3) # 3
 
