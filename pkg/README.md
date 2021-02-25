@@ -37,3 +37,10 @@ Alternatively, you can download the source and wheel files to build manually fro
 ## Getting started
 
 There is a [walk-through notebook](https://colab.research.google.com/github/isaranwrap/StandardizingAKI/blob/master/GettingStarted.ipynb) available on Github to introduce the necessary components and parameters of the flagger. The notebook can be accessed via Google Colab notebooks. The notebook has also been adapted in the [documentation](https://akiflagger.readthedocs.io/en/latest/). 
+
+## Change Log
+
+** Version 0.1.x** - Function-based implementation of flagger.
+** Version 0.2.x** - Switched to class-based implementation (OOP approach).
+** Version 0.3.x** - Switched to single-column output for AKI column.
+** Version 0.4.x** - Removed encounter and admission as optional columns.

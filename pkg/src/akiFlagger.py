@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 import datetime, random
+import pdb
 
-__version__ = '0.3.8' # master file
+__version__ = '0.4.0' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -49,21 +50,18 @@ class AKIFlagger:
         
     '''
     def __init__(self, patient_id = 'patient_id', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', # Required columns
-                 encounter_id = 'encounter_id', admission = 'admission', baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
+                 baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
                  age = 'age', sex = 'sex', race = 'race',  # Required if CKD-EPI imputation is wanted
                  padding = None, HB_trumping = False, eGFR_impute = False, # Main parameters
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', # Rolling window sizes
-                sort_values = True, add_baseline_creat = False, add_min_creat = False): # Ancillary optional parameters (include output for intermediate calculations)
+                sort_values = True, add_baseline_creat = False, add_min_creat = False, 
+                add_imputed_admission = False, add_imputed_encounter = False): # Ancillary optional parameters (include output for intermediate calculations)
         
-        # Identifiers
+        # Columns necessary for calculation
         self.patient_id = patient_id
-        self.encounter_id = encounter_id
-        
-        # Columns necessary for calculation (if admission not included it will be imputed)
-        self.creatinine = creatinine
-        self.time = time
         self.inpatient = inpatient
-        self.admission = admission
+        self.time = time
+        self.creatinine = creatinine
         
         # Demographic variables
         self.age = age
@@ -86,6 +84,8 @@ class AKIFlagger:
         self.eGFR_impute = eGFR_impute
         
         # Extra options to specify what is included in the output
+        self.add_imputed_admission = add_imputed_admission
+        self.add_imputed_encounter = add_imputed_encounter
         self.add_baseline_creat = add_baseline_creat
         self.add_min_creat = add_min_creat
 
@@ -112,10 +112,7 @@ class AKIFlagger:
 
         '''
         ## Checks: we need to make sure the required columns are in the dataframe
-        try:
-            assert (self.encounter_id in dataframe.columns or self.patient_id in dataframe.columns), "Patient identifier missing!"
-        except AssertionError:
-            assert (self.encounter_id in dataframe.index.names or self.patient_id in dataframe.index.names), "Patient identifier missing!"
+        assert self.patient_id in dataframe.columns or self.patient_id in dataframe.index.names, "Patient identifier missing!"
         assert (self.time in dataframe.columns or self.time in dataframe.index.names), "Time column missing!"
         assert (self.inpatient in dataframe.columns), "Inpatient/outpatient column missing!"
         assert (self.creatinine in dataframe.columns), "Creatinine column missing!"
@@ -158,16 +155,14 @@ class AKIFlagger:
         if self.add_min_creat: # Add in min creat time series to the dataframe
             df['min_creat{}'.format(self.cond1time.days*24 + self.cond1time.seconds // 3600)] = min_creat48
             df['min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600)] = min_creat7d
-        
-        if self.add_baseline_creat: # Add in baseline creatinine time series to the dataframe
-            df[self.baseline_creat] = self.addBaselineCreat(df)
 
         if self.HB_trumping: # Historical baseline "trumping" local minimum values
+            df = self.addAdmissionEncounterColumn(df)
             if self.baseline_creat not in df.columns:
                 baseline_creat = self.addBaselineCreat(df)
             else:
                 baseline_creat = df[self.baseline_creat]
-                assert np.all(baseline_creat.index == min_creat48.index)
+                assert np.all(baseline_creat.index == min_creat48.index), "The baseline creatinine index does not match the index"
             
             # Create masks for selecting admission to +2 days and +7 days in advance, respectively
             mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
@@ -197,6 +192,11 @@ class AKIFlagger:
             mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), ~mask_bc) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
             aki[mask_rw] = c1[mask_rw]*1
 
+            if not self.add_imputed_admission:
+                df = df.drop(self.admission, axis = 1)
+            if not self.add_imputed_encounter:
+                df = df.drop(self.encounter_id, axis = 1)
+
         else: # Vanilla rolling minimum if no HB trumping
 
             # Calculate rolling minimum conditions 
@@ -212,32 +212,33 @@ class AKIFlagger:
         # Concatenate and return output
         return pd.concat([df, aki], axis=1)
     
-    def addAdmissionColumn(self, dataframe, add_encounter_col = None, add_admission_col = True):
+    def addAdmissionEncounterColumn(self, dataframe):
         '''
         Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.
         '''
-        if add_admission_col:
-            self.admission = 'imputed_{}'.format(self.admission)
-            pat_gb = dataframe.groupby(self.patient_id, sort = False)
+        self.admission = 'imputed_admission'
+        self.encounter_id = 'imputed_encounter_id'
 
-            #Check for those rows which are all inpatient; e.g. a hospital visit
-            dataframe.loc[:, 'all_inp'] = pat_gb[self.inpatient].transform(lambda d: np.all(d))
-            dataframe.loc[:, 'all_inp'] = dataframe.all_inp & ~pat_gb.all_inp.shift(1, fill_value=False)
-
-            dataframe.loc[:, 'admit_tf'] = dataframe.inpatient & ~pat_gb.inpatient.shift(1, fill_value=False)
-            dataframe.loc[np.logical_or(dataframe.admit_tf, dataframe.all_inp), self.admission] = dataframe[np.logical_or(dataframe.admit_tf, dataframe.all_inp)].index.get_level_values(level=self.time)
-            dataframe.loc[:, self.admission] = pat_gb[self.admission].apply(lambda s: s.bfill().ffill())
-
-            dataframe.drop(['all_inp', 'admit_tf'], axis=1, inplace=True)
-
-        if add_encounter_col and add_admission_col:
-            self.encounter_id = 'imputed_{}'.format(self.encounter_id)
-            dataframe[self.encounter_id] = dataframe.groupby(self.admission).ngroup()
-        elif add_encounter_col and not add_admission_col:
-            self.encounter_id = 'imputed_{}'.format(self.encounter_id)
-            dataframe[self.encounter_id] = dataframe.groupby(self.admission).ngroup()
+        tmp = dataframe.reset_index() # Reset index
+        tmp['delta_t'] = tmp.groupby(self.patient_id)[self.time].diff(-1)
         
-        return dataframe   
+        # Admission column imputation
+        cond1 = tmp.delta_t >= pd.Timedelta('-72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
+        cond2 = tmp[self.inpatient] & tmp[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
+        cond3 = tmp[self.inpatient] & ~tmp[self.inpatient].shift(1).astype('bool') # First admit check: ensure that the True is preceded by a False; i.e. outpatient -> inpatient transition
+        admit_mask = np.logical_and.reduce([cond1, cond2, cond3])
+
+        tmp.loc[admit_mask, self.admission] = tmp.loc[admit_mask, self.time]
+        tmp[self.admission] = tmp.groupby(self.patient_id)[self.admission].ffill()
+        tmp[self.admission] = tmp.groupby(self.patient_id)[self.admission].bfill()
+        tmp[self.admission] = pd.to_datetime(tmp[self.admission])
+
+        # Encounter column imputation
+        tmp[self.encounter_id] = tmp.groupby(self.admission).ngroup()
+        
+        tmp = tmp.drop('delta_t', axis=1) 
+        tmp = tmp.set_index([self.patient_id, self.time])
+        return tmp
     
     def eGFRbasedCreatImputation(self, age, female, black):
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
@@ -267,14 +268,9 @@ class AKIFlagger:
 
         # If the admission column isn't present, impute it here
         if self.admission not in dataframe.columns:
-            dataframe = self.addAdmissionColumn(dataframe, add_encounter_col=self.encounter_id not in dataframe.columns)
-        
+            dataframe = self.addAdmissionEncounterColumn(dataframe)
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
-        try:
-            tmp = dataframe.loc[:,[self.encounter_id, self.inpatient, self.admission, self.creatinine]]
-        except KeyError: # Rare case where the admission column is provided but no encounter id is provided
-            dataframe = self.addAdmissionColumn(dataframe, add_admission_col = False, add_encounter_col = True)
-            tmp = dataframe.loc[:,[self.encounter_id, self.inpatient, self.admission, self.creatinine]]
+        tmp = dataframe.loc[:,[self.encounter_id, self.inpatient, self.admission, self.creatinine]]
             
         # Subset age/sex/race if eGFR_impute flag is set to True
         if self.eGFR_impute:
@@ -350,7 +346,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         d1 = pd.DataFrame([mrns, admns, creats]).T
         d2 = pd.DataFrame(encs)
 
-        patient_id, encounter_id, time, admission, inpatient, creatinine, baseline_creat = 'patient_id','encounter_id','time','admission','inpatient', 'creat', 'baseline_creat'
+        patient_id, encounter_id, time, admission, inpatient, creatinine, baseline_creat = 'patient_id','encounter_id','time','admission','inpatient', 'creatinine', 'baseline_creat'
         d1.columns = [patient_id, admission, baseline_creat]
         d2 = d2.add_prefix('enc_')
 
