@@ -10,7 +10,6 @@
 #' @param add_min_creat boolean on whether to add the intermediate columns generated during calculation
 #' @param add_baseline_creat boolean on whether to add the baseline creatinine values in
 #'
-#'
 #' @return patient dataset with AKI column added in
 #'
 #' #Imports
@@ -25,6 +24,7 @@
 #' @importFrom data.table copy
 #' @importFrom data.table :=
 #' @importFrom data.table .SD
+#' @importFrom data.table shift
 #'
 #' @importFrom stats median
 #'
@@ -37,13 +37,12 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
                               window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
                               add_min_creat = FALSE, add_baseline_creat = FALSE) {
   age <- sex <- race <- NULL # Add a visible binding (even if it's null) so R CMD Check doesn't complain
-  patient_id <- encounter_id <- inpatient <- admission <- creatinine <- time <- NULL
+  patient_id <- inpatient <- creatinine <- time <- NULL
   min_creat48 <- min_creat7d <- baseline_creat <- aki <- NULL # Also, erase any variables in case duplicate variable names coexist
 
   # Ensure the data frame being fed in contains the patient_id, inpatient, admission, and time columns
   if (!('patient_id' %in% colnames(dataframe))) return("Sorry! Patient ID not found in dataframe.")
   if (!('inpatient' %in% colnames(dataframe))) return("Sorry! Inpatient column not found in dataframe.")
-  if (!('admission' %in% colnames(dataframe))) return("Sorry! Admission column not found in dataframe.")
   if (!('time' %in% colnames(dataframe))) return("Sorry! Time column not found in dataframe.")
 
   # If eGFR imputation is wanted, additional columns are required.
@@ -62,7 +61,16 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 
   # If HB_trumping is set to True, we want to add condition2, then do RM calcs, then do HB cacls, then add condition1 back in
   if (HB_trumping){
+    df[, delta_t := shift(time, type = 'lead') - time, by = patient_id]
+    df[, inp_lag := shift(inpatient), by = patient_id]
+    df[, inp_lead:= shift(inpatient, type = 'lead'), by = patient_id]
 
+    cond1 = df[, delta_t] >= 72*3600 # 72 hours in units of seconds
+    cond2 = df[, inpatient] & df[, inp_lag]
+    cond3 = df[, inpatient] & !df[, inp_lead]
+    df[, admit_mask := cond1 & cond2 & cond3]
+
+    return(df)
     # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
     df[, baseline_creat := .SD[time >= admission - as.difftime(365, units='days') &
                                  time <= admission - as.difftime(7, units='days') & inpatient == F,

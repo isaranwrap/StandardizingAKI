@@ -157,7 +157,7 @@ class AKIFlagger:
             df['min_creat{}'.format(self.cond2time.days*24 + self.cond2time.seconds // 3600)] = min_creat7d
 
         if self.HB_trumping: # Historical baseline "trumping" local minimum values
-            df = self.addAdmissionEncounterColumn(df)
+            df = self.addAdmissionEncounterColumns(df)
             if self.baseline_creat not in df.columns:
                 baseline_creat = self.addBaselineCreat(df)
             else:
@@ -212,7 +212,7 @@ class AKIFlagger:
         # Concatenate and return output
         return pd.concat([df, aki], axis=1)
     
-    def addAdmissionEncounterColumn(self, dataframe):
+    def addAdmissionEncounterColumns(self, dataframe):
         '''
         Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.
         '''
@@ -268,7 +268,7 @@ class AKIFlagger:
 
         # If the admission column isn't present, impute it here
         if self.admission not in dataframe.columns:
-            dataframe = self.addAdmissionEncounterColumn(dataframe)
+            dataframe = self.addAdmissionEncounterColumns(dataframe)
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
         tmp = dataframe.loc[:,[self.encounter_id, self.inpatient, self.admission, self.creatinine]]
             

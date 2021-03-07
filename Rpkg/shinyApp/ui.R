@@ -46,6 +46,7 @@ library(shinythemes)
                       # textInput("time_id", "Time identifier",
                       #           value = "time"),
                       materialSwitch(inputId = "HB_trumping", label = "Historical baseline trumping?", status = "warning", value = FALSE),
+                      #materialSwitch(inputId = "eGFR_impute", label = "eGFR-based imputation?", status = "warning", value = FALSE),
                       sliderInput('padding', "Padding (in hours)", min=0, max=8, value = 4, step = 0.5),
                       div(
                         style = "display:inline-block;width:100%;text-align: right;",
