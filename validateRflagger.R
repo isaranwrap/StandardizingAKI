@@ -1,29 +1,49 @@
 library(data.table)
 library(tidyverse)
+library(zoo)
 source('C:/Users/ishan/Desktop/Projects/StandardizeAKI/StandardizingAKI.R')
 
+# Read in data frames
+dt <- fread("H:/Data/Standardized AKI definition/dataset/covid aki flagger 2-3-2021.csv")
+py <- fread("H:/Data/Standardized AKI definition/dataset/covid-flagger-imputedvals.csv")
+
+
+# Convert time & admission columns to POSIXct format
+dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%dT%H:%M:%S', tz = 'GMT'),
+                admission = as.POSIXct(admission, format='%Y-%m-%dT%H:%M:%S', tz = 'GMT'))
+py <- transform(py, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S', tz = 'GMT'),
+                admission = as.POSIXct(admission, format='%Y-%m-%d %H:%M:%S', tz = 'GMT'),
+                imputed_admission = as.POSIXct(imputed_admission, format='%Y-%m-%d %H:%M:%S', tz = 'GMT'))
+
+# Flagger expects inpatient, not outpatient
+dt[, inpatient := !as.logical(dt[, outpatient])]
+
 patient_id   <- 'pat_mrn_id'
-encounter_id <- 'pat_enc_csn_id' #optional
 inpatient    <- 'inpatient'
-admission    <- 'admission' #optional
 creatinine   <- 'creatinine'
 time         <- 'time'
 
-# Read in data frame
-dt <- fread("H:/Data/Standardized AKI definition/dataset/covid aki flagger 2-3-2021.csv")
-
-
-# Convert time & admission columns to POSIXct format - many ways to do this... here's one:
-dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%dT%H:%M:%S', tz = 'GMT'),
-                admission = as.POSIXct(admission, format='%Y-%m-%dT%H:%M:%S', tz = 'GMT'))
-dt[, inpatient] = !as.logical(dt[, outpatient])
-
-dt <- dt %>% rename('patient_id' = patient_id, 'encounter_id' = encounter_id, 'inpatient' = inpatient,
-                    'creatinine' = creatinine, 'admission' = admission, 'time' = time)
+dt <- dt %>% rename('patient_id' = patient_id, 'inpatient' = inpatient, 'creatinine' = creatinine, 'time' = time)
 head(dt)
+
+# Subset columns
+df <- dt[, .(patient_id, inpatient, creatinine, time)]
+
+#runtime <- system.time(
+#  out <- returnAKIpatients(df, padding = as.difftime(4, units='hours'))
+#)
 runtime <- system.time(
-  out <- returnAKIpatients(dt, padding = as.difftime(4, units='hours'), add_min_creat = T)
+  outHB <- returnAKIpatients(df, HB_trumping = T, padding = as.difftime(4, units='hours'),
+                             add_baseline_creat = T, add_imputed_admission = T)
 )
+
+comb <- merge(outHB, py, by = c('patient_id', 'time'))
+
+mismatch <- comb[comb$aki.x != comb$aki.y]
+
+
+
+
 
 tmp <- out %>% select(patient_id, time, creatinine, running_aki_stage, min_creat48, min_creat7d, aki)
 

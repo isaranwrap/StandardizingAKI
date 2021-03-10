@@ -76,6 +76,13 @@ class TestFlagger(unittest.TestCase):
 
     def test_eGFRimpute(self):
         print('Testing eGFR-based imputation...')
+
+        cols = ['patient_id', 'inpatient', 'creatinine', 'time', 'age', 'sex', 'race']
+        row0 = [1234, False, 1.0, pd.Timestamp('2020-05-24 12:00:02'), 60, 1, 1]
+        row1 = [1234, True, 1.0, pd.Timestamp('2020-05-28 12:00:02'), 60, 1, 1]
+        row2 = [1234, True, 1.0, pd.Timestamp('2020-05-29 12:00:02'), 60, 1, 1]
+        row3 = [2345, False, 1.0, pd.Timestamp('2020-05-24 12:00:02'), 60, 1, 1]
+        row4 = [2345, True]
         
     def test_patientA_RM(self): # Simplest case - both 
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']

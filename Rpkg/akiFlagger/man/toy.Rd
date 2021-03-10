@@ -7,7 +7,7 @@
 \format{
 A data frame (1078 x 6) consisting of relevant AKI measurements for patients
 \describe{
-\item{mrn}{int, the patient identifier}
+\item{patient_id}{int, the patient identifier}
 \item{enc}{int, the encounter identifier}
 \item{inpatient}{boolean, whether or not the creatinine measurement taken was an inpatient measurement}
 \item{admission}{POSIXct, the time the patient was admitted}

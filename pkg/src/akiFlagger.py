@@ -3,7 +3,7 @@ import numpy as np
 import datetime, random
 import pdb
 
-__version__ = '0.4.0' # master file
+__version__ = '0.4.1' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -220,12 +220,12 @@ class AKIFlagger:
         self.encounter_id = 'imputed_encounter_id'
 
         tmp = dataframe.reset_index() # Reset index
-        tmp['delta_t'] = tmp.groupby(self.patient_id)[self.time].diff(-1)
+        tmp['delta_t'] = tmp.groupby(self.patient_id)[self.time].diff(1).shift(-1)
         
         # Admission column imputation
-        cond1 = tmp.delta_t >= pd.Timedelta('-72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
-        cond2 = tmp[self.inpatient] & tmp[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
-        cond3 = tmp[self.inpatient] & ~tmp[self.inpatient].shift(1).astype('bool') # First admit check: ensure that the True is preceded by a False; i.e. outpatient -> inpatient transition
+        cond1 = tmp.delta_t <= pd.Timedelta('72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
+        cond2 = tmp[self.inpatient] & tmp.groupby(self.patient_id)[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
+        cond3 = tmp[self.inpatient] & ~tmp.groupby(self.patient_id)[self.inpatient].shift(1, fill_value = False).astype('bool') # First admit check: ensure that the True is preceded by a False; i.e. outpatient -> inpatient transition
         admit_mask = np.logical_and.reduce([cond1, cond2, cond3])
 
         tmp.loc[admit_mask, self.admission] = tmp.loc[admit_mask, self.time]
@@ -234,7 +234,7 @@ class AKIFlagger:
         tmp[self.admission] = pd.to_datetime(tmp[self.admission])
 
         # Encounter column imputation
-        tmp[self.encounter_id] = tmp.groupby(self.admission).ngroup()
+        tmp[self.encounter_id] = tmp.groupby([self.admission, self.patient_id]).ngroup()
         
         tmp = tmp.drop('delta_t', axis=1) 
         tmp = tmp.set_index([self.patient_id, self.time])
