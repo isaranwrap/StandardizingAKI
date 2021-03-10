@@ -27,7 +27,7 @@ class TestFlagger(unittest.TestCase):
         self.assertTrue('inpatient' in toy.columns)
         self.assertTrue('admission' in toy.columns)
         self.assertTrue('time' in toy.columns)
-        self.assertTrue('creat' in toy.columns)
+        self.assertTrue('creatinine' in toy.columns)
         print('Success!\n')
     
     def test_AssertionErrors(self):
@@ -61,8 +61,8 @@ class TestFlagger(unittest.TestCase):
         row3 = [1234, 12345, True, pd.Timestamp('2020-02-27 12:00:01'), pd.Timestamp('2020-03-01 12:00:01'), 1.8]
         row4 = [1234, 12345, True, pd.Timestamp('2020-02-27 12:00:01'), pd.Timestamp('2020-03-03 12:00:01'), 1.8]
         df = pd.DataFrame([row0, row1, row2, row3, row4], columns = cols)
-        flagger = AKIFlagger(patient_id = 'fish', encounter_id = 'dog',
-                            inpatient = 'rabbit', admission = 'snail',
+        flagger = AKIFlagger(patient_id = 'fish',
+                            inpatient = 'rabbit',
                             time = 'james', creatinine = 'buffboys')
         
         # Ensure proper output
@@ -266,9 +266,6 @@ class TestFlagger(unittest.TestCase):
         df = pd.DataFrame([row0, row1, row2, row3], columns = cols)
         flagger = AKIFlagger(HB_trumping=True)
         out = flagger.returnAKIpatients(df)
-        self.assertTrue('imputed_admission' in out.columns.values)
-        self.assertTrue('imputed_encounter_id' in out.columns.values)
-
 
         
 if __name__ == '__main__':
