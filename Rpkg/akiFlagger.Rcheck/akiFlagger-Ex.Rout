@@ -1,0 +1,69 @@
+
+R version 4.0.1 (2020-06-06) -- "See Things Now"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "akiFlagger"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('akiFlagger')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("returnAKIpatients")
+> ### * returnAKIpatients
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: returnAKIpatients
+> ### Title: Flag patients for AKI
+> ### Aliases: returnAKIpatients
+> 
+> ### ** Examples
+> 
+> returnAKIpatients(toy)
+      patient_id inpatient creatinine                time aki
+   1:      19008     FALSE       2.05 2019-07-08 14:37:33   0
+   2:      19008     FALSE       1.65 2019-07-09 08:37:33   0
+   3:      19008     FALSE       1.58 2019-07-29 08:37:33   0
+   4:      19008     FALSE       1.77 2019-08-10 08:37:33   0
+   5:      19008     FALSE       1.47 2019-09-25 02:37:33   0
+  ---                                                        
+1074:      16216     FALSE       1.24 2020-04-22 10:45:26   0
+1075:      16216     FALSE       0.84 2020-04-22 22:45:26   0
+1076:      16216     FALSE       1.50 2020-05-04 10:45:26   0
+1077:      16216     FALSE       1.32 2020-05-23 22:45:26   0
+1078:      16216      TRUE       1.61 2020-05-30 22:45:26   0
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  1.711 0.094 2.18 0.005 0.011 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

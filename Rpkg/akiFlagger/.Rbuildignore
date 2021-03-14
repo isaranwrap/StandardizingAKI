@@ -2,3 +2,11 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
+
+.DS_Store
+.Rhistory
+.gitignore
+data/.DS_Store
+Man/.DS_Store
+.Rproj.user
+.git
