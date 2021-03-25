@@ -36,14 +36,16 @@ More information about the specific data input format and examples can be found 
 Installation
 ============
 
+.. option:: Python
+
 You can install the flagger with ``pip``. Simply type the following into command line and the 
 package should install properly.
 
 .. code-block:: python
 
-   pip install akiflagger
+   pip install akiFlagger
 
-To ensure that it is working properly, you can open a Python session and test it with.
+To ensure that it is working properly, you can open a Python session and test it with
 
 .. code-block:: python
 
@@ -53,10 +55,19 @@ To ensure that it is working properly, you can open a Python session and test it
 
    >> '1.0.0'
 
-As long as the package is a stable version (1.0.0+), the flagger should be usable.
+.. option:: R
 
-Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
+You can install the flagger through `CRAN <https://cran.r-project.org/>`_. Simply type the following into an RStudio terminal and the package should install properly.
 
+.. code-block:: R
+
+   install.packages('akiFlagger')
+
+To ensure that it is working properly, you can open an RStudio session and test it with
+
+.. code-block:: R
+
+    library(akiFlagger)
 
 Getting started
 ===============
@@ -67,7 +78,7 @@ with some toy data since real patient data is probably protected health informat
 Once you've installed the package following the instructions in `Installation`, you're ready to get started.
 To begin with, we'll import the ``akiFlagger`` module.
 
-
+.. option:: Python
 .. code-block:: python
 
     import akiFlagger
@@ -78,9 +89,15 @@ To begin with, we'll import the ``akiFlagger`` module.
     
     >> '1.0.0'
 
+.. option:: R
+.. code-block:: R
+
+    library(akiFlagger)
+
 Let's start off by creating some toy data.
 ------------------------------------------
 
+.. option:: Python
 The flagger comes with a built-in generator of a toy dataset to demonstrate how it works. Simply call the `generate_toy_data()` function. By default, the toy dataset has 100 patients, but let's initialize ours with 1000 patients.
 
 .. code-block:: python
@@ -93,10 +110,12 @@ The flagger comes with a built-in generator of a toy dataset to demonstrate how 
     
        Toy dataset shape: (9094, 6)
 
-The toy dataset comes with columns for the patient identifier, the encounter identifier, whether the measurement was inpatient or outpatient, the creatinine measurement and time at which the measurement was taken. ``toy.head()`` should yield something like this:
+.. option:: R
+
+The R package comes with a built-in dataset, `toy`. The toy dataset comes with columns for the patient identifier, the encounter identifier, whether the measurement was inpatient or outpatient, the creatinine measurement and time at which the measurement was taken. ``toy.head()`` should yield something like this:
 
 .. csv-table::
-    :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/toy_head.csv
+    :file: /doc_csvs/toy_head.csv
 
 .. admonition:: Tip!
 
@@ -210,7 +229,7 @@ Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median
 
 Actually, by default the toy dataset only has patient values :math:`\pm` 5 days from the admission date, and because the baseline creatinine value calculates using values from 365 to 7 days prior, you'll notice that it didn't flag a single row as having AKI. Normally, of course, patients won't have times restricted to just :math:`\pm` 5 days, but this is a good opportunity to showcase one of the flagger features: the **eGFR-based imputation of baseline creatinine**.
 
-The following equation is known as the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating); developed via spline analysis by *Levey et. Al, 2009*. The full paper, along with the derived constants, can be found [here](https://pubmed.ncbi.nlm.nih.gov/19414839/>`_:
+The following equation is known as the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating); developed via spline analysis by *Levey et. Al, 2009*. The full paper, along with the derived constants, can be found [here](https://pubmed.ncbi.nlm.nih.gov/19414839/>`__:
 
 .. math::
     \begin{equation}
@@ -378,7 +397,7 @@ For more information on the package, feel free to contact rishabh.p.saran@vander
 Useful guides exist for more information about AKI, rolling windows, the back-calculation imputation method.
 
 * `AKI <https://www.kidney.org/atoz/content/AcuteKidneyInjury>`_
-* `KDIGO guidelines <https://kdigo.org/guidelines/acute-kidney-injury/>`_
+* `KDIGO guidelines <https://kdigo.org/guidelines/acute-kidney-injury/>`__
 * `KDIGO standard definitions <http://www.european-renal-best-practice.org/sites/default/files/u33/ndt.gfs375.full_.pdf>`_
 * `Rolling-window method <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_
 * `Back-calculation method <https://cjasn.asnjournals.org/content/5/7/1165>`_

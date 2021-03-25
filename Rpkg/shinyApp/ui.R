@@ -1,42 +1,59 @@
-library(DT)
 library(shiny)
 library(shinyWidgets)
 library(shinythemes)
 
-# Define UI ----
-  ui <- fluidPage(shinythemes::themeSelector(), # Selector to iterate between themes
-                  tags$head(
-                    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
-                  ),
-                  titlePanel("AKI Flagger GUI"),
-                  sidebarLayout(
-                    sidebarPanel(
-                      HTML('<style type="text/css">
-                      .row-fluid { width: 50%; }
-                      .well { background-color: #99CCFF; }
-                      .shiny-html-output { font-size: 16px; line-height: 21px; }
-                    </style>'),
-                      fileInput("file", h4("File input"),
-                                accept = c("text/csv",
-                                           "text/comma-separated-values,text/plain",
-                                           ".csv")),
-                      h4('Column identifier information'),
-                      materialSwitch(inputId = "HB_trumping", label = "Historical baseline trumping?", status = "warning", value = FALSE),
-                      materialSwitch(inputId = "eGFR_impute", label = "eGFR-based imputation?", status = "warning", value = FALSE),
-                      sliderInput('padding', "Padding (in hours)", min=0, max=8, value = 4, step = 0.5),
-                      div(
-                        style = "display:inline-block;width:100%;text-align: right;",
-                        actionButton("calcAKI", label = "Calculate AKI", icon = icon("calculator"))
-                      ),
-                    ),
-                    mainPanel(
-                      "File preview:",
-                      DT::dataTableOutput("contents"),
-                      br(),
-                      "Returned output:",
-                      DT::dataTableOutput("flagger_output"),
+library(DT)
 
-                      # Download data goes here
-                      uiOutput("download")
-                    )
-                    ))
+# Define UI ----
+ui <- fluidPage(shinythemes::themeSelector(),
+  
+  # Title
+  titlePanel(h2('AKI Flagger GUI')),
+  
+  # Sidebar panel for inputs
+  sidebarPanel(
+    
+    # Read in file input
+    fileInput("file", h4("File input"),
+              accept = c(".csv")),
+    
+    # Parameter options title:
+    tags$h3("Flagger parameters:"),
+    
+    # Link to documentation
+    tags$div(class="header", checked=NA,
+             tags$p("Not sure what the flagger parameters are? If so, ", style = "display: inline;"),
+             tags$a(href="https://akiflagger.readthedocs.io", "click here!")
+    ),
+    
+    br(),
+    br(),
+    
+    # Parameter options:
+    materialSwitch(inputId = "HB_trumping", 
+                   label = HTML("<b>Historical baseline trumping</b>"),
+                   status = 'primary'),
+    verbatimTextOutput("huh?"),
+    
+    materialSwitch(inputId = "eGFR_impute", 
+                   label = HTML("<b>CKD-EPI based creatinine imputation</b>"), 
+                   status = "primary"),
+    
+    # Padding slider
+    sliderInput('padding', "Padding (in hours)", min=0, max=8, value = 4, step = 0.5),
+    
+    # Calculate AKI button
+    div(
+      style = "display:inline-block;width:100%;text-align: center;",
+      actionButton("calcAKI", label = "Calculate AKI", icon = icon("calculator"))
+    ),
+  ), # End of sidebar panel
+  
+  # Main panel
+  mainPanel(
+    "File preview:",
+    DT::dataTableOutput("previewTable"),
+    br(),
+  )
+  
+)

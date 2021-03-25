@@ -189,12 +189,17 @@ More information about the specific data input format and examples can be found 
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<dl class="option">
+<dt id="cmdoption-arg-python">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-arg-python" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <p>You can install the flagger with <code class="docutils literal notranslate"><span class="pre">pip</span></code>. Simply type the following into command line and the
 package should install properly.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">akiflagger</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">akiFlagger</span>
 </pre></div>
 </div>
-<p>To ensure that it is working properly, you can open a Python session and test it with.</p>
+<p>To ensure that it is working properly, you can open a Python session and test it with</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">akiFlagger</span>
 
 <span class="n">akiFlagger</span><span class="o">.</span><span class="n">__version__</span>
@@ -202,8 +207,19 @@ package should install properly.</p>
 <span class="o">&gt;&gt;</span> <span class="s1">&#39;1.0.0&#39;</span>
 </pre></div>
 </div>
-<p>As long as the package is a stable version (1.0.0+), the flagger should be usable.</p>
-<p>Alternatively, you can download the source and wheel files to build manually from <a class="reference external" href="https://pypi.org/project/akiFlagger/">https://pypi.org/project/akiFlagger/</a>.</p>
+<dl class="option">
+<dt id="cmdoption-arg-r">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-arg-r" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>You can install the flagger through <a class="reference external" href="https://cran.r-project.org/">CRAN</a>. Simply type the following into an RStudio terminal and the package should install properly.</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&#39;akiFlagger&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To ensure that it is working properly, you can open an RStudio session and test it with</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">akiFlagger</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
@@ -211,6 +227,11 @@ package should install properly.</p>
 with some toy data since real patient data is probably protected health information.</p>
 <p>Once you’ve installed the package following the instructions in <cite>Installation</cite>, you’re ready to get started.
 To begin with, we’ll import the <code class="docutils literal notranslate"><span class="pre">akiFlagger</span></code> module.</p>
+<dl class="option">
+<dt id="id1">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">akiFlagger</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">akiFlagger</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
@@ -220,8 +241,21 @@ To begin with, we’ll import the <code class="docutils literal notranslate"><sp
 <span class="o">&gt;&gt;</span> <span class="s1">&#39;1.0.0&#39;</span>
 </pre></div>
 </div>
+<dl class="option">
+<dt id="id2">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">akiFlagger</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="section" id="let-s-start-off-by-creating-some-toy-data">
 <h3>Let’s start off by creating some toy data.<a class="headerlink" href="#let-s-start-off-by-creating-some-toy-data" title="Permalink to this headline">¶</a></h3>
+<dl class="option">
+<dt id="id3">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <p>The flagger comes with a built-in generator of a toy dataset to demonstrate how it works. Simply call the <cite>generate_toy_data()</cite> function. By default, the toy dataset has 100 patients, but let’s initialize ours with 1000 patients.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>toy = generate_toy_data(num_patients=1000)
 
@@ -232,7 +266,12 @@ print(&#39;Toy dataset shape: {}&#39;.format(toy.shape))
    Toy dataset shape: (9094, 6)
 </pre></div>
 </div>
-<p>The toy dataset comes with columns for the patient identifier, the encounter identifier, whether the measurement was inpatient or outpatient, the creatinine measurement and time at which the measurement was taken. <code class="docutils literal notranslate"><span class="pre">toy.head()</span></code> should yield something like this:</p>
+<dl class="option">
+<dt id="id4">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The R package comes with a built-in dataset, <cite>toy</cite>. The toy dataset comes with columns for the patient identifier, the encounter identifier, whether the measurement was inpatient or outpatient, the creatinine measurement and time at which the measurement was taken. <code class="docutils literal notranslate"><span class="pre">toy.head()</span></code> should yield something like this:</p>
 <div class="admonition-tip admonition">
 <p class="admonition-title">Tip!</p>
 <p>In order to calculate AKI, the flagger expects a dataset with certain columns in it. Depending on the type of computation you are interested in, your dataset will need to have different columns. Here’s a brief rundown of the necessary columns.</p>
@@ -428,7 +467,7 @@ If the pad times are different between windows, the parameters <code class="docu
 </div>
 <div class="section" id="more-information">
 <h1>More information<a class="headerlink" href="#more-information" title="Permalink to this headline">¶</a></h1>
-<p>For more information on the package, feel free to contact <a class="reference external" href="mailto:isaranwrap&#37;&#52;&#48;gmail&#46;com">isaranwrap<span>&#64;</span>gmail<span>&#46;</span>com</a> or <a class="reference external" href="mailto:is439&#37;&#52;&#48;yale&#46;edu">is439<span>&#64;</span>yale<span>&#46;</span>edu</a>.</p>
+<p>For more information on the package, feel free to contact <a class="reference external" href="mailto:rishabh&#46;p&#46;saran&#37;&#52;&#48;vanderbilt&#46;edu">rishabh<span>&#46;</span>p<span>&#46;</span>saran<span>&#64;</span>vanderbilt<span>&#46;</span>edu</a> or <a class="reference external" href="mailto:is439&#37;&#52;&#48;yale&#46;edu">is439<span>&#64;</span>yale<span>&#46;</span>edu</a>.</p>
 <p>Useful guides exist for more information about AKI, rolling windows, the back-calculation imputation method.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.kidney.org/atoz/content/AcuteKidneyInjury">AKI</a></p></li>

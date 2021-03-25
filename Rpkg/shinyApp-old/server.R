@@ -2,8 +2,7 @@ library(DT)
 library(data.table)
 library(tidyverse)
 library(zoo)
-library(akiFlagger)
-
+#library(akiFlagger)
 returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
                               window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
                               padding = as.difftime(0, units = 'days'),
@@ -129,17 +128,61 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 }
 # Define server logic ----
 server <- function(input, output) {
-  
-  # Input will start off as NULL. Once it is uploaded, 
-  # input$file will populate and the file will preview
-  
-  output$previewTable <- renderDT(
-    {
-      req(input$file)
-      
-      # The actual path is in file$datapath
-      df <- fread(input$file$datapath)
-    },
-    options = list(pageLength = 5)
+  output$contents <- DT::renderDataTable({
+    file <- input$file # Input file will initially be NULL
+
+    # Ensure the user uploads a .csv file
+    ext <- tools::file_ext(file$datapath)
+    validate(need(ext == "csv", "Please upload a csv file"))
+
+    df <- fread(file$datapath)
+    return(df)
+
+  }, # Options for rendering table
+  options = list(
+    pageLength = 5,
+    searching = F
+    ))
+
+  data <- eventReactive(input$calcAKI, {
+    file <- input$file
+
+    dt <- fread(input$file$datapath)
+
+    dt <- transform(dt,
+        time = as.POSIXct(time, format = '%Y-%m-%d %H:%M:%S'))
+
+    aki <- returnAKIpatients(dt, HB_trumping = input$HB_trumping, eGFR_impute = input$eGFR_impute)
+    aki <- transform(aki,
+                     time = as.character(time),
+                     admission = as.character(admission))
+    aki <- setnames(aki, old = c('patient_id',
+                                 'inpatient', 'creatinine', 'time'), new = c(input$patient_id, input$encounter_id,
+                                                               input$inpatient_id, input$creat_id,
+                                                               input$admission_id, input$time_id))
+    return(aki)
+  }) # eventReactive's closing brackets
+
+  output$flagger_output <- DT::renderDataTable(
+    data(),
+    options = list(
+      pageLength = 5
+    )
   )
+
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste(input$file, "-aki.csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(data(), file, row.names = FALSE)
+    }
+  )
+
+  output$download <- renderUI({
+    if(!is.null(input$file) & input$calcAKI) {
+      downloadButton('downloadData', 'Download')
+    }
+  })
+
 }

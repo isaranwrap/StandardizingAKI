@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import datetime, random
-import pdb
 
 __version__ = '0.4.1' # master file
 
@@ -383,12 +382,12 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
             df = df.set_index([patient_id, time], drop=False)
             
         if include_demographic_info:
-            df = df.loc[:,[patient_id, encounter_id, age, female, black, inpatient, admission, time, creatinine]]
+            df = df.loc[:,[patient_id, age, female, black, inpatient, time, creatinine]]
             if printMsg:
                 print('Successfully generated toy data!\n')
             return df
         
-        df = df.loc[:,[patient_id, encounter_id, inpatient, admission, time, creatinine]]
+        df = df.loc[:,[patient_id, inpatient, time, creatinine]]
         if printMsg:
             print('Successfully generated toy data!\n')
         return df
