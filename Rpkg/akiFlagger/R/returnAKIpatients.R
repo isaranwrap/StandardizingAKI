@@ -63,9 +63,13 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 
   }
 
-  df <- dataframe[, list(patient_id, inpatient, creatinine, time)] # Select the columns of interest
+  if (eGFR_impute) { # Select columns of interest
+    df <- dataframe[, list(patient_id, inpatient, creatinine, time, age, sex, race)]
+    }
+  else df <- dataframe[, list(patient_id, inpatient, creatinine, time)]
+
   df <- df[!duplicated(df)] # Remove duplicated rows
-  df <- df[order(time), .SD ,by = patient_id]
+  df <- df[order(time), .SD, by = patient_id] # Sort by time
 
   # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
   df[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window1, x)])), by=patient_id]
@@ -107,8 +111,8 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 
       creat_over_kappa <- 75/(141*(1 + 0.018*df[null_bc, sex])*(1 + 0.159*df[null_bc, race])*0.993**df[null_bc, age])
 
-      df[null_bc & creat_over_kappa < 1, baseline_creat] <- kappa*creat_over_kappa**(-1/1.209)
-      df[null_bc & creat_over_kappa >=1, baseline_creat] <- kappa*creat_over_kappa**(1/alpha)
+      df[null_bc][creat_over_kappa < 1]$baseline_creat <- kappa[creat_over_kappa < 1]*creat_over_kappa[creat_over_kappa < 1]**(-1/1.209)
+      df[null_bc][creat_over_kappa >=1]$baseline_creat <- kappa[creat_over_kappa >=1]*creat_over_kappa[creat_over_kappa >=1]**(1/alpha[creat_over_kappa >=1])
 
     }
 
@@ -139,6 +143,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 
     # Now, add the 0.3 bump rolling min condition back in
     mask_empty = df[,aki == 0]
+    mask_2d[is.na(mask_2d)] = FALSE
     mask_rw = (!mask_2d & mask_empty) | bc_mask
     df[mask_rw, aki := condition1[mask_rw]]
 
