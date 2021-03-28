@@ -4,7 +4,7 @@ library(zoo)
 source('C:/Users/ishan/Desktop/Projects/StandardizeAKI/StandardizingAKI.R')
 
 # Read in data frames
-dt <- fread("H:/Data/Standardized AKI definition/dataset/covid aki flagger 2-3-2021.csv")
+dt <- fread("H:/Data/Standardized AKI definition/dataset/flagger/covid-dataset.csv")
 py <- fread("H:/Data/Standardized AKI definition/dataset/covid-flagger-imputedvals.csv")
 
 
@@ -24,26 +24,38 @@ creatinine   <- 'creatinine'
 time         <- 'time'
 
 dt <- dt %>% rename('patient_id' = patient_id, 'inpatient' = inpatient, 'creatinine' = creatinine, 'time' = time)
-head(dt)
 
 # Subset columns
-df <- dt[, .(patient_id, inpatient, creatinine, time)]
+df <- dt[, .(patient_id, inpatient, creatinine, time, age, sex, race)]
+head(df)
 
-#runtime <- system.time(
-#  out <- returnAKIpatients(df, padding = as.difftime(4, units='hours'))
-#)
-runtime <- system.time(
-  outHB <- returnAKIpatients(df, HB_trumping = T, padding = as.difftime(4, units='hours'),
-                             add_baseline_creat = T, add_imputed_admission = T)
+runtimeA <- system.time(
+  outA <- returnAKIpatients(df)
 )
 
-comb <- merge(outHB, py, by = c('patient_id', 'time'))
+runtimeB <- system.time(
+  outB <- returnAKIpatients(df, padding = as.difftime(4, units='hours'))
+)
 
-mismatch <- comb[comb$aki.x != comb$aki.y]
+runtimeC <- system.time(
+  outC <- returnAKIpatients(df, HB_trumping = T)
+)
+
+runtimeD <- system.time(
+  outD <- returnAKIpatients(df, HB_trumping = T, padding = as.difftime(4, units='hours'))
+)
+
+runtimeE <- system.time(
+  outE <- returnAKIpatients(df, HB_trumping = T, eGFR_impute = T)
+)
+
+runtimeF <- system.time(
+  outF <- returnAKIpatients(df, HB_trumping = T, eGFR_impute = T, padding = as.difftime(4, units='hours'))
+)
 
 
-
-
+tmp <- merge(pyA, outA, by = c("patient_id", "time"), all.y = TRUE)
+#tmp <- subset(merge(pyA, outA, by = c("patient_id", "time"), all.y = TRUE), is.na(SPID.x) == TRUE)
 
 tmp <- out %>% select(patient_id, time, creatinine, running_aki_stage, min_creat48, min_creat7d, aki)
 
@@ -51,8 +63,9 @@ mismatch <- which(tmp[, aki] != tmp[, running_aki_stage])
 
 outHB <- returnAKIpatients(dt, padding = as.difftime(4, units = 'hours'), add_baseline_creat = TRUE, HB_trumping = TRUE)
 
-write.csv(outHB, 'H:/Data/Standardized AKI definition/dataset/covid-2-3-2021-rflagger.csv')
+#write.csv(outHB, 'H:/Data/Standardized AKI definition/dataset/covid-2-3-2021-rflagger.csv')
 
+# OLD -- fixed by specifying time zone -- keeping in case future problem arises
 print(mismatch) # Mismatch indices --> These only mismatch if you don't specify a timezone while converting time/admission
 # 283278  445843  461098  619641  627817  627840  627863  755286  755307  834181 1023461 1023587 1023713 1023839
 # 1023965 1024091 1024217 1183471 1183566 1218258 1292896 1292958 1431266 1431350
