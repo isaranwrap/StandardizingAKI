@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Additional Features / Common Use Cases &mdash; akiFlagger 0.0.3 documentation</title>
+  <title>Additional Features and Common Use Cases &mdash; akiFlagger 0.0.3 documentation</title>
   
 
   
@@ -88,7 +88,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Additional Features / Common Use Cases</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Additional Features and Common Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example"><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows instead, for example)</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="MoreInformation.html">More information</a></li>
 </ul>
 
@@ -136,7 +139,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Additional Features / Common Use Cases</li>
+      <li>Additional Features and Common Use Cases</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,88 +158,517 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="additional-features-common-use-cases">
-<h1>Additional Features / Common Use Cases<a class="headerlink" href="#additional-features-common-use-cases" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="additional-features-and-common-use-cases">
+<h1>Additional Features and Common Use Cases<a class="headerlink" href="#additional-features-and-common-use-cases" title="Permalink to this headline">¶</a></h1>
 <p>For most use cases, you will just need to specify <cite>rolling-window</cite> or <cite>back-calculate</cite> and the AKI-column will be returned. There are a slew of other features, some of which are listed below. For a full listing of the features and appropriate use cases, see the <cite>Documentation</cite> at <a class="reference external" href="https://akiflagger.readthedocs.io/en/latest/">akiflagger.readthedocs.io</a>.</p>
-<p><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows, instead, for example)</p>
+<div class="section" id="adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example">
+<h2><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows instead, for example)<a class="headerlink" href="#adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example" title="Permalink to this headline">¶</a></h2>
 <p>It’s often the case that you want to add some padding to the window to account for variations occurring on the floor. If the amount of padding you would like to add is the same for both the smaller and larger window, simply pass <code class="docutils literal notranslate"><span class="pre">padding='_hours'</span></code> filling the blank with the number of hours to add to the windows.
 If the pad times are different between windows, the parameters <code class="docutils literal notranslate"><span class="pre">pad1time</span></code> and <code class="docutils literal notranslate"><span class="pre">pad2time</span></code> allow you to add just this padding to the initial windows of 48 and 172 hours. In fact, if you wanted a window of 36 hours, you could even set <cite>pad1time = ‘-12hours’</cite>; this is one way in which you could modify the rolling window.</p>
+<dl class="option">
+<dt id="cmdoption-arg-python">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-arg-python" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 0: Adding 4-hour padding to windows</span>
 
-<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">rolling_window</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">padding</span> <span class="o">=</span> <span class="s1">&#39;4hours&#39;</span><span class="p">,</span> <span class="n">creatinine</span> <span class="o">=</span> <span class="s1">&#39;creat&#39;</span><span class="p">)</span>
+<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">padding</span> <span class="o">=</span> <span class="s1">&#39;4hours&#39;</span><span class="p">)</span>
 
 <span class="n">example0</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">)</span>
 
-<span class="n">example0</span><span class="p">[</span><span class="n">example0</span><span class="o">.</span><span class="n">rw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">example0</span><span class="p">[</span><span class="n">example0</span><span class="o">.</span><span class="n">aki</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>patient_id</p></td>
+<td><p>time</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-24 23:42:42</p></td>
+<td><p>False</p></td>
+<td><p>1.61</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>19845</p></td>
+<td><p>2020-05-12 18:02:54</p></td>
+<td><p>True</p></td>
+<td><p>0.76</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>19845</p></td>
+<td><p>2020-05-14 18:02:54</p></td>
+<td><p>True</p></td>
+<td><p>0.89</p></td>
+<td><p>2</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="option">
+<dt id="cmdoption-arg-r">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-arg-r" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 0: Adding 4-hour padding to windows</span>
+
+<span class="n">example0</span> <span class="o">&lt;-</span> <span class="nf">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">,</span> <span class="n">padding</span> <span class="o">=</span> <span class="nf">as.difftime</span><span class="p">(</span><span class="m">4</span><span class="p">,</span> <span class="n">units</span> <span class="o">=</span> <span class="s">&#39;hours&#39;</span><span class="p">))</span>
+
+<span class="nf">head</span><span class="p">(</span><span class="n">example0[example0</span><span class="o">$</span><span class="n">aki</span> <span class="o">&gt;</span> <span class="m">0</span><span class="n">]</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>patient_id</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>time</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>2.06</p></td>
+<td><p>2019-11-26 08:37:33</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>13264</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.75</p></td>
+<td><p>2019-08-11 17:16:57</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>13264</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.5</p></td>
+<td><p>2019-11-07 05:16:57</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>13264</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.63</p></td>
+<td><p>2019-11-08 23:16:57</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>18752</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.18</p></td>
+<td><p>2019-09-13 01:18:00</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>10537</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.34</p></td>
+<td><p>2019-11-08 07:55:12</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
 <p><strong>→ Working with different column names</strong></p>
+<dl class="option">
+<dt id="id1">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <p>As an additional example, the patient identifier will often come in as <em>‘PAT_MRN_ID’</em> or <em>‘PAT_ENC_CSN_ID’</em> (or something of the sort) if it is coming from a typical clinical data warehouse/repository. Accordingly, these should be passed in as options to the flagger.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Working with different column names</span>
 
-<span class="n">dataframe</span> <span class="o">=</span> <span class="n">toy</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mrn&#39;</span><span class="p">:</span> <span class="s1">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;enc&#39;</span><span class="p">:</span> <span class="s1">&#39;PAT_ENC_CSN_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;creat&#39;</span><span class="p">:</span><span class="s1">&#39;CREATININE&#39;</span><span class="p">,</span>
-                                <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="s1">&#39;AGE&#39;</span><span class="p">,</span> <span class="s1">&#39;female&#39;</span><span class="p">:</span> <span class="s1">&#39;SEX&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">:</span> <span class="s1">&#39;RACE&#39;</span><span class="p">,</span> <span class="s1">&#39;inpatient&#39;</span><span class="p">:</span> <span class="s1">&#39;INPATIENT&#39;</span><span class="p">,</span>
-                                <span class="s1">&#39;admission&#39;</span><span class="p">:</span> <span class="s1">&#39;ADMISSION&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;TIME&#39;</span><span class="p">})</span>
+<span class="n">dataframe</span> <span class="o">=</span> <span class="n">toy</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;patient_id&#39;</span><span class="p">:</span> <span class="s1">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;creatinine&#39;</span><span class="p">:</span><span class="s1">&#39;CREATININE&#39;</span><span class="p">,</span> <span class="s1">&#39;inpatient&#39;</span><span class="p">:</span> <span class="s1">&#39;INPATIENT&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;TIME&#39;</span>
+                                  <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="s1">&#39;AGE&#39;</span><span class="p">,</span> <span class="s1">&#39;female&#39;</span><span class="p">:</span> <span class="s1">&#39;SEX&#39;</span><span class="p">,</span> <span class="s1">&#39;black&#39;</span><span class="p">:</span> <span class="s1">&#39;RACE&#39;</span><span class="p">})</span>
 
-<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">rolling_window</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">patient_id</span> <span class="o">=</span> <span class="s1">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="n">encounter_id</span> <span class="o">=</span> <span class="s1">&#39;PAT_ENC_CSN_ID&#39;</span><span class="p">,</span>
-                    <span class="n">inpatient</span> <span class="o">=</span> <span class="s1">&#39;INPATIENT&#39;</span><span class="p">,</span> <span class="n">admission</span> <span class="o">=</span> <span class="s1">&#39;ADMISSION&#39;</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="n">creatinine</span> <span class="o">=</span> <span class="s1">&#39;CREATININE&#39;</span><span class="p">)</span>
+<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">patient_id</span> <span class="o">=</span> <span class="s1">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="n">inpatient</span> <span class="o">=</span> <span class="s1">&#39;INPATIENT&#39;</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="n">creatinine</span> <span class="o">=</span> <span class="s1">&#39;CREATININE&#39;</span><span class="p">,</span> <span class="n">age</span> <span class="o">=</span> <span class="s1">&#39;AGE&#39;</span><span class="p">,</span> <span class="n">sex</span> <span class="o">=</span> <span class="s1">&#39;SEX&#39;</span><span class="p">,</span> <span class="n">race</span> <span class="o">=</span> <span class="s1">&#39;RACE&#39;</span><span class="p">)</span>
 
 <span class="n">example1</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
 
 <span class="n">example1</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>PAT_MRN_ID</p></td>
+<td><p>TIME</p></td>
+<td><p>AGE</p></td>
+<td><p>SEX</p></td>
+<td><p>RACE</p></td>
+<td><p>INPATIENT</p></td>
+<td><p>CREATININE</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-22 11:42:42</p></td>
+<td><p>64.5</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>1.62</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>12732</p></td>
+<td><p>2020-02-23 11:42:42</p></td>
+<td><p>64.5</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>1.52</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-24 23:42:42</p></td>
+<td><p>64.5</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>1.63</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="option">
+<dt id="id2">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Say we had a dataframe which looked like this:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>PAT_MRN_ID</p></td>
+<td><p>OUTPATIENT</p></td>
+<td><p>TIME</p></td>
+<td><p>CREATININE</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>12732</p></td>
+<td><p>TRUE</p></td>
+<td><p>2019-11-16 05:42:42</p></td>
+<td><p>1.05</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>12732</p></td>
+<td><p>TRUE</p></td>
+<td><p>2019-11-20 05:42:42</p></td>
+<td><p>1.61</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>12732</p></td>
+<td><p>TRUE</p></td>
+<td><p>2020-01-15 05:42:42</p></td>
+<td><p>1.42</p></td>
+</tr>
+</tbody>
+</table>
+<p>In order to pass it to the flagger, we need to shape our data in a way that the flagger will understand. This means converting the outpatient columns to inpatient, and specifying the names of the columns as follows</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Working with different column names</span>
+
+<span class="nf">library</span><span class="p">(</span><span class="n">dplyr</span><span class="p">)</span> <span class="c1"># rename function from dplyr library</span>
+
+<span class="n">dataframe</span><span class="o">$</span><span class="n">OUTPATIENT</span> <span class="o">&lt;-</span> <span class="o">!</span><span class="n">dataframe</span><span class="o">$</span><span class="n">OUTPATIENT</span> <span class="c1"># turn the dataframe into inpatient instead of outpatient by logically inverting it</span>
+
+<span class="n">dataframe</span> <span class="o">&lt;-</span> <span class="n">dataframe</span> <span class="o">%&gt;%</span> <span class="nf">rename</span><span class="p">(</span><span class="s">&#39;patient_id&#39;</span> <span class="o">=</span> <span class="s">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="s">&#39;inpatient&#39;</span> <span class="o">=</span> <span class="s">&#39;OUTPATIENT&#39;</span><span class="p">,</span> <span class="s">&#39;time&#39;</span> <span class="o">=</span> <span class="s">&#39;TIME&#39;</span><span class="p">,</span> <span class="s">&#39;creatinine&#39;</span> <span class="o">=</span> <span class="s">&#39;CREATININE&#39;</span><span class="p">)</span>
+
+<span class="nf">head</span><span class="p">(</span><span class="nf">returnAKIpatients</span><span class="p">(</span><span class="n">dataframe</span><span class="p">),</span> <span class="n">n</span> <span class="o">=</span> <span class="m">3L</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>patient_id</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>time</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>2.05</p></td>
+<td><p>2019-07-08 14:37:33</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.65</p></td>
+<td><p>2019-07-09 08:37:33</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.58</p></td>
+<td><p>2019-07-29 08:37:33</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
 <p><strong>→ Adding in rolling-window minimum creatinines</strong></p>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_min_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. This will add in two columns which contain the minimum values in the rolling window, which is an intermediate column generated to calculate AKI; the flag adds in the column which the current creatinine is checked against.</p>
+<dl class="option">
+<dt id="id3">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 2: Adding in rolling-window minima</span>
 
-<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">rolling_window</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">creatinine</span> <span class="o">=</span> <span class="s1">&#39;creat&#39;</span><span class="p">,</span> <span class="n">add_min_creat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">add_min_creat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
 <span class="n">example2</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">)</span>
 
 <span class="n">example2</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>patient_id</p></td>
+<td><p>time</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>min_creat48</p></td>
+<td><p>min_creat168</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-22 17:42:42</p></td>
+<td><p>False</p></td>
+<td><p>1.05</p></td>
+<td><p>1.05</p></td>
+<td><p>1.05</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>12732</p></td>
+<td><p>2020-02-26 05:42:42</p></td>
+<td><p>False</p></td>
+<td><p>1.26</p></td>
+<td><p>1.26</p></td>
+<td><p>1.05</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-29 05:42:42</p></td>
+<td><p>True</p></td>
+<td><p>1.06</p></td>
+<td><p>1.06</p></td>
+<td><p>1.05</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="option">
+<dt id="id4">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 2: Adding in rolling-window minima</span>
+
+<span class="n">example2</span> <span class="o">&lt;-</span> <span class="nf">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">,</span> <span class="n">add_min_creat</span> <span class="o">=</span> <span class="bp">T</span><span class="p">)</span>
+
+<span class="nf">head</span><span class="p">(</span><span class="n">example2</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>patient_id</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>time</p></td>
+<td><p>min_creat48</p></td>
+<td><p>min_creat7d</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>2.05</p></td>
+<td><p>2019-07-08 14:37:33</p></td>
+<td><p>2.05</p></td>
+<td><p>2.05</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.65</p></td>
+<td><p>2019-07-09 08:37:33</p></td>
+<td><p>1.65</p></td>
+<td><p>1.65</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.58</p></td>
+<td><p>2019-07-29 08:37:33</p></td>
+<td><p>1.58</p></td>
+<td><p>1.58</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.77</p></td>
+<td><p>2019-08-10 08:37:33</p></td>
+<td><p>1.77</p></td>
+<td><p>1.77</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.47</p></td>
+<td><p>2019-09-25 02:37:33</p></td>
+<td><p>1.47</p></td>
+<td><p>1.47</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.64</p></td>
+<td><p>2019-11-25 14:37:33</p></td>
+<td><p>1.64</p></td>
+<td><p>1.64</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
 <p><strong>→ Adding in baseline creatinine</strong></p>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_baseline_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. Note that the baseline creatinine is not defined for outpatient measurements. Baseline creatinine can be thought of as the “resting” creatinine before coming into the hospital, so it doesn’t make much sense to define the baseline creatinine outside of a hospital visit.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 3: Adding in baseline creatinine</span>
 
-<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">rolling_window</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">back_calculate</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="c1">#Specifying both calculation methods</span>
-                    <span class="n">patient_id</span> <span class="o">=</span> <span class="s1">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="n">encounter_id</span> <span class="o">=</span> <span class="s1">&#39;PAT_ENC_CSN_ID&#39;</span><span class="p">,</span> <span class="n">inpatient</span> <span class="o">=</span> <span class="s1">&#39;INPATIENT&#39;</span><span class="p">,</span> <span class="c1">#Specifying col names</span>
-                    <span class="n">age</span> <span class="o">=</span> <span class="s1">&#39;AGE&#39;</span><span class="p">,</span> <span class="n">sex</span> <span class="o">=</span> <span class="s1">&#39;SEX&#39;</span><span class="p">,</span> <span class="n">race</span> <span class="o">=</span> <span class="s1">&#39;RACE&#39;</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="n">admission</span> <span class="o">=</span> <span class="s1">&#39;ADMISSION&#39;</span><span class="p">,</span> <span class="n">creatinine</span> <span class="o">=</span> <span class="s1">&#39;CREATININE&#39;</span><span class="p">,</span><span class="c1">#Specifying col names</span>
-                    <span class="n">eGFR_impute</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">add_baseline_creat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="c1">#Specifying additional columns to add</span>
+<span class="n">toy</span> <span class="o">=</span> <span class="n">generate_toy_data</span><span class="p">(</span><span class="n">include_demographic_info</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
-<span class="n">example3</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
+<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">HB_trumping</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">eGFR_impute</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="c1">#Specifying both calculation methods</span>
+                     <span class="n">add_baseline_creat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="c1"># Additional parameter to add in baseline creatinine values</span>
+                     <span class="n">age</span> <span class="o">=</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="n">sex</span> <span class="o">=</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span> <span class="n">race</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
 
-<span class="n">example3</span> <span class="o">=</span> <span class="n">example3</span><span class="p">[[</span><span class="s1">&#39;PAT_MRN_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;PAT_ENC_CSN_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;INPATIENT&#39;</span><span class="p">,</span> <span class="s1">&#39;AGE&#39;</span><span class="p">,</span> <span class="s1">&#39;SEX&#39;</span><span class="p">,</span> <span class="s1">&#39;RACE&#39;</span><span class="p">,</span> <span class="s1">&#39;ADMISSION&#39;</span><span class="p">,</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="s1">&#39;CREATININE&#39;</span><span class="p">,</span> <span class="s1">&#39;baseline_creat&#39;</span><span class="p">,</span> <span class="s1">&#39;rw&#39;</span><span class="p">,</span> <span class="s1">&#39;bc&#39;</span><span class="p">]]</span>
+<span class="n">example3</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">)</span>
 
 <span class="n">example3</span><span class="p">[</span><span class="o">~</span><span class="n">example3</span><span class="o">.</span><span class="n">baseline_creat</span><span class="o">.</span><span class="n">isnull</span><span class="p">()]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>→ Bare-bones dataset</strong></p>
-<p>As stated above, the bare minimum columns necessary for the flagger to run are the <strong>patient_id, inpatient/outpatient, time,</strong> and <strong>creatinine</strong>. In this case, any other columns used in intermediate steps will be imputed (admission, for example).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 4: Bare-bones dataset</span>
-
-<span class="n">barebones</span> <span class="o">=</span> <span class="n">toy</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,[</span><span class="s1">&#39;mrn&#39;</span><span class="p">,</span> <span class="s1">&#39;inpatient&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;creat&#39;</span><span class="p">]]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Barebones head:&#39;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">barebones</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
-
-<span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">rolling_window</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">creatinine</span> <span class="o">=</span> <span class="s1">&#39;creat&#39;</span><span class="p">)</span>
-
-<span class="n">example4</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">barebones</span><span class="p">)</span>
-
-<span class="n">example4</span><span class="p">[</span><span class="n">example4</span><span class="o">.</span><span class="n">rw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-
-<span class="o">&gt;&gt;</span> <span class="n">Barebones</span> <span class="n">head</span><span class="p">:</span>
-    <span class="n">mrn</span>   <span class="n">inpatient</span>                <span class="n">time</span>   <span class="n">creat</span>
-<span class="mi">0</span>  <span class="mi">12732</span>      <span class="kc">False</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">26</span> <span class="mi">11</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">42</span>   <span class="mf">1.78</span>
-<span class="mi">1</span>  <span class="mi">12732</span>      <span class="kc">False</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">26</span> <span class="mi">23</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">42</span>   <span class="mf">1.46</span>
-<span class="mi">2</span>  <span class="mi">12732</span>       <span class="kc">True</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">28</span> <span class="mi">05</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">42</span>   <span class="mf">1.52</span>
-<span class="mi">3</span>  <span class="mi">12732</span>       <span class="kc">True</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">28</span> <span class="mi">11</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">42</span>   <span class="mf">1.62</span>
-<span class="mi">4</span>  <span class="mi">12732</span>       <span class="kc">True</span> <span class="mi">2020</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">28</span> <span class="mi">17</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mi">42</span>   <span class="mf">1.51</span>
-</pre></div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>patient_id</p></td>
+<td><p>time</p></td>
+<td><p>age</p></td>
+<td><p>female</p></td>
+<td><p>black</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>baseline_creat</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-22 11:42:42</p></td>
+<td><p>64.5</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>1.62</p></td>
+<td><p>0.9300765849293293</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>12732</p></td>
+<td><p>2020-02-25 11:42:42</p></td>
+<td><p>64.5</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>1.63</p></td>
+<td><p>0.9300765849293293</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>12732</p></td>
+<td><p>2020-02-25 17:42:42</p></td>
+<td><p>64.5</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+<td><p>1.52</p></td>
+<td><p>0.9300765849293293</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

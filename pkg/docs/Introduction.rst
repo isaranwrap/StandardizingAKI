@@ -18,16 +18,16 @@ Methods of calculating AKI
 
 There are two methods to retroactively determine if a patient developed AKI: ``rolling-window`` and ``back-calculation``. 
 
-.. option:: Rolling Window 
+.. option:: Rolling Window (default)
 
    The rolling window definition of AKI is based on the change in creatinine in a 48 hour or 7 day `rolling window <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_ period.
    These are the stages mentioned in the KDIGO guidelines in the `Introduction`. 
 
-.. option:: Back-calculation
+.. option:: Back-calculation (HB_trumping)
 
    The back-calculated definition of AKI is based on retroactively imputing baseline creatinine values. This is done by taking the *median*
    of the patient's outpatient creatinine values from 365 to 7 days prior to admission and setting that as the baseline creatinine. Then, the 
    first KDIGO criterion for *Stage 1* is applied (the 50% increase in creatinine in < 7 days). If the condition is satisfied, the patient is considered to have AKI.
 
-   If there are no outpatient creatinine values measured for the patient from 365 to 7 days prior to admission, it is possible to still impute a
+   If there are no outpatient creatinine values measured for the patient from 365 t o 7 days prior to admission, it is possible to still impute a
    baseline creatinine value based on the patients demographics: namely their age, sex, and race. 

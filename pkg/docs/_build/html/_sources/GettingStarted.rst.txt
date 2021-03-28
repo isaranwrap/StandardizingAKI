@@ -46,13 +46,7 @@ The toy dataset comes with columns for the patient identifier, the encounter ide
 
 .. option:: R
 
-The R package comes with a built-in dataset, `toy`. To access it, run the follow command:
-
-.. code-block:: R
-
-    setDT(toy)
-
-The toy dataset comes with columns for the patient identifier, inpatient, the creatinine measurement and the time at which the measurement was taken. ``head(toy)`` should yield something like this:
+The R package comes with a built-in dataset, `toy`. The toy dataset comes with columns for the patient identifier, inpatient, the creatinine measurement and the time at which the measurement was taken. ``head(toy)`` should yield something like this:
 
 .. csv-table::
     :file: ../doc_csvs/r/toy_headR.csv
@@ -205,16 +199,18 @@ Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median
 
 .. code-block:: python
 
-    flagger = AKIFlagger(HB_trumping = True)
+    flagger = AKIFlagger(HB_trumping = True, add_baseline_creat = True)
 
     out = flagger.returnAKIpatients(toy)
     
     out.head()
 
 .. csv-table::
-    :file: ../doc_csvs/bc_out.csv
+    :file: ../doc_csvs/python/bc_out.csv
 
-Actually, by default the toy dataset only has patient values :math:`\pm` 5 days from the admission date, and because the baseline creatinine value calculates using values from 365 to 7 days prior, you'll notice that it didn't flag a single row as having AKI. Normally, of course, patients won't have times restricted to just :math:`\pm` 5 days, but this is a good opportunity to showcase one of the flagger features: the **eGFR-based imputation of baseline creatinine**.
+Actually, by default the toy dataset only has patient values :math:`\pm` 5 days from the admission date, and because the baseline creatinine value calculates using values from 365 to 7 days prior, you'll notice that the flagger reverts to the rolling window definition. 
+This is important: in the absence of available baseline creatinine values, the flagger defaults to a rolling minimum comparison. Indeed, most of the checking for AKI occurs outside of period of hospitalization.
+Normally, of course, patients won't have times restricted to just :math:`\pm` 5 days, but this is a good opportunity to showcase one of the flagger features: the **eGFR-based imputation of baseline creatinine**.
 
 The following equation is known as the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating); developed via spline analysis by *Levey et. Al, 2009*. The full paper, along with the derived constants, can be found [here](https://pubmed.ncbi.nlm.nih.gov/19414839/>`_.
 
@@ -234,7 +230,7 @@ where:
 
 The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age, sex, and race to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
 
-**Note:** The toy dataset doesn't come with demographic information by default, but simply passing ``include_demographic_info=True`` adds in the age, race, and sex columns. We need to specify that sex is female & race is black in the flagger as well.
+**Note:** The toy dataset doesn't come with demographic information by default, but simply passing ``include_demographic_info = True`` adds in the age, race, and sex columns. We need to specify that sex is female & race is black in the flagger as well.
 
 .. code-block:: python
 
@@ -243,20 +239,18 @@ The idea is as follows: based on the above equation, we assume a GFR of 75 and t
     toy.head()
 
 .. csv-table::
-    :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/toy_demo.csv
+    :file: ../doc_csvs/python/toy_demo.csv
 
 .. code-block:: python
 
-    flagger = AKIFlagger(back_calculate = True, creatinine = 'creat',
-                        eGFR_impute = True, sex = 'female', race = 'black')
+    flagger = AKIFlagger(HB_trumping = True, eGFR_impute = True, add_baseline_creat = True,
+                         sex = 'female', race = 'black')
 
     out = flagger.returnAKIpatients(toy)
-
-    out = out[['mrn', 'enc', 'inpatient', 'age', 'female', 'black', 'admission', 'time', 'creat', 'bc']] # This just orders the columns to match the initial order
 
     out.head()
 
 .. csv-table::
-    :file: /Users/Praveens/Desktop/ishan/StandardizingAKI/pkg/doc_csvs/egfr_out.csv
+    :file: ../doc_csvs/python/egfr_out.csv
 
 That about does it for the basics! There are a slew of other features, some of which are listed in the `Additional Features` section. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
