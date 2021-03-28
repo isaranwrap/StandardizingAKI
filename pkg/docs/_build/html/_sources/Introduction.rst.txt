@@ -16,18 +16,30 @@ More information about the specific data input format can be found in the `Getti
 Methods of calculating AKI
 ==========================
 
+.. role:: bolditalic
+  :class: bolditalic
+
 There are two methods to retroactively determine if a patient developed AKI: ``rolling-window`` and ``back-calculation``. 
 
 .. option:: Rolling Window (default)
 
    The rolling window definition of AKI is based on the change in creatinine in a 48 hour or 7 day `rolling window <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_ period.
-   These are the stages mentioned in the KDIGO guidelines in the `Introduction`. 
+   These are the stages mentioned in the KDIGO guidelines in the `Introduction` above. 
 
-.. option:: Back-calculation (HB_trumping)
+.. option:: Historical baseline trumping (back-calculate)
 
-   The back-calculated definition of AKI is based on retroactively imputing baseline creatinine values. This is done by taking the *median*
-   of the patient's outpatient creatinine values from 365 to 7 days prior to admission and setting that as the baseline creatinine. Then, the 
-   first KDIGO criterion for *Stage 1* is applied (the 50% increase in creatinine in < 7 days). If the condition is satisfied, the patient is considered to have AKI.
+   The idea with :bolditalic:`Historical baseline trumping` is to use the historical baseline creatinine value as the value to compare the current creatinine to when runnning the KDIGO criterion 
+   *instead of* the rolling window value; i.e. the historical baseline *trumps* the rolling minimum value. 
+   
+   :bolditalic:`Definition:` The historical baseline is defined as the :bolditalic:`median` of the patient's :bolditalic:`outpatient` creatinine values from 365 to 7 days prior to admission. 
+
+   :bolditalic:`Reasoning:` Right when a patient is admitted to the hospital, their creatinine might not be representative of what their true, stable creatinine values
+   normally are. As such, you might want to use the *historical baseline value*. This historical baseline value, calculated retroactively, is only used around the time of admission -
+   specifically from the time of admission to 7 days (+ padding) out. For any time outside of this, the rolling window is still in effect... but this allows you to capture patients
+   whose hemodynamic balance might be messed up at the time of admission. 
 
    If there are no outpatient creatinine values measured for the patient from 365 t o 7 days prior to admission, it is possible to still impute a
-   baseline creatinine value based on the patients demographics: namely their age, sex, and race. 
+   baseline creatinine value based on the patients demographics: namely their age, sex, and race. This is what the ``eGFR_impute`` option in the flagger does:
+   *eGFR imputation* because it assumes an eGFR of 75 mL/min/1.73m^2 and estimates the creatinine from that. 
+
+   
