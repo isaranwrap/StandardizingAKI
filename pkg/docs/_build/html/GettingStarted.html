@@ -37,7 +37,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Additional Features / Common Use Cases" href="AdditionalFeatures.html" />
+    <link rel="next" title="Additional Features and Common Use Cases" href="AdditionalFeatures.html" />
     <link rel="prev" title="Installation" href="Installation.html" /> 
 </head>
 
@@ -93,7 +93,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-back-calculation">Example: Back-calculation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="AdditionalFeatures.html">Additional Features / Common Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AdditionalFeatures.html">Additional Features and Common Use Cases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MoreInformation.html">More information</a></li>
 </ul>
 
@@ -186,6 +186,10 @@ To begin with, we’ll import the <code class="docutils literal notranslate"><sp
 <dd></dd></dl>
 
 <div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">akiFlagger</span><span class="p">)</span>
+
+<span class="o">?</span><span class="n">returnAKIpatients</span>
+
+<span class="o">&gt;</span> ℹ <span class="n">Rendering</span> <span class="n">development</span> <span class="n">documentation</span> <span class="n">for</span> <span class="s">&#39;returnAKIpatients&#39;</span>
 </pre></div>
 </div>
 <div class="section" id="let-s-start-off-by-creating-some-toy-data">
@@ -712,6 +716,11 @@ the flagger is performing a row-wise computation, it is comparing the current cr
 <div class="section" id="example-back-calculation">
 <h2>Example: Back-calculation<a class="headerlink" href="#example-back-calculation" title="Permalink to this headline">¶</a></h2>
 <p>Next, we’ll run the flagger to “back-calculate” AKI; that is, using the <strong>median outpatient creatinine values from 365 to 7 days prior to admission</strong> to impute a baseline creatinine value. Then, we’ll run the same KDIGO criterion (except for the 0.3 increase) comparing the creatinine value to baseline creatinine.</p>
+<dl class="option">
+<dt id="id5">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">flagger</span> <span class="o">=</span> <span class="n">AKIFlagger</span><span class="p">(</span><span class="n">HB_trumping</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">add_baseline_creat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
 <span class="n">out</span> <span class="o">=</span> <span class="n">flagger</span><span class="o">.</span><span class="n">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">)</span>
@@ -773,6 +782,85 @@ the flagger is performing a row-wise computation, it is comparing the current cr
 </tr>
 </tbody>
 </table>
+<dl class="option">
+<dt id="id6">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">&lt;-</span> <span class="nf">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">,</span> <span class="n">HB_trumping</span> <span class="o">=</span> <span class="bp">T</span><span class="p">,</span> <span class="n">add_baseline_creat</span> <span class="o">=</span> <span class="bp">T</span><span class="p">)</span>
+
+<span class="nf">head</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>patient_id</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>time</p></td>
+<td><p>baseline_creat</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>2.05</p></td>
+<td><p>2019-07-08 14:37:33</p></td>
+<td><p>NA</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.65</p></td>
+<td><p>2019-07-09 08:37:33</p></td>
+<td><p>NA</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.58</p></td>
+<td><p>2019-07-29 08:37:33</p></td>
+<td><p>NA</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.77</p></td>
+<td><p>2019-08-10 08:37:33</p></td>
+<td><p>NA</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.47</p></td>
+<td><p>2019-09-25 02:37:33</p></td>
+<td><p>NA</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.64</p></td>
+<td><p>2019-11-25 14:37:33</p></td>
+<td><p>NA</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
 <p>Actually, by default the toy dataset only has patient values <span class="math notranslate nohighlight">\(\pm\)</span> 5 days from the admission date, and because the baseline creatinine value calculates using values from 365 to 7 days prior, you’ll notice that the flagger reverts to the rolling window definition.
 This is important: in the absence of available baseline creatinine values, the flagger defaults to a rolling minimum comparison. Indeed, most of the checking for AKI occurs outside of period of hospitalization.
 Normally, of course, patients won’t have times restricted to just <span class="math notranslate nohighlight">\(\pm\)</span> 5 days, but this is a good opportunity to showcase one of the flagger features: the <strong>eGFR-based imputation of baseline creatinine</strong>.</p>
@@ -791,6 +879,11 @@ GFR = 141 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)
 <li><p><span class="math notranslate nohighlight">\(b\)</span> is 1 if black, 0 if another race</p></li>
 </ul>
 <p>The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age, sex, and race to determine an estimate for the baseline creatinine. Theory aside, simply pass <code class="docutils literal notranslate"><span class="pre">eGFR_impute</span> <span class="pre">=</span> <span class="pre">True</span></code> into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.</p>
+<dl class="option">
+<dt id="id7">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id7" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <p><strong>Note:</strong> The toy dataset doesn’t come with demographic information by default, but simply passing <code class="docutils literal notranslate"><span class="pre">include_demographic_info</span> <span class="pre">=</span> <span class="pre">True</span></code> adds in the age, race, and sex columns. We need to specify that sex is female &amp; race is black in the flagger as well.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">toy</span> <span class="o">=</span> <span class="n">generate_toy_data</span><span class="p">(</span><span class="n">num_patients</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">include_demographic_info</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -948,6 +1041,110 @@ GFR = 141 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)
 </tr>
 </tbody>
 </table>
+<dl class="option">
+<dt id="id8">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id8" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>There are actually two toy datasets that come with the packages: <code class="docutils literal notranslate"><span class="pre">toy</span></code> and <code class="docutils literal notranslate"><span class="pre">toy.demo</span></code>. <code class="docutils literal notranslate"><span class="pre">toy.demo</span></code> is the toy dataframe with columns for age, sex, and race. As such, all we have to do is run</p>
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">&lt;-</span> <span class="nf">returnAKIpatients</span><span class="p">(</span><span class="n">toy.demo</span><span class="p">,</span> <span class="n">HB_trumping</span> <span class="o">=</span> <span class="bp">T</span><span class="p">,</span> <span class="n">eGFR_impute</span> <span class="o">=</span> <span class="bp">T</span><span class="p">)</span>
+
+<span class="nf">head</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>patient_id</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>time</p></td>
+<td><p>age</p></td>
+<td><p>sex</p></td>
+<td><p>race</p></td>
+<td><p>baseline_creat</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.94</p></td>
+<td><p>2019-12-30 02:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.41</p></td>
+<td><p>2020-01-02 02:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.2</p></td>
+<td><p>2020-01-02 14:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.4</p></td>
+<td><p>2020-01-03 02:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.49</p></td>
+<td><p>2020-01-03 14:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.71</p></td>
+<td><p>2020-01-03 20:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
 <p>That about does it for the basics! There are a slew of other features, some of which are listed in the <cite>Additional Features</cite> section. For a full listing of the features and appropriate use cases, see the <cite>Documentation</cite> at <a class="reference external" href="https://akiflagger.readthedocs.io/en/latest/">akiflagger.readthedocs.io</a>.</p>
 </div>
 </div>
@@ -960,7 +1157,7 @@ GFR = 141 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="AdditionalFeatures.html" class="btn btn-neutral float-right" title="Additional Features / Common Use Cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="AdditionalFeatures.html" class="btn btn-neutral float-right" title="Additional Features and Common Use Cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

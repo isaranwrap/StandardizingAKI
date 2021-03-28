@@ -23,6 +23,10 @@ To begin with, we'll import the ``akiFlagger`` module.
 
     library(akiFlagger)
 
+    ?returnAKIpatients
+
+    > ℹ Rendering development documentation for 'returnAKIpatients'
+
 Let's start off by creating some toy data.
 ------------------------------------------
 
@@ -197,6 +201,7 @@ Example: Back-calculation
 
 Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median outpatient creatinine values from 365 to 7 days prior to admission** to impute a baseline creatinine value. Then, we'll run the same KDIGO criterion (except for the 0.3 increase) comparing the creatinine value to baseline creatinine.
 
+.. option:: Python
 .. code-block:: python
 
     flagger = AKIFlagger(HB_trumping = True, add_baseline_creat = True)
@@ -207,6 +212,17 @@ Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median
 
 .. csv-table::
     :file: ../doc_csvs/python/bc_out.csv
+
+.. option:: R
+
+.. code-block:: R
+
+    out <- returnAKIpatients(toy, HB_trumping = T, add_baseline_creat = T)
+
+    head(out)
+
+.. csv-table::
+    :file: ../doc_csvs/r/bc_out.csv
 
 Actually, by default the toy dataset only has patient values :math:`\pm` 5 days from the admission date, and because the baseline creatinine value calculates using values from 365 to 7 days prior, you'll notice that the flagger reverts to the rolling window definition. 
 This is important: in the absence of available baseline creatinine values, the flagger defaults to a rolling minimum comparison. Indeed, most of the checking for AKI occurs outside of period of hospitalization.
@@ -230,6 +246,7 @@ where:
 
 The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age, sex, and race to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
 
+.. option:: Python
 **Note:** The toy dataset doesn't come with demographic information by default, but simply passing ``include_demographic_info = True`` adds in the age, race, and sex columns. We need to specify that sex is female & race is black in the flagger as well.
 
 .. code-block:: python
@@ -252,5 +269,18 @@ The idea is as follows: based on the above equation, we assume a GFR of 75 and t
 
 .. csv-table::
     :file: ../doc_csvs/python/egfr_out.csv
+
+.. option:: R
+
+There are actually two toy datasets that come with the packages: ``toy`` and ``toy.demo``. ``toy.demo`` is the toy dataframe with columns for age, sex, and race. As such, all we have to do is run
+
+.. code-block:: R
+
+    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = T)
+
+    head(out)
+
+.. csv-table::
+    :file: ../doc_csvs/r/egfr_out.csv
 
 That about does it for the basics! There are a slew of other features, some of which are listed in the `Additional Features` section. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.

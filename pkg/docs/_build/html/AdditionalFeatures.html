@@ -89,7 +89,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Additional Features and Common Use Cases</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example"><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows instead, for example)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-padding-to-the-rolling-window"><strong>→ Adding padding to the rolling window</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-different-column-names"><strong>→ Working with different column names</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-in-rolling-window-minimum-creatinines"><strong>→ Adding in rolling-window minimum creatinines</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-in-baseline-creatinine"><strong>→ Adding in baseline creatinine</strong></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="MoreInformation.html">More information</a></li>
@@ -161,9 +164,9 @@
   <div class="section" id="additional-features-and-common-use-cases">
 <h1>Additional Features and Common Use Cases<a class="headerlink" href="#additional-features-and-common-use-cases" title="Permalink to this headline">¶</a></h1>
 <p>For most use cases, you will just need to specify <cite>rolling-window</cite> or <cite>back-calculate</cite> and the AKI-column will be returned. There are a slew of other features, some of which are listed below. For a full listing of the features and appropriate use cases, see the <cite>Documentation</cite> at <a class="reference external" href="https://akiflagger.readthedocs.io/en/latest/">akiflagger.readthedocs.io</a>.</p>
-<div class="section" id="adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example">
-<h2><strong>→ Adding padding to the rolling window</strong> (52 hour &amp; 172 hour windows instead, for example)<a class="headerlink" href="#adding-padding-to-the-rolling-window-52-hour-172-hour-windows-instead-for-example" title="Permalink to this headline">¶</a></h2>
-<p>It’s often the case that you want to add some padding to the window to account for variations occurring on the floor. If the amount of padding you would like to add is the same for both the smaller and larger window, simply pass <code class="docutils literal notranslate"><span class="pre">padding='_hours'</span></code> filling the blank with the number of hours to add to the windows.
+<div class="section" id="adding-padding-to-the-rolling-window">
+<h2><strong>→ Adding padding to the rolling window</strong><a class="headerlink" href="#adding-padding-to-the-rolling-window" title="Permalink to this headline">¶</a></h2>
+<p>It’s often the case that you want to add some padding to the window to account for variations occurring on the floor (52 hour &amp; 172 hour windows instead, for example). If the amount of padding you would like to add is the same for both the smaller and larger window, simply pass <code class="docutils literal notranslate"><span class="pre">padding='_hours'</span></code> filling the blank with the number of hours to add to the windows.
 If the pad times are different between windows, the parameters <code class="docutils literal notranslate"><span class="pre">pad1time</span></code> and <code class="docutils literal notranslate"><span class="pre">pad2time</span></code> allow you to add just this padding to the initial windows of 48 and 172 hours. In fact, if you wanted a window of 36 hours, you could even set <cite>pad1time = ‘-12hours’</cite>; this is one way in which you could modify the rolling window.</p>
 <dl class="option">
 <dt id="cmdoption-arg-python">
@@ -287,7 +290,9 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-<p><strong>→ Working with different column names</strong></p>
+</div>
+<div class="section" id="working-with-different-column-names">
+<h2><strong>→ Working with different column names</strong><a class="headerlink" href="#working-with-different-column-names" title="Permalink to this headline">¶</a></h2>
 <dl class="option">
 <dt id="id1">
 <code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
@@ -449,7 +454,9 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-<p><strong>→ Adding in rolling-window minimum creatinines</strong></p>
+</div>
+<div class="section" id="adding-in-rolling-window-minimum-creatinines">
+<h2><strong>→ Adding in rolling-window minimum creatinines</strong><a class="headerlink" href="#adding-in-rolling-window-minimum-creatinines" title="Permalink to this headline">¶</a></h2>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_min_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. This will add in two columns which contain the minimum values in the rolling window, which is an intermediate column generated to calculate AKI; the flag adds in the column which the current creatinine is checked against.</p>
 <dl class="option">
 <dt id="id3">
@@ -599,8 +606,15 @@ If the pad times are different between windows, the parameters <code class="docu
 </tr>
 </tbody>
 </table>
-<p><strong>→ Adding in baseline creatinine</strong></p>
+</div>
+<div class="section" id="adding-in-baseline-creatinine">
+<h2><strong>→ Adding in baseline creatinine</strong><a class="headerlink" href="#adding-in-baseline-creatinine" title="Permalink to this headline">¶</a></h2>
 <p>To add in the baseline creatinine, simply pass the flag <code class="docutils literal notranslate"><span class="pre">add_baseline_creat</span> <span class="pre">=</span> <span class="pre">True</span></code> to the flagger. Note that the baseline creatinine is not defined for outpatient measurements. Baseline creatinine can be thought of as the “resting” creatinine before coming into the hospital, so it doesn’t make much sense to define the baseline creatinine outside of a hospital visit.</p>
+<dl class="option">
+<dt id="id5">
+<code class="sig-name descname">Python</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 3: Adding in baseline creatinine</span>
 
 <span class="n">toy</span> <span class="o">=</span> <span class="n">generate_toy_data</span><span class="p">(</span><span class="n">include_demographic_info</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -666,6 +680,111 @@ If the pad times are different between windows, the parameters <code class="docu
 <td><p>1.52</p></td>
 <td><p>0.9300765849293293</p></td>
 <td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="option">
+<dt id="id6">
+<code class="sig-name descname">R</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-R notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 3: Adding in baseline creatinine</span>
+
+<span class="n">example3</span> <span class="o">&lt;-</span> <span class="nf">returnAKIpatients</span><span class="p">(</span><span class="n">toy</span><span class="p">,</span> <span class="n">add_baseline_creat</span> <span class="o">=</span> <span class="bp">T</span><span class="p">)</span>
+
+<span class="nf">head</span><span class="p">(</span><span class="n">example3</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p>patient_id</p></td>
+<td><p>inpatient</p></td>
+<td><p>creatinine</p></td>
+<td><p>time</p></td>
+<td><p>age</p></td>
+<td><p>sex</p></td>
+<td><p>race</p></td>
+<td><p>baseline_creat</p></td>
+<td><p>aki</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>19008</p></td>
+<td><p>FALSE</p></td>
+<td><p>1.94</p></td>
+<td><p>2019-12-30 02:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.41</p></td>
+<td><p>2020-01-02 02:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.2</p></td>
+<td><p>2020-01-02 14:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.4</p></td>
+<td><p>2020-01-03 02:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.49</p></td>
+<td><p>2020-01-03 14:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>19008</p></td>
+<td><p>TRUE</p></td>
+<td><p>1.71</p></td>
+<td><p>2020-01-03 20:37:33</p></td>
+<td><p>52.9</p></td>
+<td><p>TRUE</p></td>
+<td><p>FALSE</p></td>
+<td><p>0.8806117024042</p></td>
+<td><p>1</p></td>
 </tr>
 </tbody>
 </table>
