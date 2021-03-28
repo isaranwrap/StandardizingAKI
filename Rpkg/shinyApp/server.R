@@ -142,4 +142,48 @@ server <- function(input, output) {
     },
     options = list(pageLength = 5)
   )
+  
+  # Text before table 
+  aki_preview_text <- eventReactive(input$calcAKI, {
+    "Returned output:"
+  })
+  
+  aki <- eventReactive(input$calcAKI, {
+    req(input$file)
+    pad_val <- input$padding
+    df <- fread(input$file$datapath)
+    aki <- returnAKIpatients(df, HB_trumping = input$HB_trumping, 
+                      eGFR_impute = input$eGFR_impute, padding = as.difftime(input$padding, units = 'hours'))
+    validate(
+      need(class(aki) == c('data.table', 'data.frame'), aki)
+    )
+    return(aki)
+  })
+  
+  # Rendering outputs:
+  output$aki_preview_text <- renderText({
+    aki_preview_text() # Returned output before the table shows
+  })
+  
+  output$aki <- renderDT({
+    aki() # The actual table
+  },
+  options = list(pageLength = 5)
+  )
+  
+  # Download data
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste(substr(input$file$name, 1, nchar(input$file$name) - 4), "_aki.csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(aki(), file, row.names = FALSE)
+    }
+  )
+  
+  output$download <- renderUI({
+    if(!is.null(input$file) & input$calcAKI) {
+      downloadButton('downloadData', 'Download')
+    }
+  })
 }

@@ -301,7 +301,7 @@ class AKIFlagger:
             dataframe[self.baseline_creat] = tmp.baseline_creat
 
         assert np.all(dataframe.index == tmp.index)
-        return tmp.baseline_creat
+        return tmp.baseline_creat.astype('float')
     
 def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_time_range = (5,10), creat_scale = 0.3,
                       include_demographic_info = False, date_range = None, time_delta_range = None, set_index = False, printMsg=True):
@@ -350,7 +350,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         d2 = d2.add_prefix('enc_')
 
         if include_demographic_info:
-            ages = np.random.normal(loc = 60, scale = 5, size=num_patients)
+            ages = np.round(np.random.normal(loc = 60, scale = 5, size=num_patients), decimals = 1)
             race = np.random.rand(num_patients) > 0.85
             sex = np.random.rand(num_patients) > 0.5
 

@@ -33,7 +33,6 @@ ui <- fluidPage(shinythemes::themeSelector(),
     materialSwitch(inputId = "HB_trumping", 
                    label = HTML("<b>Historical baseline trumping</b>"),
                    status = 'primary'),
-    verbatimTextOutput("huh?"),
     
     materialSwitch(inputId = "eGFR_impute", 
                    label = HTML("<b>CKD-EPI based creatinine imputation</b>"), 
@@ -47,6 +46,14 @@ ui <- fluidPage(shinythemes::themeSelector(),
       style = "display:inline-block;width:100%;text-align: center;",
       actionButton("calcAKI", label = "Calculate AKI", icon = icon("calculator"))
     ),
+    
+    br(),
+    br(),
+    
+    div(
+      style = "display:inline-block;width:100%;text-align: center;",
+      uiOutput("download")
+    )
   ), # End of sidebar panel
   
   # Main panel
@@ -54,6 +61,9 @@ ui <- fluidPage(shinythemes::themeSelector(),
     "File preview:",
     DT::dataTableOutput("previewTable"),
     br(),
+    
+    textOutput("aki_preview_text"),
+    DT::dataTableOutput("aki")
   )
   
 )
