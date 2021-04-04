@@ -1,6 +1,6 @@
 Package: akiFlagger
 Title: Flags Acute Kidney Injury (AKI) 
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     c(
     person(given = "Ishan",
@@ -40,7 +40,8 @@ RoxygenNote: 7.1.1
 Imports: 
     dplyr,
     data.table,
-    zoo
+    zoo,
+    shiny
 Suggests: 
     testthat
 Depends: 
