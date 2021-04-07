@@ -219,24 +219,21 @@ class AKIFlagger:
         self.encounter_id = 'imputed_encounter_id'
 
         tmp = dataframe.reset_index() # Reset index
-        tmp['delta_t'] = tmp.groupby(self.patient_id)[self.time].diff(1).shift(-1)
         
         # Admission column imputation
-        cond1 = tmp.delta_t <= pd.Timedelta('72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
+        cond1 = tmp.groupby(self.patient_id)[self.time].diff(1).shift(-1) <= pd.Timedelta('72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
         cond2 = tmp[self.inpatient] & tmp.groupby(self.patient_id)[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
-        cond3 = tmp[self.inpatient] & ~tmp.groupby(self.patient_id)[self.inpatient].shift(1, fill_value = False).astype('bool') # First admit check: ensure that the True is preceded by a False; i.e. outpatient -> inpatient transition
-        admit_mask = np.logical_and.reduce([cond1, cond2, cond3])
-
+        tmp['c1c2'] = cond1 & cond2
+        admit_mask = tmp.c1c2 & ~tmp.groupby(self.patient_id).c1c2.shift(1, fill_value = False).astype('bool') # First admit check: ensure that the True is preceded by a False; i.e. outpatient -> inpatient transition
         tmp.loc[admit_mask, self.admission] = tmp.loc[admit_mask, self.time]
         tmp[self.admission] = tmp.groupby(self.patient_id)[self.admission].ffill()
         tmp[self.admission] = tmp.groupby(self.patient_id)[self.admission].bfill()
         tmp[self.admission] = pd.to_datetime(tmp[self.admission])
-
+            
         # Encounter column imputation
         tmp[self.encounter_id] = tmp.groupby([self.admission, self.patient_id]).ngroup()
-        
-        tmp = tmp.drop('delta_t', axis=1) 
         tmp = tmp.set_index([self.patient_id, self.time])
+        tmp = tmp.drop('c1c2', axis=1)
         return tmp
     
     def eGFRbasedCreatImputation(self, age, female, black):
@@ -279,7 +276,7 @@ class AKIFlagger:
         # Next, create a T/F mask for the times between 365 & 7 days prior to admission AND outpatient vals 
         bc_tz = np.logical_and(tmp[self.admission] - pd.Timedelta(days=365) <= tmp.index.get_level_values(level=self.time),
                            tmp[self.admission] - pd.Timedelta(days=7) >= tmp.index.get_level_values(level=self.time))
-        mask = np.logical_and(bc_tz, ~tmp[self.inpatient])
+        mask = np.logical_and(bc_tz, ~tmp[self.inpatient].astype('bool'))
         
         # Finally, add the median creat values to the dataframe, forward-fill, and return
         tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')

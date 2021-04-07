@@ -68,7 +68,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
     }
   else df <- dataframe[, list(patient_id, inpatient, creatinine, time)]
 
-  df <- df[!duplicated(df)] # Remove duplicated rows
+  df <- df[!duplicated(df[, list(patient_id, inpatient, creatinine, time)])] # Remove duplicated rows
   df <- df[order(time), .SD, by = patient_id] # Sort by time
 
   # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
@@ -80,19 +80,19 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 
     # Impute estimated admission and encounter columns
     df[, delta_t := shift(time, type = 'lead') - time, by = patient_id] # Time difference between current row and next
-    df[, inp_lag := shift(inpatient, fill = F), by = patient_id] # Inpatient column shifted forward
     df[, inp_lead:= shift(inpatient, type = 'lead'), by = patient_id] # Inpatient column shifted backwards
 
     cond1 <- df[, delta_t] <= 72*3600 # Check to make sure times are within 72 hours (in units of seconds) from each other
     cond2 <- df[, inpatient] & df[, inp_lead] # Ensure that a True is followed by a True (i.e. at least 2 visits)
-    cond3 <- df[, inpatient] & !df[, inp_lag] # Ensure that a True is preceded by a False (i.e. outpatient -> inpatient transition)
+    df[, c1c2 := cond1 & cond2]
 
-    df[cond1 & cond2 & cond3, imputed_admission := time]
+    df[, admit_mask := c1c2 & !shift(c1c2, fill = F), by = patient_id] # Admit mask requires F -> T transition
+    df[df$admit_mask, imputed_admission := time] # Impute admission with admit mask times
     df[, imputed_admission := na.locf(na.locf(imputed_admission, na.rm = F), fromLast = T), by = patient_id] # Forward-fill then back-fill
     df[, imputed_encounter_id := .GRP, by = c('imputed_admission', 'patient_id')] # Group by encounter and count each group
 
-    # Remove delta_t, inp_lag, & inp_lead from the dataframe
-    df <- df %>% select(-delta_t, -inp_lag, -inp_lead)
+    # Remove delta_t, inp_lag, inp_lead & all_inp from the dataframe
+    df <- df %>% select(-delta_t, -inp_lead, -c1c2, -admit_mask)
 
     # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
     df[, baseline_creat := .SD[time >= imputed_admission - as.difftime(365, units='days') &
