@@ -46,7 +46,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
   age <- sex <- race <- NULL # Add a visible binding (even if it's null) so R CMD Check doesn't complain
   patient_id <- inpatient <- creatinine <- time <- NULL
   min_creat48 <- min_creat7d <- baseline_creat <- aki <- NULL # Also, erase any variables in case duplicate variable names coexist
-  delta_t <- inp_lag <- inp_lead <- imputed_admission <- imputed_encounter_id <- NULL
+  delta_t <- inp_lead <- imputed_admission <- imputed_encounter_id <- c1c2 <- admit_mask <- NULL
   window1 <- window1 + padding
   window2 <- window2 + padding
 
