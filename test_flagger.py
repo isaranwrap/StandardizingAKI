@@ -273,6 +273,18 @@ class TestFlagger(unittest.TestCase):
         df = pd.DataFrame([row0, row1, row2, row3], columns = cols)
         flagger = AKIFlagger(HB_trumping=True)
         out = flagger.returnAKIpatients(df)
+        
+    def test_BaselineImputation(self):
+        cols= ['patient_id', 'inpatient', 'time', 'creatinine']
+        row0 = [1234, False, pd.Timestamp('2019-12-26 12:00:02'), 1.3]
+        row1 = [1234, False, pd.Timestamp('2019-12-27 12:00:02'), 1.3]
+        row2 = [1234, True, pd.Timestamp('2020-01-01 12:00:02'), 1.0]
+        row3 = [1234, True, pd.Timestamp('2020-01-02 12:00:02'), 1.0]
+        row4 = [1234, False, pd.Timestamp('2020-01-09 12:00:02'), 0.5]
+        row5 = [1234, True, pd.Timestamp('2020-01-10 12:00:02'), 1.6]
+        row6 = [1234, True, pd.Timestamp('2020-01-11 12:00:02'), 1.6]
+        
+        
 
         
 if __name__ == '__main__':

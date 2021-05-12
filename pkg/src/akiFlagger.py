@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.4.1' # master file
+__version__ = '0.4.2' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -161,7 +161,7 @@ class AKIFlagger:
                 baseline_creat = self.addBaselineCreat(df)
             else:
                 baseline_creat = df[self.baseline_creat]
-                assert np.all(baseline_creat.index == min_creat48.index), "The baseline creatinine index does not match the index"
+                assert np.all(baseline_creat.index == min_creat48.index), "The baseline creatinine index does not match the dataframe index"
             
             # Create masks for selecting admission to +2 days and +7 days in advance, respectively
             mask2d = np.logical_and(df.index.get_level_values(level=self.time) >= df[self.admission], df.index.get_level_values(level=self.time) <= df[self.admission] + self.cond1time)
@@ -177,7 +177,7 @@ class AKIFlagger:
             stage2 = np.round(df[self.creatinine], decimals=4) >= np.round(2*min_creat7d, decimals=4)
             stage3 = np.round(df[self.creatinine], decimals=4) >= np.round(3*min_creat7d, decimals=4)
             aki = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'aki')
-            
+            print(aki)
             # Calculate historical baseline conditions
             c1hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(0.3 + baseline_creat[mask], decimals=4)
             c2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
@@ -185,11 +185,11 @@ class AKIFlagger:
             stage2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(2*baseline_creat[mask], decimals=4)
             stage3hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(3*baseline_creat[mask], decimals=4)
             aki[mask]= pd.Series(stage3hb.add(stage2hb.add(stage1hb*1)), name = 'aki')
-
+            print(aki)
             # Add back in the 0.3 bump criterion (separately since the rolling window is of a different size than the other checks)
             mask_empty = aki == 0 # Replace the current value only if the flagger didn't flag as baseline. If it was 1, same result. If it was 2 or 3, we would prioritize those over the 0.3 bump
-            mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), ~mask_bc) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
-            aki[mask_rw] = c1[mask_rw]*1
+            mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), np.logical_and(~mask_bc, mask_empty)) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
+            aki[mask_rw] = np.logical_or(c1[mask_rw], c2[mask_rw])*1
 
             if not self.add_imputed_admission:
                 df = df.drop(self.admission, axis = 1)
@@ -263,6 +263,8 @@ class AKIFlagger:
         # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
 
         # If the admission column isn't present, impute it here
+        self.admission = 'imputed_admission'
+        self.encounter_id = 'imputed_encounter_id'
         if self.admission not in dataframe.columns:
             dataframe = self.addAdmissionEncounterColumns(dataframe)
         # First, subset on columns necessary for calculation: creatinine, admission & inpatient/outpatient
@@ -273,18 +275,8 @@ class AKIFlagger:
             tmp = dataframe.loc[:, [self.encounter_id, self.inpatient, self.admission, self.creatinine,
                                     self.age, self.sex, self.race]]
 
-        # Next, create a T/F mask for the times between 365 & 7 days prior to admission AND outpatient vals 
-        bc_tz = np.logical_and(tmp[self.admission] - pd.Timedelta(days=365) <= tmp.index.get_level_values(level=self.time),
-                           tmp[self.admission] - pd.Timedelta(days=7) >= tmp.index.get_level_values(level=self.time))
-        mask = np.logical_and(bc_tz, ~tmp[self.inpatient].astype('bool'))
-        
-        # Finally, add the median creat values to the dataframe, forward-fill, and return
-        tmp.loc[mask, self.baseline_creat] = tmp[mask].groupby(self.encounter_id, as_index=True)[self.creatinine].transform('median')
-        enc_gb = tmp.groupby(self.encounter_id)
-        tmp[self.baseline_creat] = enc_gb[self.baseline_creat].ffill()
-        tmp[self.baseline_creat] = enc_gb[self.baseline_creat].bfill()
-        
-        # If we'd like to perform the imputation based on the eGFR of 75
+        tmp = tmp.groupby(self.patient_id).apply(self.returnBaselineCreat)
+
         if self.eGFR_impute:
             imp = dataframe.loc[tmp[self.baseline_creat].isnull()]
             if self.sex == 'male':
@@ -299,6 +291,15 @@ class AKIFlagger:
 
         assert np.all(dataframe.index == tmp.index)
         return tmp.baseline_creat.astype('float')
+    
+    def returnBaselineCreat(self, dataframe):
+        for admn in dataframe[self.admission].unique():
+            c1 = admn - pd.Timedelta(days=365) <= dataframe.index.get_level_values(level = self.time)
+            c2 = admn - pd.Timedelta(days=7) >= dataframe.index.get_level_values(level= self.time)
+            c3 = ~dataframe[self.inpatient]
+            dataframe.loc[dataframe[self.admission] == admn, self.baseline_creat] = dataframe[c1 & c2 & c3][self.creatinine].median()
+            #dataframe[self.baseline_creat] = dataframe[self.baseline_creat].ffill().bfill()
+        return dataframe
     
 def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_time_range = (5,10), creat_scale = 0.3,
                       include_demographic_info = False, date_range = None, time_delta_range = None, set_index = False, printMsg=True):
@@ -388,3 +389,4 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         if printMsg:
             print('Successfully generated toy data!\n')
         return df
+
