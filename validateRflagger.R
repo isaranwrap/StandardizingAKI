@@ -26,7 +26,7 @@ time         <- 'time'
 dt <- dt %>% rename('patient_id' = patient_id, 'inpatient' = inpatient, 'creatinine' = creatinine, 'time' = time)
 
 # Subset columns
-df <- dt[, .(patient_id, inpatient, creatinine, time, age, sex, race)]
+df <- dt[1:10000, .(patient_id, inpatient, creatinine, time, age, sex, race)]
 head(df)
 
 runtimeA <- system.time(
@@ -74,5 +74,54 @@ print(mismatch) # Mismatch indices --> These only mismatch if you don't specify 
 time2 <- tmp[283278, time]
 time1 <- tmp[283276, time]
 print(as.difftime(time2 - time1))
+
+
+## Check mismatch
+tmp <- df[df$patient_id == 'MR1000347']
+tmpo <- returnAKIpatients(tmp, HB_trumping = T, add_baseline_creat = T, add_imputed_admission = T)
+
+for (admn in unique(tmpo$imputed_admission)) {
+  print(as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01'))
+  print(class(admn))
+  print(typeof(admn))
+
+  c1 <- (as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01') - as.difftime(365, units = 'days')) <= tmpo$time
+  c2 <- (as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01') - as.difftime(7, units = 'days')) >= tmpo$time
+  c3 <- !tmpo$inpatient
+  c4 <- tmpo$imputed_admission == as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01')
+
+  tmpo[c4, baseline_creat := tmpo[, median(as.numeric(.SD[c1 & c2 & c3])), .SDcols = 'creatinine']]
+
+}
+
+
+## Dummy functions
+returnBaselineCreat <- function(dt) {
+  c1 <- (as.POSIXct(dt$imputed_admission[1], tz = 'GMT', origin = '1970-01-01') - as.difftime(365, units = 'days')) <= dt$time
+  c2 <- (as.POSIXct(dt$imputed_admission[1], tz = 'GMT', origin = '1970-01-01') - as.difftime(7, units = 'days')) >= dt$time
+  c3 <- !dt$inpatient
+
+  dt[c1 & c2 & c3]
+
+  return(baseline_creat)
+}
+
+# This one works to get baseline creatinine from a SINGLE patient dataframe; I just groupby patient_id & run this
+returnBaselineCreat <- function(dataframe) {
+  for (admn in unique(dataframe$imputed_admission)) {
+
+    c1 <- (as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01') - as.difftime(365, units = 'days')) <= dataframe$time
+    c2 <- (as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01') - as.difftime(7, units = 'days')) >= dataframe$time
+    c3 <- !dataframe$inpatient
+    c4 <- dataframe$imputed_admission == as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01')
+
+    setDT(dataframe)[c4, baseline_creat := dataframe[, median(as.numeric(as.character(unlist(.SD[c1 & c2 & c3])))), .SDcols = 'creatinine']]
+  }
+  return(dataframe$baseline_creat)
+}
+
+dfo[, baseline_creat := returnBaselineCreat(c(unique(.SD))), by = patient_id]
+
+tmp <- dfo[dfo$patient_id == 'MR1005023']
 
 

@@ -177,7 +177,7 @@ class AKIFlagger:
             stage2 = np.round(df[self.creatinine], decimals=4) >= np.round(2*min_creat7d, decimals=4)
             stage3 = np.round(df[self.creatinine], decimals=4) >= np.round(3*min_creat7d, decimals=4)
             aki = pd.Series(stage3.add(stage2.add(stage1*1)), name = 'aki')
-            print(aki)
+            
             # Calculate historical baseline conditions
             c1hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(0.3 + baseline_creat[mask], decimals=4)
             c2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(1.5*baseline_creat[mask], decimals=4)
@@ -185,7 +185,7 @@ class AKIFlagger:
             stage2hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(2*baseline_creat[mask], decimals=4)
             stage3hb = np.round(df[mask][self.creatinine], decimals=4) >= np.round(3*baseline_creat[mask], decimals=4)
             aki[mask]= pd.Series(stage3hb.add(stage2hb.add(stage1hb*1)), name = 'aki')
-            print(aki)
+            
             # Add back in the 0.3 bump criterion (separately since the rolling window is of a different size than the other checks)
             mask_empty = aki == 0 # Replace the current value only if the flagger didn't flag as baseline. If it was 1, same result. If it was 2 or 3, we would prioritize those over the 0.3 bump
             mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), np.logical_and(~mask_bc, mask_empty)) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
@@ -195,6 +195,7 @@ class AKIFlagger:
                 df = df.drop(self.admission, axis = 1)
             if not self.add_imputed_encounter:
                 df = df.drop(self.encounter_id, axis = 1)
+            
 
         else: # Vanilla rolling minimum if no HB trumping
 

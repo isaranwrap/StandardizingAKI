@@ -165,4 +165,7 @@ py <- transform(py, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'),
                 admission = as.POSIXct(admission, format='%Y-%m-%d %H:%M:%S'))
 sapply(py, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
 
+#tmpo[, baseline_creat := .SD[time >= imputed_admission - as.difftime(365, units='days') &
+ #                              +                                  time <= imputed_admission - as.difftime(7, units='days') & inpatient == F,
+  #                           +                              round(median(creatinine), 4)]]
 

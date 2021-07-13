@@ -11,7 +11,7 @@
 #' @param add_min_creat boolean on whether to add the intermediate columns generated during calculation
 #' @param add_baseline_creat boolean on whether to add the baseline creatinine values in
 #' @param add_imputed_admission boolean on whether to add the imputed admission column in
-#' @param add_imputed_encounter boolean on whether to add the imputer encounter id column in
+#' @param add_imputed_encounter boolean on whether to add the imputed encounter id column in
 #'
 #' @return patient dataset with AKI column added in
 #'
@@ -75,7 +75,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
   df[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window1, x)])), by=patient_id]
   df[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - window2, x)])), by=patient_id]
 
-  # If HB_trumping is set to True, we want to add condition2, then do RM calcs, then do HB cacls, then add condition1 back in
+  # If HB_trumping is set to True, we want to add condition2, then do RM calcs, then do HB calcs, then add condition1 back in
   if (HB_trumping){
 
     # Impute estimated admission and encounter columns
@@ -95,9 +95,7 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
     df <- df %>% select(-delta_t, -inp_lead, -c1c2, -admit_mask)
 
     # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
-    df[, baseline_creat := .SD[time >= imputed_admission - as.difftime(365, units='days') &
-                                 time <= imputed_admission - as.difftime(7, units='days') & inpatient == F,
-                               round(median(creatinine), 4)], by = imputed_encounter_id]
+    df[, baseline_creat := returnBaselineCreat(c(unique(.SD))), by = patient_id]
 
     # Imputation of baseline creatinine from CKD-EPI equation; i.e. eGFR-based imputation (assuming an eGFR of 75)
     if (eGFR_impute) {
@@ -136,16 +134,19 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
     condition1hb <- round(df[mask, creatinine], digits=4) >= round(df[mask, baseline_creat] + 0.3, digits=4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
     condition2hb <- round(df[mask, creatinine], digits=4) >= round(1.5*df[mask, baseline_creat], digits=4)
 
+    #
+    if (!all(!mask)) {
     stage1hb <- as.integer(condition1hb | condition2hb)
     stage2hb <- as.integer(round(df[mask, creatinine], digits=4) >= round(2*df[mask, baseline_creat], digits=4))
     stage3hb <- as.integer(round(df[mask, creatinine], digits=4) >= round(3*df[mask, baseline_creat], digits=4))
     df[mask, aki := stage1hb + stage2hb + stage3hb]
+    }
 
     # Now, add the 0.3 bump rolling min condition back in
     mask_empty = df[,aki == 0]
     mask_2d[is.na(mask_2d)] = FALSE
-    mask_rw = (!mask_2d & mask_empty) | bc_mask
-    df[mask_rw, aki := condition1[mask_rw]]
+    mask_rw = (!mask_2d & mask_empty) | (bc_mask & mask_empty)
+    df[mask_rw, aki := (condition1[mask_rw] | condition2[mask_rw])]# + stage2[mask_rw] + stage3[mask_rw]]
 
     if (!add_imputed_admission) df <- df %>% select(-imputed_admission)
     if (!add_imputed_encounter) df <- df %>% select(-imputed_encounter_id)
@@ -164,4 +165,17 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
   if (!add_min_creat) df <- df %>% select(-min_creat48, -min_creat7d)
   if (!add_baseline_creat) df <- df %>% select(-baseline_creat)
   return(df)
+}
+
+returnBaselineCreat <- function(dataframe) {
+  for (admn in unique(dataframe$imputed_admission)) {
+
+    c1 <- (as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01') - as.difftime(365, units = 'days')) <= dataframe$time
+    c2 <- (as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01') - as.difftime(7, units = 'days')) >= dataframe$time
+    c3 <- !dataframe$inpatient
+    c4 <- dataframe$imputed_admission == as.POSIXct(admn, tz = 'GMT', origin = '1970-01-01')
+
+    setDT(dataframe)[c4, baseline_creat := dataframe[, median(as.numeric(as.character(unlist(.SD[c1 & c2 & c3])))), .SDcols = 'creatinine']]
+  }
+  return(dataframe$baseline_creat)
 }
