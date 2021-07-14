@@ -18,8 +18,9 @@ dir_info(all=T, regexp = '^[.]git$') %>% select(path, type, user) # Ensure .git 
 
 # Step 3: Create the functions you'd like to add in to your package
 # After creating the addRollingWindowAKI.R in the R/ folder, the following command integrates the files with the package
-use_r("addRollingWindowAKI") # And I would do this for as many functions as I have (2 for the flagger)
-use_r("addBackCalcAKI") # And ONLY the definition (no library imports or nuthin') goes in the R file.
+#use_r("addRollingWindowAKI") # And I would do this for as many functions as I have (2 for the flagger)
+#use_r("addBackCalcAKI") # And ONLY the definition (no library imports or nuthin') goes in the R file.
+use_r("returnAKIpatients") # UPDATED Feb 3, 2021 --> single col output now
 
 # Step 4: Load the package and test functionality (iteratively)
 load_all() # load_all() is the best way to iteratively build, install, and test the package
@@ -29,7 +30,7 @@ addRollingWindowAKI(3) # I modified addRW.R to return the current working direct
 # ... works! :)
 
 # Note, though, that it doesn't exist in the global workspace
-exists("addRollingWindowAKI", where = globalenv(), inherits=FALSE) # Outputs FALSE
+exists("returnAKIpatients", where = globalenv(), inherits=FALSE) # Outputs FALSE
 
 # Step 5: Commit addRW --> I did this from terminal via:
 >> cd Rpkg/akiFlagger # this code won't run bit it's how I committed
@@ -67,6 +68,6 @@ document() # After filling in the barebones roxygen template, document() builds 
 
 # Step 10 (optional): Add data to package (for akiFlagger, toy.csv & out.csv)
 
-# Step 11:
+
 
 

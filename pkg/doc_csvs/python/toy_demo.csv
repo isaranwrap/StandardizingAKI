@@ -1,0 +1,6 @@
+,patient_id,age,female,black,inpatient,time,creatinine
+0,12732,64.5,True,True,False,2020-02-23 23:42:42,1.45
+1,12732,64.5,True,True,False,2020-02-24 05:42:42,1.59
+2,12732,64.5,True,True,True,2020-02-28 05:42:42,1.46
+3,12732,64.5,True,True,True,2020-03-01 05:42:42,1.51
+4,12732,64.5,True,True,True,2020-03-01 23:42:42,1.52

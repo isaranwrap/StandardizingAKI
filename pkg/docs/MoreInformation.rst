@@ -2,7 +2,7 @@
 More information
 ================
 
-For more information on the package, feel free to contact isaranwrap@gmail.com or is439@yale.edu.
+For more information on the package, feel free to contact francis.p.wilson@yale.edu or is439@yale.edu.
 
 Useful guides exist for more information about AKI, rolling windows, the back-calculation imputation method.
 

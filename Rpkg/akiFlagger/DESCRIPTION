@@ -1,12 +1,36 @@
 Package: akiFlagger
 Title: Flags Acute Kidney Injury (AKI) 
-Version: 0.1.0
+Version: 0.3.0
 Authors@R: 
+    c(
     person(given = "Ishan",
            family = "Saran",
            role = c("aut", "cre"),
-           email = "ishansaran65@gmail.com",
-           )
+           email = "ishansaran65@gmail.com"),
+    person(given = "Shivam",
+           family = "Saran",
+           role = "aut",
+           email = "shivampsaran@gmail.com"),
+    person(given = "Rishi",
+           family = "Saran",
+           role = "aut",
+           email = "rishipsaran@gmail.com"),
+    person(given = "Aditya",
+           family = "Biswas",
+           role = "ctb",
+           email = "adita.biswas@yale.edu"),
+    person(given = "Sankee",
+           family = "Mummareddy",
+           role = "ctb",
+           email = "sankee.mummareddy@emory.edu"),
+    person(given = "Yu",
+           family = "Yamamoto",
+           role = "ctb",
+           email = "yu.yamamoto@yale.edu"),
+    person(given = "Francis Perry",
+           family = "Wilson",
+           role = c("ctb", "ths"),
+           email = "francis.p.wilson@yale.edu"))
 Description: Flagger to detect acute kidney injury (AKI) in a patient dataset.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -16,7 +40,8 @@ RoxygenNote: 7.1.1
 Imports: 
     dplyr,
     data.table,
-    zoo
+    zoo,
+    shiny
 Suggests: 
     testthat
 Depends: 
