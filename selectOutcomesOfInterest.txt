@@ -1,0 +1,19 @@
+# Imports
+import pandas as pd
+
+# Parameters
+select_cols = ['patient_id', 'inpatient', 'creatinine', 'time', 'death', 'dialysis', 'los'] # Columns of interest
+filePath = r'H:\Data\Standardized AKI definition\dataset\flagger data 3-30-2021.csv'
+outPath = r'H:\akiflagger-consolidatedscripts\output\flaggerOutcomes.csv'
+
+# Read in data
+df = pd.read_csv(filePath)
+
+# Shape data for input into flagger
+df['inpatient'] = ~df.outpatient.astype('bool')
+df['patient_id'] = df['pat_mrn_id']
+df['time'] = pd.to_datetime(df.time)
+
+out = df.loc[:, select_cols] # Select columns of interest
+out.to_csv(outPath, index = False)
+
