@@ -23,9 +23,7 @@ class TestFlagger(unittest.TestCase):
 
         # Testing all the expected columns are in the generated data set
         self.assertTrue('patient_id' in toy.columns)
-        self.assertTrue('encounter_id' in toy.columns)
         self.assertTrue('inpatient' in toy.columns)
-        self.assertTrue('admission' in toy.columns)
         self.assertTrue('time' in toy.columns)
         self.assertTrue('creatinine' in toy.columns)
         print('Success!\n')
@@ -217,7 +215,7 @@ class TestFlagger(unittest.TestCase):
         self.assertTrue(out.aki.iloc[3])
         self.assertTrue(out.aki.iloc[4]) # But on the last one, RM should trigger
 
-    def test_PatientX_RM(self):
+    def test_PatientD_RM(self):
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 2.0] # Patient X has a baseline creatinine of 2 
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1] # Admission creatinine
@@ -233,7 +231,7 @@ class TestFlagger(unittest.TestCase):
         self.assertTrue(out.aki.iloc[2])
         self.assertTrue(out.aki.iloc[3])
 
-    def test_PatientX_HB(self):
+    def test_PatientD_HB(self):
         cols = ['patient_id', 'encounter_id', 'inpatient', 'admission', 'time', 'creatinine']
         row0 = [1234, 12345, False, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-01-01 12:00:01'), 2.0] # Patient X has a baseline creatinine of 2 
         row1 = [1234, 12345, True, pd.Timestamp('2020-05-24 12:00:02'), pd.Timestamp('2020-05-24 12:00:02'), 1] # Admission creatinine
