@@ -1,0 +1,6 @@
+returnAKIpatients       Main function to flag patients for AKI
+returnBaselineCreat     Helper function to calculate historical
+                        baseline for a SINGLE patient
+runGUI                  GUI Shiny App
+toy                     Toy dataset
+toy.demo                Toy dataset

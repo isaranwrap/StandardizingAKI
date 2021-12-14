@@ -1,0 +1,55 @@
+Package: akiFlagger
+Title: Flags Acute Kidney Injury (AKI)
+Version: 0.4.0
+Authors@R: 
+    c(
+    person(given = "Ishan",
+           family = "Saran",
+           role = c("aut", "cre"),
+           email = "is439@yale.edu"),
+    person(given = "Shivam",
+           family = "Saran",
+           role = "aut",
+           email = "shivampsaran@gmail.com"),
+    person(given = "Rishi",
+           family = "Saran",
+           role = "aut",
+           email = "rishipsaran@gmail.com"),
+    person(given = "Aditya",
+           family = "Biswas",
+           role = "ctb",
+           email = "adita.biswas@yale.edu"),
+    person(given = "Sankee",
+           family = "Mummareddy",
+           role = "ctb",
+           email = "sankee.mummareddy@emory.edu"),
+    person(given = "Yu",
+           family = "Yamamoto",
+           role = "ctb",
+           email = "yu.yamamoto@yale.edu"),
+    person(given = "Francis Perry",
+           family = "Wilson",
+           role = c("ctb", "ths"),
+           email = "francis.p.wilson@yale.edu"))
+Description: Flagger to detect acute kidney injury (AKI) in a patient dataset.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: dplyr, data.table, zoo, shiny
+Suggests: testthat
+Depends: R (>= 3.5.0)
+URL: https://github.com/isaranwrap/akiFlagger
+BugReports: https://github.com/isaranwrap/akiFlagger/issues
+NeedsCompilation: no
+Packaged: 2021-12-09 17:51:13 UTC; Ishan
+Author: Ishan Saran [aut, cre],
+  Shivam Saran [aut],
+  Rishi Saran [aut],
+  Aditya Biswas [ctb],
+  Sankee Mummareddy [ctb],
+  Yu Yamamoto [ctb],
+  Francis Perry Wilson [ctb, ths]
+Maintainer: Ishan Saran <is439@yale.edu>
+Built: R 3.6.3; ; 2021-12-09 17:51:21 UTC; unix

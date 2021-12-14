@@ -4,6 +4,8 @@ library(tidyverse)
 library(zoo)
 library(akiFlagger)
 
+
+# Probably change this something like to source("../../R/returnAKIpatients.R")
 returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
                               window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
                               padding = as.difftime(0, units = 'days'),
@@ -129,48 +131,48 @@ returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALS
 }
 # Define server logic ----
 server <- function(input, output) {
-  
-  # Input will start off as NULL. Once it is uploaded, 
+
+  # Input will start off as NULL. Once it is uploaded,
   # input$file will populate and the file will preview
-  
+
   output$previewTable <- renderDT(
     {
       req(input$file)
-      
+
       # The actual path is in file$datapath
       df <- fread(input$file$datapath)
     },
     options = list(pageLength = 5)
   )
-  
-  # Text before table 
+
+  # Text before table
   aki_preview_text <- eventReactive(input$calcAKI, {
     "Returned output:"
   })
-  
+
   aki <- eventReactive(input$calcAKI, {
     req(input$file)
     pad_val <- input$padding
     df <- fread(input$file$datapath)
-    aki <- returnAKIpatients(df, HB_trumping = input$HB_trumping, 
+    aki <- returnAKIpatients(df, HB_trumping = input$HB_trumping,
                       eGFR_impute = input$eGFR_impute, padding = as.difftime(input$padding, units = 'hours'))
     validate(
       need(class(aki) == c('data.table', 'data.frame'), aki)
     )
     return(aki)
   })
-  
+
   # Rendering outputs:
   output$aki_preview_text <- renderText({
     aki_preview_text() # Returned output before the table shows
   })
-  
+
   output$aki <- renderDT({
     aki() # The actual table
   },
   options = list(pageLength = 5)
   )
-  
+
   # Download data
   output$downloadData <- downloadHandler(
     filename = function() {
@@ -180,7 +182,7 @@ server <- function(input, output) {
       write.csv(aki(), file, row.names = FALSE)
     }
   )
-  
+
   output$download <- renderUI({
     if(!is.null(input$file) & input$calcAKI) {
       downloadButton('downloadData', 'Download')

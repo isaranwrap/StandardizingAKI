@@ -1,0 +1,32 @@
+# Imports
+
+library(data.table)
+library(dplyr)
+library(caret)
+
+# Parameters
+
+filePath = 'H:/akiflagger-consolidatedscripts/output/flaggerOutput.csv'
+outPath = 'H:/akiflagger-consolidatedscripts/output/confusionMatrix.txt'
+
+x_percent_increase <- 0.25
+in_y_time <- as.difftime(24, units = 'hours')
+y_pred <- 'RMW' # Definition of interest goes here [select from c('RMW', 'HBT', 'BCI')]
+
+# Read in data
+
+aki.df <- fread(filePath)
+aki.df <- transform(aki.df, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S')) 
+head(aki.df)
+
+# Generate confusion matrix
+
+runtime <- system.time(aki.df[, max_creat48 := sapply(.SD[, time], function(x) max(creatinine[between(.SD[, time], x, x + in_y_time)])), by=patient_id]) # 349 seconds for this example (bulk calculation takes place here)
+aki.df[, y_true := max_creat48 >= creatinine*(1+x_percent_increase)]
+aki.df$y_pred <- lapply(aki.df[, ..y_pred], as.logical)
+
+confusionMatrix(factor(aki.df$y_pred), factor(aki.df$y_true))
+
+# Write out data
+
+write.csv(aki.df, file = outPath)

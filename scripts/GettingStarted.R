@@ -1,5 +1,5 @@
 # Import libraries
-library(tidyverse)
+library(data.table)
 library(akiFlagger)
 library(zoo)
 
@@ -21,6 +21,7 @@ dt <- transform(dt, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S'), # Conve
 sapply(dt, class) # mrn, enc -> int; inpatient -> bool; admission, time -> POSIXct; creat -> numeric
 
 View(dt)
+
 # Add in rolling-window AKI
 out <- addRollingWindowAKI(dt)
 View(out)

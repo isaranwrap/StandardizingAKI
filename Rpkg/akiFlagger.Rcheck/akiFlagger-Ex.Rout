@@ -1,0 +1,84 @@
+
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "akiFlagger"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> base::assign(".ExTimings", "akiFlagger-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+> 
+> ### * </HEADER>
+> library('akiFlagger')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("returnAKIpatients")
+> ### * returnAKIpatients
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: returnAKIpatients
+> ### Title: Main function to flag patients for AKI
+> ### Aliases: returnAKIpatients
+> 
+> ### ** Examples
+> 
+> returnAKIpatients(toy)
+      patient_id inpatient creatinine                time aki
+   1:      19008     FALSE       2.05 2019-07-08 11:37:33   0
+   2:      19008     FALSE       1.65 2019-07-09 05:37:33   0
+   3:      19008     FALSE       1.58 2019-07-29 05:37:33   0
+   4:      19008     FALSE       1.77 2019-08-10 05:37:33   0
+   5:      19008     FALSE       1.47 2019-09-24 23:37:33   0
+  ---                                                        
+1074:      16216     FALSE       1.24 2020-04-22 07:45:26   0
+1075:      16216     FALSE       0.84 2020-04-22 19:45:26   0
+1076:      16216     FALSE       1.50 2020-05-04 07:45:26   0
+1077:      16216     FALSE       1.32 2020-05-23 19:45:26   0
+1078:      16216      TRUE       1.61 2020-05-30 19:45:26   0
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("returnAKIpatients", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  1.631 0.065 1.348 0.002 0.002 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

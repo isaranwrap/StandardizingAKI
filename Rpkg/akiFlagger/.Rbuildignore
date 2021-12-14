@@ -10,3 +10,5 @@ data/.DS_Store
 Man/.DS_Store
 .Rproj.user
 .git
+^\.travis\.yml$
+^data-raw$

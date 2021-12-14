@@ -1,0 +1,18 @@
+# Imports
+import pandas
+import akiFlagger
+
+# Parameters
+filePath = r'H:\Data\Standardized AKI definition\dataset\flagger\flaggerInput.csv'
+outPath = r'H:\Data\Standardized AKI definition\dataset\flagger\flaggerOutput.csv'
+selected_definition = 'RMW'
+
+# Read in data
+df = pd.read_csv(filePath)
+
+# Create flagger
+flagger = AKIFlagger()
+out = flagger.returnAKIpatients(df)
+
+# Write out data
+out.to_csv(outPath, index = False)

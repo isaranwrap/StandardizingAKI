@@ -1,0 +1,110 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2513
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Chalkboard;\f1\fswiss\fcharset0 Helvetica;\f2\froman\fcharset0 Times-Roman;
+\f3\froman\fcharset0 Times-Bold;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11480\viewh9680\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # Imports\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 library(data.table)\
+library(dplyr)\
+library(caret)\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # User-defined functions\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \
+subsequentCreatinineIncrease_yTrue <- function(dataframe, x_percent_increase = 0.25, in_y_time = as.difftime(2, units = 'days')) \{\
+  dataframe[, max_creat48 := sapply(.SD[, time], function(x) max(creatinine[between(.SD[, time], x, x + in_y_time)])), by=patient_id]\
+  dataframe[, y_true := max_creat48 >= creatinine*(1+x_percent_increase)]\
+\
+  yTrue <- dataframe$y_true\
+  dataframe <- dataframe %>% select(-max_creat48, -y_true)\
+  return(yTrue)\
+\}\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # Parameters\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f2 \cf0 filePath = \'91
+\f1 C:/Users/ishan/Desktop/Projects/flagger_covid/data/results-tally.csv\'92
+\f2 \
+
+\f3\b \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b0 \cf0 # Read in data\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f3\b \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1\b0 \cf0 aki.df <- fread(
+\f2 filePath
+\f1 )\
+aki.df <- transform(aki.df, time = as.POSIXct(time, format='%Y-%m-%d %H:%M:%S')) \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # Start timer\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 start.time <- Sys.time()\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # Create dictionary to store results\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \
+subsCreat.df <- data.frame(aki.df)\
+\
+for (i in seq(from = 5, to = 50, length.out = 10)) \{\
+  for (j in seq(from = 24, to = 180, length.out = 14)) \{\
+    x_percent_increase <- 0.01*i\
+    in_y_time <- as.difftime(j, units = 'hours')\
+\
+    subsCreat.df$y_true <- subsequentCreatinineIncrease_yTrue(aki.df, x_percent_increase = x_percent_increase, in_y_time = in_y_time)\
+\
+    col_name <- paste0("x", x_percent_increase, "y", in_y_time)\
+    colnames(subsCreat.df)[ncol(subsCreat.df)] <- col_name\
+    print(paste0(col_name, " done!"))\
+  \}\
+\}\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # End timer \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \
+end.time <- Sys.time()\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # Log runtime to console\
+\
+rlog(start.time - end.time)\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 # Use flagger to predict subsequent rises in creatinine\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \
+aki.df$y_true <- subsequentCreatinineIncrease_yTrue(aki.df, x_percent_increase = 0.25, in_y_time = as.difftime(48, units = 'hours'))\
+aki.df$y_pred <- aki.df$BCI > 0\
+\
+}

@@ -1,0 +1,14 @@
+Cohort population for first encounters COVID dataset
+
+Starting with 77,610 total encounters
+
+Exclusion criterion
+=============================
+15,572 with subsequent encounters
+3,476 who were less than 18 years old
+16,100 with less than 2 creatinine measurements
+1,638 who received renal transplantation or got end-stage renal disease
+718 with an initial creatinine of greater than (or equal to) 4
+=============================
+
+Ending with 40,106 patients
