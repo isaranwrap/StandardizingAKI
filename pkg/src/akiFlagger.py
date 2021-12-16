@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.4.5' # master file
+__version__ = '0.5.0' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -51,10 +51,12 @@ class AKIFlagger:
     def __init__(self, patient_id = 'patient_id', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', # Required columns
                  baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
                  age = 'age', sex = 'sex', race = 'race',  # Required if CKD-EPI imputation is wanted
-                 padding = '4hours', HB_trumping = False, eGFR_impute = False, # Main parameters
+                 padding = '4hours', # Default padding of 4 hours, to account for delays in blood sample input draws
+                 RM_window = True, HB_trumping = False, eGFR_impute = False, # Main parameters
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', # Rolling window sizes
                 sort_values = True, add_baseline_creat = False, add_min_creat = False, 
-                add_imputed_admission = False, add_imputed_encounter = False): # Ancillary optional parameters (include output for intermediate calculations)
+                add_imputed_admission = False, add_imputed_encounter = False,
+                **defMapper): # Ancillary optional parameters (include output for intermediate calculations)
         
         # Columns necessary for calculation
         self.patient_id = patient_id
@@ -393,4 +395,3 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         if printMsg:
             print('Successfully generated toy data!\n')
         return df
-
