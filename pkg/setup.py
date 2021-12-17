@@ -4,8 +4,8 @@ with open('README.md', 'r') as f:
       long_description = f.read() 
 setup(
       name = 'akiFlagger',
-      version = '0.4.2',
-      description = 'Flagger to detect patients with acute kidney injury (AKI).',
+      version = '0.5.0',
+      description = 'Flag patients with acute kidney injury as per the KDIGO guidelines.',
       py_modules = ['akiFlagger'],
       package_dir = {'':'src'},
       classifiers = [

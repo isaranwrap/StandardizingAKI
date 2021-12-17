@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.4.2' # master file
+__version__ = '0.5.0' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -18,11 +18,11 @@ class AKIFlagger:
         
     Attributes:
         patient_id (string): **default 'mrn'.** Name of the column used to identify patients; e.g. 'PAT_MRN_ID'
-        encounter_id (string): **default 'enc'.** Name of the column used to identify encounters; e.g. 'PAT_ENC_CSN_ID'
+        encounter_id (string): **default 'enc'.** DEPRECATED; included for backwards compatibility. Name of the column used to identify encounters; e.g. 'PAT_ENC_CSN_ID'
         
         time (string): **default 'time'.** Name of the column containing time stamps; e.g. 'time'
         inpatient (string): **default 'inpatient'.** Name of the column containing inpatient/outpatient identifier; e.g. 'inpatient'
-        admission (string): **default 'admission'.** Name of the column containing the admission dates; e.g. 'admission'
+        admission (string): **default 'admission'.** DEPRECATED; included for backwards compatibility. Name of the column containing the admission dates; e.g. 'admission'
         creatinine (string): **default 'creatinine'.** Name of the column containing creatinine values; e.g. 'creatinine'
         
         age (string): **default 'age'.** Name of the column containing the age values; e.g. 'age'
@@ -51,10 +51,12 @@ class AKIFlagger:
     def __init__(self, patient_id = 'patient_id', creatinine = 'creatinine', time = 'time', inpatient = 'inpatient', # Required columns
                  baseline_creat = 'baseline_creat', # Helpful columns, imputed otherwise
                  age = 'age', sex = 'sex', race = 'race',  # Required if CKD-EPI imputation is wanted
-                 padding = None, HB_trumping = False, eGFR_impute = False, # Main parameters
+                 padding = '4hours', # Default padding of 4 hours, to account for delays in blood sample input draws
+                 RM_window = True, HB_trumping = False, eGFR_impute = False, # Main parameters
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', # Rolling window sizes
                 sort_values = True, add_baseline_creat = False, add_min_creat = False, 
-                add_imputed_admission = False, add_imputed_encounter = False): # Ancillary optional parameters (include output for intermediate calculations)
+                add_imputed_admission = False, add_imputed_encounter = False,
+                **defMapper): # Ancillary optional parameters (include output for intermediate calculations)
         
         # Columns necessary for calculation
         self.patient_id = patient_id
@@ -276,7 +278,7 @@ class AKIFlagger:
             tmp = dataframe.loc[:, [self.encounter_id, self.inpatient, self.admission, self.creatinine,
                                     self.age, self.sex, self.race]]
 
-        tmp = tmp.groupby(self.patient_id).apply(self.returnBaselineCreat)
+        tmp = tmp.groupby(self.patient_id).apply(self._returnBaselineCreat)
 
         if self.eGFR_impute:
             imp = dataframe.loc[tmp[self.baseline_creat].isnull()]
@@ -293,7 +295,10 @@ class AKIFlagger:
         assert np.all(dataframe.index == tmp.index)
         return tmp.baseline_creat.astype('float')
     
-    def returnBaselineCreat(self, dataframe):
+    def _returnBaselineCreat(self, dataframe):
+        '''
+        Helper function to calculate baseline creatinine in a SINGLE patient dataset (i.e. pipe through a groupby operation)
+        '''
         for admn in dataframe[self.admission].unique():
             c1 = admn - pd.Timedelta(days=365) <= dataframe.index.get_level_values(level = self.time)
             c2 = admn - pd.Timedelta(days=7) >= dataframe.index.get_level_values(level= self.time)
@@ -390,4 +395,3 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         if printMsg:
             print('Successfully generated toy data!\n')
         return df
-
