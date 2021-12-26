@@ -72,6 +72,7 @@ returnAKIpatients <- function(dataframe,
       return("The race column is needed for eGFR imputation!")
     }
   }
+  setDT(dataframe)
 
   if (eGFR_impute) { # Select columns of interest
     df <- dataframe[, list(patient_id, inpatient, creatinine, time, age, sex, race)]
@@ -103,7 +104,7 @@ returnAKIpatients <- function(dataframe,
     df[, imputed_encounter_id := .GRP, by = c("imputed_admission", "patient_id")] # Group by encounter and count each group
 
     # Remove delta_t, inp_lag, inp_lead & all_inp from the dataframe
-    df <- df %>% select(-delta_t, -inp_lead, -c1c2, -admit_mask)
+    df <- df %>% dplyr::select(-delta_t, -inp_lead, -c1c2, -admit_mask)
 
     # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
     df[, baseline_creat := returnBaselineCreat(c(unique(.SD))), by = patient_id]
@@ -158,8 +159,8 @@ returnAKIpatients <- function(dataframe,
     mask_rw <- (!mask_2d & mask_empty) | (bc_mask & mask_empty)
     df[mask_rw, aki := (condition1[mask_rw] | condition2[mask_rw])] # + stage2[mask_rw] + stage3[mask_rw]]
 
-    if (!add_imputed_admission) df <- df %>% select(-imputed_admission)
-    if (!add_imputed_encounter) df <- df %>% select(-imputed_encounter_id)
+    if (!add_imputed_admission) df <- df %>% dplyr::select(-imputed_admission)
+    if (!add_imputed_encounter) df <- df %>% dplyr::select(-imputed_encounter_id)
   } else {
 
     # If HB_trumping is False, just implement the rolling minimum definitions
@@ -171,8 +172,8 @@ returnAKIpatients <- function(dataframe,
 
     df[, aki := stage1 + stage2 + stage3]
   }
-  if (!add_min_creat) df <- df %>% select(-min_creat48, -min_creat7d)
-  if (!add_baseline_creat) df <- df %>% select(-baseline_creat)
+  if (!add_min_creat) df <- df %>% dplyr::select(-min_creat48, -min_creat7d)
+  if (!add_baseline_creat) df <- df %>% dplyr::select(-baseline_creat)
   return(df)
 }
 

@@ -61,6 +61,7 @@ server <- function(input, output, session) {
 
     df <- read.csv(input$file$datapath)
   })
+
   datasetIntermediate <- reactive({
 
     intermediateData <- data.frame(matrix(nrow = dim(datasetInput())[1],

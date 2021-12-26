@@ -7,87 +7,87 @@ library(DT)
 message(list.files("../akiFlagger/R"))
 source("../akiFlagger/R/returnAKIpatients.R")
 
+ticker <- 0
+message(ticker)
 # Ideally,
 # toy <- read.csv(text = getURL("htpps://raw.githubusercontent.com/isaranwrap / toy.csv )) # or some central repository
+
 ui <- bootstrapPage(
-  sidebarPanel(
+  fluidRow(sidebarPanel(
     fileInput("file1", h4("File input"),
               accept = c(".csv")), # File input ends here
-
-    radioButtons("sep", "Separator",
-                 choices = c(Comma = ",",
-                             Tab = "\t")), # Separator selector ends here
 
     checkboxGroupInput("definitions", "Select your definition(s):",
                        choices = c("RMW", "HBT", "BCI"), inline = TRUE), # Definition selection ends here
 
-    actionButton("calcAKI", "Calculate AKI", class = "btn btn-primary") # Calculate AKI button here
+    actionButton("calcAKI", "Calculate AKI") # Calculate AKI button here
 
   ),
   mainPanel(
-    DT::dataTableOutput("context"),
     verbatimTextOutput("status"),
-    #plotOutput(),
-    DT::dataTableOutput("AKI")
+    #DT::dataTableOutput("inputTable"),
+    DT::dataTableOutput("outTable")
+    )
   )
   #plotOutput()
 )
 
 server <- function(input, output, session) {
 
-  #inputFile <- reactive(paste0(input$file1))
-
-  output$definitions <- renderText({ input$definitions })
-
-  inputTable <- reactive({
-    req(input$file1)
-
-    df <- data.frame(
-      Name = c("patient_id", "inpatient", "time", "creatinine"),
-      Value = as.character(),
-      stringsAsFactors = FALSE
-    )
-  })
-
   datasetInput <- reactive({
+
     req(input$file1)
 
-    df <- read.csv(input$file1$datapath)
+    df626 <- data.table::fread(input$file1$datapath)
 
     # Pre-process
-    df
+    df626$time <- as.POSIXct(df626$time)
+    #setDT(df626)
+    df626
   })
 
-  datasetIntermediate <- reactive({
-
-    intermediateData <- data.frame(matrix(nrow = dim(datasetInput())[1],
-                                          ncol = dim(datasetInput())[2]))
-    colnames(intermediateData) <- c("patient_id", "inpatient", "time", "creatinine")
-    intermediateData$patient_id <- datasetInput()$patient_id
-    intermediateData$inpatient <- datasetInput()$inpatient
-    intermediateData$creatinine <- datasetInput()$creatinine
-
-    intermediateData$time <- as.POSIXct(datasetInput()$time)
-
-    data.frame(intermediateData)
+  output$inputTable <- DT::renderDataTable({
+    DT::datatable(datasetInput())
   })
-  #inputTable()
 
   output$status <- renderPrint({
     if (input$calcAKI > 0) {
       isolate("Calculation complete.")
     } else {
-      return("akiflagger.readthedocs.io")
+      return(paste("akiflagger.readthedocs.io", as.character(typeof(datasetInput()$time))))
     }
   })
 
-  output$AKI <- eventReactive(input$calcAKI, {
-    returnAKIpatients(setDT(isolate(datasetIntermediate())))
+  output$outTable <- DT::renderDataTable({
+    DT::datatable(
+      datasetInput()
+      )
+  })
+    #observeEvent(input$calcAKI, {
+    #})
+
+  output$outTable <- DT::renderDataTable({
+    dInp <- datasetInput()
+
+    dInp$time <- as.POSIXct(dInp$time)
+    dInp <- dInp[order(time), .SD, by = patient_id]
+    dInp[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[between(.SD[, time], x - as.difftime(2, units = "days"), x)])), by=patient_id]
   })
 
-
-  #output$dataTableCap <- DT::renderDataTable(inputFile)
-
+  # output$displayTable <- DT::renderDataTable({
+  #   observeEvent(input$calAKI, {
+  #   isolate()
+  #   })
+  # })
+  # Bookmarking - save for now
+  # observe({
+  #   reactiveValuesToList(input)
+  #   session$doBookmark()
+  # })
+  # onBookmarked(updateQueryString)
+  # output$AKI <- eventReactive(input$calcAKI, {
+  #   returnAKIpatients(setDT(isolate(datasetIntermediate())))
+  # })
 }
 
 shinyApp(ui, server)
