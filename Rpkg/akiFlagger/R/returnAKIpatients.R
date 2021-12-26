@@ -36,10 +36,10 @@
 #'
 #' @examples
 #' returnAKIpatients(toy)
-returnAKIpatients <- function(dataframe,
-                              RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
-                              window1 = as.difftime(2, units = "days"), window2 = as.difftime(7, units = "days"),
-                              padding = as.difftime(0, units = "days"),
+
+returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
+                              window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
+                              padding = as.difftime(4, units = 'hours'),
                               add_min_creat = FALSE, add_baseline_creat = FALSE,
                               add_imputed_admission = FALSE, add_imputed_encounter = FALSE) {
   age <- sex <- race <- NULL # Add a visible binding (even if it's null) so R CMD Check doesn't complain
