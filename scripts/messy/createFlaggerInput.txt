@@ -16,4 +16,3 @@ df['time'] = pd.to_datetime(df.time)
 
 out = df.loc[:, select_cols] # Select columns of interest
 out.to_csv(outPath, index = False)
-
