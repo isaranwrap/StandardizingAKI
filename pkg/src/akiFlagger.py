@@ -70,6 +70,7 @@ class AKIFlagger:
         self.race = race
         
         # Rolling-window variables
+        self.RM_window = RM_window
         self.pad1time = pad1time
         self.pad2time = pad2time
         if padding is not None:
