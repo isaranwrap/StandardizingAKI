@@ -1,4 +1,4 @@
-# akiFlagger
+# AKI Flagger
 
 ## Introduction
 
@@ -28,7 +28,7 @@ import akiFlagger
 
 print(akiFlagger.__version__)
 
->> '1.0.0'
+>> '0.5.0'
 ```
 
 Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
@@ -36,4 +36,4 @@ Alternatively, you can download the source and wheel files to build manually fro
 
 ## Getting started
 
-There is a [walk-through notebook](https://colab.research.google.com/github/isaranwrap/StandardizingAKI/blob/master/GettingStarted.ipynb) available on Github to introduce the necessary components and parameters of the flagger. The notebook can be accessed via Google Colab notebooks. The notebook has also been adapted in the [documentation](https://akiflagger.readthedocs.io/en/latest/). 
+There is a [walk-through notebook](https://colab.research.google.com/github/isaranwrap/StandardizingAKI/blob/master/notebooks/GettingStarted.ipynb) available on Github to introduce the necessary components and parameters of the flagger. The notebook can be accessed via Google Colab notebooks. The notebook has also been adapted in the [documentation](https://akiflagger.readthedocs.io/en/latest/). 
