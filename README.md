@@ -1,4 +1,4 @@
-# AKI Flagger
+# AKI Flagger <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/hex-AKI%20FlaggeR.png?raw=true" alt="hex-AKI FlaggeR" width="200" align = "right"/>
 
 ## Introduction
 
