@@ -8,6 +8,14 @@
 Welcome to the akiFlagger documentation!
 ========================================
 
+.. image:: ../../logos/hex-AKI_FlaggeR_github.png
+	:width: 200
+	:alt: AKI Flagger logo
+	:align: right
+
+..
+	_https://sublime-and-sphinx-guide.readthedocs.io/en/latest/images.html
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents
@@ -17,7 +25,7 @@ Welcome to the akiFlagger documentation!
    GettingStarted
    AdditionalFeatures
    MoreInformation
-   
+
 
 Introduction
 ============
