@@ -18,6 +18,7 @@ Welcome to the akiFlagger documentation!
    AdditionalFeatures
    MoreInformation
    
+.. image:: ../../logos/hex-AKI_FlaggeR_github.png
 
 Introduction
 ============
