@@ -1,5 +1,7 @@
 # AKI Flagger <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/hex-AKI_FlaggeR_github.png?raw=true" alt="hex-AKI FlaggeR_github" width="200" align = "right"/>
 
+#### [Advisor](https://medicine.yale.edu/intmed/ctra/profile/francis_p_wilson/): Dr. Francis Perry Wilson, MD MSCE 
+
 ## Introduction
 
 Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked by an increase in the serum creatinine levels (amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of guidelines and standard definitions of AKI:
