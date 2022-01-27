@@ -5,6 +5,8 @@
 *** moving datasets to lazyload DB
 ** inst
 ** byte-compile and prepare package for lazy loading
+Warning: package ‘dplyr’ was built under R version 4.0.2
+Warning: package ‘data.table’ was built under R version 4.0.2
 ** help
 *** installing help indices
 ** building package indices

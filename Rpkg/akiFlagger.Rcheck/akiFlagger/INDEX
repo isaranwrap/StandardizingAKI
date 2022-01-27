@@ -1,6 +1,9 @@
-returnAKIpatients       Main function to flag patients for AKI
-returnBaselineCreat     Helper function to calculate historical
-                        baseline for a SINGLE patient
+returnAKIpatients_BCI   Historical Baseline Trumping (HBT) Definition
+returnAKIpatients_HBT   Historical Baseline Trumping (HBT) Definition
+returnAKIpatients_RMW   Rolling Minimum Window (RMW) Definition
+returnBaselineCreat     Return the baseline creatinine, helper function
+runAllDefinitions       Run all THREE definitions for acute kidney
+                        injury (AKI); helper function.
 runGUI                  GUI Shiny App
 toy                     Toy dataset
 toy.demo                Toy dataset

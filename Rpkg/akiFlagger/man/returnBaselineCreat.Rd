@@ -2,16 +2,21 @@
 % Please edit documentation in R/returnAKIpatients.R
 \name{returnBaselineCreat}
 \alias{returnBaselineCreat}
-\title{Helper function to calculate historical baseline for a SINGLE patient}
+\title{Return the baseline creatinine, helper function}
 \usage{
-returnBaselineCreat(dataframe)
+returnBaselineCreat(dataframe, eGFR_impute = F)
 }
 \arguments{
-\item{dataframe}{patient dataset}
+\item{dataframe}{Input patient dataset of a single patient, of class c(data.table, data.frame).}
+
+\item{eGFR_impute}{Boolean value, whether to impute the creatinine based on the updated \url{https://www.nejm.org/doi/full/10.1056/NEJMoa2102953}{CKD-EPI equation} (Inker et. Al, 2021).}
 }
 \value{
-Vector of baseline creatinine values
+The dataframe inputted with the \code{baseline_creat} column added in
 }
 \description{
-Helper function to calculate historical baseline for a SINGLE patient
+Return the baseline creatinine, helper function
+}
+\examples{
+returnBaselineCreat(toy, eGFR_impute = TRUE)
 }

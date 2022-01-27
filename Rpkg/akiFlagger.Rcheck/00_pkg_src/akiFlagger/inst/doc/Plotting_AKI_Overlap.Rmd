@@ -1,0 +1,25 @@
+---
+title: "Plotting AKI Overlap"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Plotting_AKI_Overlap}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+OK! So we run the AKI Flagger on our patient data set and that's all good, but what now? The key point is to understand that the different definitions in the literature are all capturing subtely different phenotypes of the underlying etiology of kidney dysfunction. We'll start off by loading our libraries. For the subsequent data analysis, we will want to import a few more libraries that can allow us to understand the differences between which patient populations are being captured. I'll draw a few concepts from set theory in order to make some of the key points, because although the differences in gross outcomes (i.e. hard outcomes: death and dialysis) are substantial, to tease apart the differences in definitions requires some probing.
+
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(akiFlagger)
+library(data.table)
+```
+

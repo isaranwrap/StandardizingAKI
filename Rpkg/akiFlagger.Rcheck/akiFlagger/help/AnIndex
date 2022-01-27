@@ -1,5 +1,8 @@
-returnAKIpatients	returnAKIpatients
+returnAKIpatients_BCI	returnAKIpatients_BCI
+returnAKIpatients_HBT	returnAKIpatients_HBT
+returnAKIpatients_RMW	returnAKIpatients_RMW
 returnBaselineCreat	returnBaselineCreat
+runAllDefinitions	runAllDefinitions
 runGUI	runGUI
 toy	toy
 toy.demo	toy.demo

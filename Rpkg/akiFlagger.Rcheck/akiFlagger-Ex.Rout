@@ -1,7 +1,7 @@
 
-R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+R version 4.0.1 (2020-06-06) -- "See Things Now"
 Copyright (C) 2020 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Platform: x86_64-apple-darwin17.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -37,48 +37,46 @@ Type 'q()' to quit R.
 > base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 > base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 > cleanEx()
-> nameEx("returnAKIpatients")
-> ### * returnAKIpatients
+> nameEx("returnAKIpatients_BCI")
+> ### * returnAKIpatients_BCI
 > 
 > flush(stderr()); flush(stdout())
 > 
 > base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-> ### Name: returnAKIpatients
-> ### Title: Main function to flag patients for AKI
-> ### Aliases: returnAKIpatients
+> ### Name: returnAKIpatients_BCI
+> ### Title: Historical Baseline Trumping (HBT) Definition
+> ### Aliases: returnAKIpatients_BCI
 > 
 > ### ** Examples
 > 
-> returnAKIpatients(toy)
-      patient_id inpatient creatinine                time aki
-   1:      19008     FALSE       2.05 2019-07-08 11:37:33   0
-   2:      19008     FALSE       1.65 2019-07-09 05:37:33   0
-   3:      19008     FALSE       1.58 2019-07-29 05:37:33   0
-   4:      19008     FALSE       1.77 2019-08-10 05:37:33   0
-   5:      19008     FALSE       1.47 2019-09-24 23:37:33   0
-  ---                                                        
-1074:      16216     FALSE       1.24 2020-04-22 07:45:26   0
-1075:      16216     FALSE       0.84 2020-04-22 19:45:26   0
-1076:      16216     FALSE       1.50 2020-05-04 07:45:26   0
-1077:      16216     FALSE       1.32 2020-05-23 19:45:26   0
-1078:      16216      TRUE       1.61 2020-05-30 19:45:26   0
-> 
-> 
-> 
-> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-> base::cat("returnAKIpatients", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
-> ### * <FOOTER>
-> ###
-> cleanEx()
-> options(digits = 7L)
-> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  1.631 0.065 1.348 0.002 0.002 
-> grDevices::dev.off()
-null device 
-          1 
-> ###
-> ### Local variables: ***
-> ### mode: outline-minor ***
-> ### outline-regexp: "\\(> \\)?### [*]+" ***
-> ### End: ***
-> quit('no')
+> returnAKIpatients_BCI(toy)
+Error: Can't subset columns that don't exist.
+x Column `sex` doesn't exist.
+Backtrace:
+     █
+  1. ├─akiFlagger::returnAKIpatients_BCI(toy)
+  2. │ └─`%>%`(...)
+  3. ├─dplyr::select(...)
+  4. └─dplyr:::select.data.frame(...)
+  5.   └─tidyselect::eval_select(expr(c(...)), .data)
+  6.     └─tidyselect:::eval_select_impl(...)
+  7.       ├─tidyselect:::with_subscript_errors(...)
+  8.       │ ├─base::tryCatch(...)
+  9.       │ │ └─base:::tryCatchList(expr, classes, parentenv, handlers)
+ 10.       │ │   └─base:::tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 11.       │ │     └─base:::doTryCatch(return(expr), name, parentenv, handler)
+ 12.       │ └─tidyselect:::instrument_base_errors(expr)
+ 13.       │   └─base::withCallingHandlers(...)
+ 14.       └─tidyselect:::vars_select_eval(...)
+ 15.         └─tidyselect:::walk_data_tree(expr, data_mask, context_mask)
+ 16.           └─tidyselect:::eval_c(expr, data_mask, context_mask)
+ 17.             └─tidyselect:::reduce_sels(node, data_mask, context_mask, init = init)
+ 18.               └─tidyselect:::walk_data_tree(new, data_mask, context_mask)
+ 19.                 └─tidyselect:::as_indices_sel_impl(...)
+ 20.                   └─tidyselect:::as_indices_impl(x, vars, strict = strict)
+ 21.                     └─tidyselect:::chr_as_locations(x, vars)
+ 22.                       └─vctrs::vec_as_location(x, n = length(vars), names = vars)
+ 23.                         └─(function () ...
+ 24.                           └─vctrs:::stop_subscript_oob(...)
+ 25.                             └─vctrs:::stop_subscript(...)
+Execution halted
