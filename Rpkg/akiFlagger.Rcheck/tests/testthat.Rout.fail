@@ -23,18 +23,20 @@ package 'testthat' was built under R version 4.0.2
 > test_check("akiFlagger")
 ══ Failed tests ════════════════════════════════════════════════════════════════
 ── Error (test-returnAKIpatients.R:38:3): Test HBT (historical baseline trumping) on patient A ──
-Error in `ungroup(.)`: could not find function "ungroup"
+Error in `filter(., inpatient == FALSE)`: object 'inpatient' not found
 Backtrace:
-    █
- 1. └─akiFlagger::returnAKIpatients_HBT(testDATA.patientA) test-returnAKIpatients.R:38:2
- 2.   └─`%>%`(...)
-── Error (test-returnAKIpatients.R:73:3): Test BCI (baseline creatinine imputation) on patient A;  ──
-Error in `ungroup(.)`: could not find function "ungroup"
-Backtrace:
-    █
- 1. └─akiFlagger::returnAKIpatients_BCI(testDATA.patientA) test-returnAKIpatients.R:73:2
- 2.   └─`%>%`(...)
+     █
+  1. ├─akiFlagger::returnAKIpatients_HBT(testDATA.patientA) test-returnAKIpatients.R:38:2
+  2. │ └─`%>%`(...)
+  3. ├─dplyr::ungroup(.)
+  4. ├─akiFlagger::returnBaselineCreat(., eGFR_impute = eGFR_impute)
+  5. │ └─`%>%`(...)
+  6. ├─dplyr::mutate(., baseline_creat = median(creatinine))
+  7. ├─dplyr::group_by(., patient_id)
+  8. ├─stats::filter(...)
+  9. │ └─stats::as.ts(x)
+ 10. └─stats::filter(., inpatient == FALSE)
 
-[ FAIL 2 | WARN 0 | SKIP 0 | PASS 4 ]
+[ FAIL 1 | WARN 0 | SKIP 0 | PASS 5 ]
 Error: Test failures
 Execution halted

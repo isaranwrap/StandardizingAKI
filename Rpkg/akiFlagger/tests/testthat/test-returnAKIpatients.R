@@ -73,4 +73,3 @@ test_that("Test BCI (baseline creatinine imputation) on patient A; ", {
   aki <- returnAKIpatients_BCI(testDATA.patientA)
   expect_equal(aki$aki, c(0, 0, 0, 0, 0, 0))
 })
-

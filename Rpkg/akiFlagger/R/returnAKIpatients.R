@@ -138,7 +138,7 @@ returnAKIpatients_HBT <- function(dataframe, RM_window = TRUE, HB_trumping = TRU
     dataframe[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
 
     # Calculate baseline creatinine
-    dataframe <- dataframe %>% group_by(patient_id) %>% returnBaselineCreat(eGFR_impute = eGFR_impute) %>% ungroup()
+    dataframe <- dataframe %>% dplyr::group_by(patient_id) %>% returnBaselineCreat(eGFR_impute = eGFR_impute) %>% dplyr::ungroup()
     data.table::setDT(dataframe)
     # Create masks (i.e. select those times from )
     maskShortTF <- dataframe$time >= dataframe$admissionImputed & (dataframe$time <= dataframe$admissionImputed + shortTIMEFRAME)
@@ -252,7 +252,7 @@ returnAKIpatients_BCI <- function(dataframe, RM_window = TRUE, HB_trumping = TRU
     dataframe[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
 
     # Calculate baseline creatinine
-    dataframe <- dataframe %>% group_by(patient_id) %>% returnBaselineCreat(eGFR_impute = eGFR_impute) %>% ungroup()
+    dataframe <- dataframe %>% dplyr::group_by(patient_id) %>% returnBaselineCreat(eGFR_impute = eGFR_impute) %>% dplyr::ungroup()
     data.table::setDT(dataframe)
 
     # Create masks (i.e. select those times from )
@@ -346,7 +346,7 @@ returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
     dataframe$alpha[dataframe$sex == T] <- -0.341
     dataframe$alpha[dataframe$sex == F] <- -0.201
 
-    dataframe <- dataframe %>% mutate(
+    dataframe <- dataframe %>% dplyr::mutate(
       creat_over_kappa = 75 / (141*(1 + 0.018*sex)*0.993**age)
     )
 
@@ -360,8 +360,8 @@ returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
   } else {
     dataframe.im <- dataframe %>% filter(inpatient == FALSE) %>%
       filter(time <= admissionImputed - as.difftime(7, units = "days") & time >= admissionImputed - as.difftime(365, units = "days")) %>%
-      group_by(patient_id) %>%
-      mutate(baseline_creat = median(creatinine))
+      dplyr::group_by(patient_id) %>%
+        dplyr::mutate(baseline_creat = median(creatinine))
 
     dataframe$baseline_creat <- dataframe.im$baseline_creat[match(dataframe$patient_id, dataframe.im$patient_id)]
     dataframe$baseline_creat <- round(dataframe$baseline_creat, digits = 3)
