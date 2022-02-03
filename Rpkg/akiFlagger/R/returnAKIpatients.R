@@ -1,21 +1,22 @@
-#' Main function to flag patients for AKI
+library(dplyr)
+library(stringr)
+library(data.table)
+
+#' Rolling Minimum Window (RMW) Definition
 #'
-#' Add in the AKI column in a patient dataframe according to the  KDIGO criterion
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
+#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
+#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
+#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
+#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
+#'   Defaults to \code{FALSE}.
 #'
-#' @param dataframe patient dataset
-#' @param HB_trumping boolean on whether to have historical baseline creatinine values trump the local minimum creatinine values
-#' @param eGFR_impute boolean on whether to impute missing baseline creatinine values with CKD-EPI equation
-#' @param window1 rolling window length of the shorter time window; defaults to 48 hours
-#' @param window2 rolling window length of the longer time window; defaults to 162 hours
-#' @param padding padding to add to rolling windows; defaults to 0 hours
-#' @param add_min_creat boolean on whether to add the intermediate columns generated during calculation
-#' @param add_baseline_creat boolean on whether to add the baseline creatinine values in
-#' @param add_imputed_admission boolean on whether to add the imputed admission column in
-#' @param add_imputed_encounter boolean on whether to add the imputed encounter id column in
+#' @return The input patient dataset with the AKI column added in.
 #'
-#' @return patient dataset with AKI column added in
-#'
-#' #Imports
 #' @import zoo
 #' @importFrom dplyr select
 #' @importFrom dplyr between
@@ -30,175 +31,343 @@
 #' @importFrom data.table .SD
 #' @importFrom data.table .GRP
 #'
-#' @importFrom stats median
+#' @export
+#'
+#' @examples
+#' returnAKIpatients_RMW(toy)
+returnAKIpatients_RMW <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
+                                  padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
+                                  addIntermediateCols = FALSE) {
+  dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
+
+  shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
+  longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
+
+  if (RM_window) {
+
+    dataframe[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
+    dataframe[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
+
+    stage1.condition1 <- round(dataframe$creatinine, digits = 4) >= round(dataframe$min_creat48 + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
+    stage1.condition2 <- round(dataframe$creatinine, digits = 4) >= round(dataframe$min_creat7d * 1.5, digits = 4)
+
+    stage1 <- as.integer(stage1.condition1 | stage1.condition2)
+    stage2 <- as.integer(round(dataframe$creatinine, digits = 4) >= round(2 * dataframe$min_creat7d, digits = 4))
+    stage3 <- as.integer(round(dataframe$creatinine, digits = 4) >= round(3 * dataframe$min_creat7d, digits = 4))
+
+    dataframe[, aki := stage1 + stage2 + stage3]
+
+    if (!addIntermediateCols) {
+      dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d)
+    }
+
+  }
+
+  return(dataframe)
+}
+
+#' Historical Baseline Trumping (HBT) Definition
+#'
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
+#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
+#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
+#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
+#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
+#'   Defaults to \code{FALSE}.
+#'
+#' @return The input patient dataset with the AKI column added in.
+#'
+#' @import zoo
+#' @importFrom dplyr select
+#' @importFrom dplyr between
+#' @importFrom dplyr %>%
+#'
+#' @importFrom data.table fread
+#' @importFrom data.table first
+#' @importFrom data.table last
+#' @importFrom data.table copy
+#' @importFrom data.table shift
+#' @importFrom data.table :=
+#' @importFrom data.table .SD
+#' @importFrom data.table .GRP
 #'
 #' @export
 #'
 #' @examples
-#' returnAKIpatients(toy)
-
-returnAKIpatients <- function(dataframe, HB_trumping = FALSE, eGFR_impute = FALSE,
-                              window1 = as.difftime(2, units='days'), window2 = as.difftime(7, units='days'),
-                              padding = as.difftime(4, units = 'hours'),
-                              add_min_creat = FALSE, add_baseline_creat = FALSE,
-                              add_imputed_admission = FALSE, add_imputed_encounter = FALSE) {
-  age <- sex <- race <- NULL # Add a visible binding (even if it's null) so R CMD Check doesn't complain
-  patient_id <- inpatient <- creatinine <- time <- NULL
-  min_creat48 <- min_creat7d <- baseline_creat <- aki <- NULL # Also, erase any variables in case duplicate variable names coexist
-  delta_t <- inp_lead <- imputed_admission <- imputed_encounter_id <- c1c2 <- admit_mask <- NULL
-  window1 <- window1 + padding
-  window2 <- window2 + padding
-
-  # Ensure the data frame being fed in contains the patient_id, inpatient, admission, and time columns
-  if (!("patient_id" %in% colnames(dataframe))) {
-    return("Sorry! Patient ID not found in dataframe.")
-  }
-  if (!("inpatient" %in% colnames(dataframe))) {
-    return("Sorry! Inpatient column not found in dataframe.")
-  }
-  if (!("time" %in% colnames(dataframe))) {
-    return("Sorry! Time column not found in dataframe.")
-  }
-
-  # If eGFR imputation is wanted, additional columns are required.
+#' returnAKIpatients_HBT(toy)
+returnAKIpatients_HBT <- function(dataframe, RM_window = TRUE, HB_trumping = TRUE, eGFR_impute = FALSE,
+                                  padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
+                                  addIntermediateCols = FALSE) {
   if (eGFR_impute) {
-    if (!("age" %in% colnames(dataframe))) {
-      return("The age column is needed for eGFR imputation!")
-    }
-    if (!("sex" %in% colnames(dataframe))) {
-      return("The sex column is needed for eGFR imputation!")
-    }
-    if (!("race" %in% colnames(dataframe))) {
-      return("The race column is needed for eGFR imputation!")
-    }
-  }
-  setDT(dataframe)
-
-  if (eGFR_impute) { # Select columns of interest
-    df <- dataframe[, list(patient_id, inpatient, creatinine, time, age, sex, race)]
+    dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
   } else {
-    df <- dataframe[, list(patient_id, inpatient, creatinine, time)]
+    dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
   }
 
-  df <- df[!duplicated(df[, list(patient_id, inpatient, creatinine, time)])] # Remove duplicated rows
-  df <- df[order(time), .SD, by = patient_id] # Sort by time
+  # Parameters
+  shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
+  longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
 
-  # Rolling minimum creatinine values in the past 48 hours and 7 days, respectively
-  df[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - window1, x)])), by = patient_id]
-  df[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - window2, x)])), by = patient_id]
+  consecutiveCreatinineFORAdmission <- 72 * 3600 #
 
-  # If HB_trumping is set to True, we want to add condition2, then do RM calcs, then do HB calcs, then add condition1 back in
   if (HB_trumping) {
 
-    # Impute estimated admission and encounter columns
-    df[, delta_t := shift(time, type = "lead") - time, by = patient_id] # Time difference between current row and next
-    df[, inp_lead := shift(inpatient, type = "lead"), by = patient_id] # Inpatient column shifted backwards
+    dataframe[, timeBetweenRows := data.table::shift(time, type = "lead") - time, by = patient_id] # Time difference between current row and next
+    dataframe[, inpShiftedBack := data.table::shift(inpatient, type = "lead"), by = patient_id] # Inpatient column shifted backwards
 
-    cond1 <- df[, delta_t] <= 72 * 3600 # Check to make sure times are within 72 hours (in units of seconds) from each other
-    cond2 <- df[, inpatient] & df[, inp_lead] # Ensure that a True is followed by a True (i.e. at least 2 visits)
-    df[, c1c2 := cond1 & cond2]
+    admission.condition1 <- dataframe$timeBetweenRows <= consecutiveCreatinineFORAdmission # Check to make sure times are within 72 hours from each other
+    admission.condition2 <- dataframe$inpatient & dataframe$inpShiftedBack # Two consecutive inpatient measurements
+    admission.condition3 <- dataframe[, admission.condition3 := as.logical(cumsum(inpatient) == 1), by = patient_id]$admission.condition3
 
-    df[, admit_mask := c1c2 & !shift(c1c2, fill = F), by = patient_id] # Admit mask requires F -> T transition
-    df[df$admit_mask, imputed_admission := time] # Impute admission with admit mask times
-    df[, imputed_admission := na.locf(na.locf(imputed_admission, na.rm = F), fromLast = T), by = patient_id] # Forward-fill then back-fill
-    df[, imputed_encounter_id := .GRP, by = c("imputed_admission", "patient_id")] # Group by encounter and count each group
+    # Admission imputation
+    dataframe[, admissionConditions := admission.condition1 & admission.condition2 & admission.condition3]
+    dataframe[, admissionMask := admissionConditions & !data.table::shift(admissionConditions, fill = F), by = patient_id] # Admit mask requires F -> T transition
+    dataframe[ dataframe$admissionMask, admissionImputed := time] # Use mask to grab time stamps that will be used for admission
+    dataframe[, admissionImputed := zoo::na.locf(zoo::na.locf(admissionImputed, na.rm = F), fromLast = T), by = patient_id] # Forward-fill then back-fill
 
-    # Remove delta_t, inp_lag, inp_lead & all_inp from the dataframe
-    df <- df %>% dplyr::select(-delta_t, -inp_lead, -c1c2, -admit_mask)
+    dataframe <- dataframe %>% dplyr::select(-admissionConditions, -admissionMask,
+                                             -admission.condition3,
+                                             -timeBetweenRows, -inpShiftedBack)
 
-    # Baseline creatinine is defined as the median of the outpatient creatinine values from 365 to 7 days prior to admission
-    df[, baseline_creat := returnBaselineCreat(c(unique(.SD))), by = patient_id]
+    # Rolling minimum conditions
+    dataframe[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
+    dataframe[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
 
-    # Imputation of baseline creatinine from CKD-EPI equation; i.e. eGFR-based imputation (assuming an eGFR of 75)
-    if (eGFR_impute) {
+    # Calculate baseline creatinine
+    dataframe <- dataframe %>% group_by(patient_id) %>% returnBaselineCreat(eGFR_impute = eGFR_impute) %>% ungroup()
+    data.table::setDT(dataframe)
+    # Create masks (i.e. select those times from )
+    maskShortTF <- dataframe$time >= dataframe$admissionImputed & (dataframe$time <= dataframe$admissionImputed + shortTIMEFRAME)
+    maskLongTF <- dataframe$time >= dataframe$admissionImputed & (dataframe$time <= dataframe$admissionImputed + longTIMEFRAME)
+    maskBCNull <- !is.na(dataframe$baseline_creat)
+    mask.HBT <- maskBCNull & maskLongTF
 
-      # Only want to apply the eGFR imputation to those who have a missing baseline creatinine
-      null_bc <- is.na(df[, baseline_creat])
+    # Rolling minimum calculations (RMW)
+    stage1.condition1 <- round(dataframe$creatinine, digits = 4) >= round(dataframe$min_creat48 + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
+    stage1.condition2 <- round(dataframe$creatinine, digits = 4) >= round(dataframe$min_creat48 * 1.5, digits = 4)
 
-      # Coefficients used in the CKD-EPI equation (Levey et. Al, 2009)
-      kappa <- 0.9 - 0.2 * df[null_bc, sex]
-      alpha <- -0.411 + 0.082 * df[null_bc, sex]
+    # Historical baseline calculations (HBT)
+    stage1.condition1.HBT <- round(dataframe[mask.HBT, creatinine], digits = 4) >= round(dataframe[mask.HBT, baseline_creat] + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
+    stage1.condition2.HBT <- round(dataframe[mask.HBT, creatinine], digits = 4) >= round(1.5 * dataframe[mask.HBT, baseline_creat], digits = 4)
 
-      creat_over_kappa <- 75 / (141 * (1 + 0.018 * df[null_bc, sex]) * (1 + 0.159 * df[null_bc, race]) * 0.993**df[null_bc, age])
 
-      df[null_bc][creat_over_kappa < 1]$baseline_creat <- kappa[creat_over_kappa < 1] * creat_over_kappa[creat_over_kappa < 1]**(-1 / 1.209)
-      df[null_bc][creat_over_kappa >= 1]$baseline_creat <- kappa[creat_over_kappa >= 1] * creat_over_kappa[creat_over_kappa >= 1]**(1 / alpha[creat_over_kappa >= 1])
+    stage1 <- as.integer(stage1.condition2) # NOTE: Stage 1 is simply condition 2 ... condition 1 will get re-inserted after HB conditions are applied
+    stage2 <- as.integer(round(dataframe$creatinine, digits = 4) >= round(2 * dataframe$min_creat7d, digits = 4))
+    stage3 <- as.integer(round(dataframe$creatinine, digits = 4) >= round(3 * dataframe$min_creat7d, digits = 4))
+
+    dataframe[, aki := stage1 + stage2 + stage3]
+
+    if (!all(!mask.HBT)) {
+      stage1.HBT <- as.integer(stage1.condition1.HBT | stage1.condition2.HBT)
+      stage2.HBT <- as.integer(round(dataframe[mask.HBT, creatinine], digits = 4) >= round(2 * dataframe[mask.HBT, baseline_creat], digits = 4))
+      stage3.HBT <- as.integer(round(dataframe[mask.HBT, creatinine], digits = 4) >= round(3 * dataframe[mask.HBT, baseline_creat], digits = 4))
+
+      dataframe[mask.HBT, aki := stage1.HBT + stage2.HBT + stage3.HBT]
     }
 
-    # Two different conditions for how stage 1 can be met (with two distinct rolling window periods)
-    condition1 <- round(df[, creatinine], digits = 4) >= round(df[, min_creat48] + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
-    condition2 <- round(df[, creatinine], digits = 4) >= round(1.5 * df[, min_creat7d], digits = 4) # Check if the creat increases by 50%; KDIGO criterion 2
-
-    # Masks from admission to 2 & 7 days into the future, respectively
-    mask_2d <- (df[, time] >= df[, imputed_admission]) & (df[, time] <= df[, imputed_admission] + window1)
-    mask_7d <- (df[, time] >= df[, imputed_admission]) & (df[, time] <= df[, imputed_admission] + window2)
-    bc_mask <- is.na(df[, baseline_creat]) # We don't want to capture null values
-    mask <- !bc_mask & mask_7d
-
-    # Rolling minimum definitions
-    stage1 <- as.integer(condition2) # Note now that stage1 is just condition 2; re-insert condition1 after HB calculations
-    stage2 <- as.integer(round(df[, creatinine], digits = 4) >= round(2 * df[, min_creat7d], digits = 4))
-    stage3 <- as.integer(round(df[, creatinine], digits = 4) >= round(3 * df[, min_creat7d], digits = 4))
-    df[, aki := stage1 + stage2 + stage3]
-
-    # Historical baseline calculations
-    condition1hb <- round(df[mask, creatinine], digits = 4) >= round(df[mask, baseline_creat] + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
-    condition2hb <- round(df[mask, creatinine], digits = 4) >= round(1.5 * df[mask, baseline_creat], digits = 4)
-
-    #
-    if (!all(!mask)) {
-      stage1hb <- as.integer(condition1hb | condition2hb)
-      stage2hb <- as.integer(round(df[mask, creatinine], digits = 4) >= round(2 * df[mask, baseline_creat], digits = 4))
-      stage3hb <- as.integer(round(df[mask, creatinine], digits = 4) >= round(3 * df[mask, baseline_creat], digits = 4))
-      df[mask, aki := stage1hb + stage2hb + stage3hb]
-    }
-
-    # Now, add the 0.3 bump rolling min condition back in
-    mask_empty <- df[, aki == 0]
-    mask_2d[is.na(mask_2d)] <- FALSE
-    mask_rw <- (!mask_2d & mask_empty) | (bc_mask & mask_empty)
-    df[mask_rw, aki := (condition1[mask_rw] | condition2[mask_rw])] # + stage2[mask_rw] + stage3[mask_rw]]
-
-    if (!add_imputed_admission) df <- df %>% dplyr::select(-imputed_admission)
-    if (!add_imputed_encounter) df <- df %>% dplyr::select(-imputed_encounter_id)
-  } else {
-
-    # If HB_trumping is False, just implement the rolling minimum definitions
-    condition1 <- round(df[, creatinine], digits = 4) >= round(df[, min_creat48] + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
-    condition2 <- round(df[, creatinine], digits = 4) >= round(1.5 * df[, min_creat7d], digits = 4) # Check if the creat increases by 50%; KDIGO criterion 2
-    stage1 <- as.integer(condition1 | condition2)
-    stage2 <- as.integer(round(df[, creatinine], digits = 4) >= round(2 * df[, min_creat7d], digits = 4))
-    stage3 <- as.integer(round(df[, creatinine], digits = 4) >= round(3 * df[, min_creat7d], digits = 4))
-
-    df[, aki := stage1 + stage2 + stage3]
+    # After HBT conditions are applied, we add the 0.3 bump back in
+    maskNoAKI <- dataframe$aki == 0
+    maskShortTF[is.na(maskShortTF)] <- FALSE # Replace NULL values with FALSE
+    mask.RMW <- (!maskShortTF & maskNoAKI) | (!maskBCNull & maskNoAKI)
+    dataframe[mask.RMW, aki := stage1.condition1[mask.RMW]]
   }
-  if (!add_min_creat) df <- df %>% dplyr::select(-min_creat48, -min_creat7d)
-  if (!add_baseline_creat) df <- df %>% dplyr::select(-baseline_creat)
-  return(df)
+
+  if (!addIntermediateCols) {
+    dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d, -baseline_creat, -admissionImputed)
+  }
+
+  return(dataframe)
 }
 
-# These are two functions within returnAKIpatient ~ design choice to keep it 1 or 2 .R files
-
-#' Helper function to calculate historical baseline for a SINGLE patient
+#' Historical Baseline Trumping (HBT) Definition
 #'
-#' @param dataframe patient dataset
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
+#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
+#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
+#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
+#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
+#'   Defaults to \code{FALSE}.
 #'
-#' @return Vector of baseline creatinine values
+#' @return The input patient dataset with the AKI column added in.
 #'
-#' @importFrom data.table setDT
+#' @import zoo
+#' @importFrom dplyr select
+#' @importFrom dplyr between
+#' @importFrom dplyr %>%
+#'
+#' @importFrom data.table fread
+#' @importFrom data.table first
+#' @importFrom data.table last
+#' @importFrom data.table copy
+#' @importFrom data.table shift
+#' @importFrom data.table :=
+#' @importFrom data.table .SD
+#' @importFrom data.table .GRP
+#'
+#' @export
 #'
 #' @examples
-returnBaselineCreat <- function(dataframe) { # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
-  for (admn in unique(dataframe$imputed_admission)) {
-    baseline_creat <- NULL
+#' returnAKIpatients_BCI(toy)
+returnAKIpatients_BCI <- function(dataframe, RM_window = TRUE, HB_trumping = TRUE, eGFR_impute = TRUE,
+                                  padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
+                                  addIntermediateCols = FALSE) {
+  patient_id <-
+  dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine, sex, age, race)
 
-    # Select the times from 365 - 7 days prior to admission
-    c1 <- (as.POSIXct(admn, tz = "GMT", origin = "1970-01-01") - as.difftime(365, units = "days")) <= dataframe$time
-    c2 <- (as.POSIXct(admn, tz = "GMT", origin = "1970-01-01") - as.difftime(7, units = "days")) >= dataframe$time
-    c3 <- !dataframe$inpatient # Ensure outpatient
-    c4 <- dataframe$imputed_admission == as.POSIXct(admn, tz = "GMT", origin = "1970-01-01")
+  # Parameters
+  shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
+  longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
 
-    data.table::setDT(dataframe)[c4, baseline_creat := dataframe[, median(as.numeric(as.character(unlist(.SD[c1 & c2 & c3])))), .SDcols = "creatinine"]]
+  consecutiveCreatinineFORAdmission <- 72 * 3600 #
+
+  if (eGFR_impute) {
+
+    dataframe[, timeBetweenRows := data.table::shift(time, type = "lead") - time, by = patient_id] # Time difference between current row and next
+    dataframe[, inpShiftedBack := data.table::shift(inpatient, type = "lead"), by = patient_id] # Inpatient column shifted backwards
+
+    admission.condition1 <- dataframe$timeBetweenRows <= consecutiveCreatinineFORAdmission # Check to make sure times are within 72 hours from each other
+    admission.condition2 <- dataframe$inpatient & dataframe$inpShiftedBack # Two consecutive inpatient measurements
+    admission.condition3 <- dataframe[, admission.condition3 := as.logical(cumsum(inpatient) == 1), by = patient_id]$admission.condition3
+
+    # Admission imputation
+    dataframe[, admissionConditions := admission.condition1 & admission.condition2 & admission.condition3]
+    dataframe[, admissionMask := admissionConditions & !data.table::shift(admissionConditions, fill = F), by = patient_id] # Admit mask requires F -> T transition
+    dataframe[ dataframe$admissionMask, admissionImputed := time] # Use mask to grab time stamps that will be used for admission
+    dataframe[, admissionImputed := zoo::na.locf(zoo::na.locf(admissionImputed, na.rm = F), fromLast = T), by = patient_id] # Forward-fill then back-fill
+
+    dataframe <- dataframe %>% dplyr::select(-admissionConditions, -admissionMask,
+                                             -admission.condition3,
+                                             -timeBetweenRows, -inpShiftedBack)
+
+    # Rolling minimum conditions
+    dataframe[, min_creat48 := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
+    dataframe[, min_creat7d := sapply(.SD[, time], function(x) min(creatinine[data.table::between(.SD[, time], x - shortTIMEFRAME, x)])), by = patient_id]
+
+    # Calculate baseline creatinine
+    dataframe <- dataframe %>% group_by(patient_id) %>% returnBaselineCreat(eGFR_impute = eGFR_impute) %>% ungroup()
+    data.table::setDT(dataframe)
+
+    # Create masks (i.e. select those times from )
+    maskShortTF <- dataframe$time >= dataframe$admissionImputed & (dataframe$time <= dataframe$admissionImputed + shortTIMEFRAME)
+    maskLongTF <- dataframe$time >= dataframe$admissionImputed & (dataframe$time <= dataframe$admissionImputed + longTIMEFRAME)
+    maskBCNull <- !is.na(dataframe$baseline_creat)
+    mask.HBT <- maskBCNull & maskLongTF
+
+    # Rolling minimum calculations (RMW)
+    stage1.condition1 <- round(dataframe$creatinine, digits = 4) >= round(dataframe$min_creat48 + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
+    stage1.condition2 <- round(dataframe$creatinine, digits = 4) >= round(dataframe$min_creat48 * 1.5, digits = 4)
+
+    # Historical baseline calculations (HBT)
+    stage1.condition1.HBT <- round(dataframe[mask.HBT, creatinine], digits = 4) >= round(dataframe[mask.HBT, baseline_creat] + 0.3, digits = 4) # Check if the creat jumps by 0.3; aka KDIGO criterion 1
+    stage1.condition2.HBT <- round(dataframe[mask.HBT, creatinine], digits = 4) >= round(1.5 * dataframe[mask.HBT, baseline_creat], digits = 4)
+
+
+    stage1 <- as.integer(stage1.condition2) # NOTE: Stage 1 is simply condition 2 ... condition 1 will get re-inserted after HB conditions are applied
+    stage2 <- as.integer(round(dataframe$creatinine, digits = 4) >= round(2 * dataframe$min_creat7d, digits = 4))
+    stage3 <- as.integer(round(dataframe$creatinine, digits = 4) >= round(3 * dataframe$min_creat7d, digits = 4))
+
+    dataframe[, aki := stage1 + stage2 + stage3]
+
+    if (!all(!mask.HBT)) {
+      stage1.HBT <- as.integer(stage1.condition1.HBT | stage1.condition2.HBT)
+      stage2.HBT <- as.integer(round(dataframe[mask.HBT, creatinine], digits = 4) >= round(2 * dataframe[mask.HBT, baseline_creat], digits = 4))
+      stage3.HBT <- as.integer(round(dataframe[mask.HBT, creatinine], digits = 4) >= round(3 * dataframe[mask.HBT, baseline_creat], digits = 4))
+
+      dataframe[mask.HBT, aki := stage1.HBT + stage2.HBT + stage3.HBT]
+    }
+
+    # After HBT conditions are applied, we add the 0.3 bump back in
+    maskNoAKI <- dataframe$aki == 0
+    maskShortTF[is.na(maskShortTF)] <- FALSE # Replace NULL values with FALSE
+    mask.RMW <- (!maskShortTF & maskNoAKI) | (!maskBCNull & maskNoAKI)
+    dataframe[mask.RMW, aki := stage1.condition1[mask.RMW]]
   }
-  return(dataframe$baseline_creat)
+
+  if (!addIntermediateCols) {
+    dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d, -baseline_creat, -admissionImputed)
+  }
+
+  return(dataframe)
 }
+
+#' Run all THREE definitions for acute kidney injury (AKI); helper function.
+#'
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @return The input patient dataset with the 3 AKI columns added in, titled `RMW`, `HBT` and `BCI`.
+#' @export
+#'
+#' @examples
+#' runAllDefinitions(toy)
+runAllDefinitions <- function(dataframe, padding = c(4, "hours")) {
+  dataframe.RMW <- returnAKIpatients_RMW(dataframe)
+  dataframe.HBT <- returnAKIpatients_HBT(dataframe)
+  dataframe.BCI <- returnAKIpatients_BCI(dataframe)
+
+  dataframe$RMW <- dataframe.RMW$aki
+  dataframe$HBT <- dataframe.HBT$aki
+  dataframe$BCI <- dataframe.BCI$aki
+  return(dataframe)
+}
+
+# Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
+#' Return the baseline creatinine, helper function
+#'
+#' @param dataframe Input patient dataset of a single patient, of class c(data.table, data.frame).
+#' @param eGFR_impute Boolean value, whether to impute the creatinine based on the updated \url{https://www.nejm.org/doi/full/10.1056/NEJMoa2102953}{CKD-EPI equation} (Inker et. Al, 2021).
+#'
+#' @return The dataframe inputted with the `baseline_creat` column added in
+#' @export
+#'
+#' @examples
+#' returnBaselineCreat(toy, eGFR_impute = TRUE)
+returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
+
+  if (eGFR_impute) {
+    # Imputed based on updated CKD-EPI equation (Inker et. Al, 2021)
+    eGFR <- 75
+
+    dataframe$kappa <- 0
+    dataframe$alpha <- 0
+    dataframe$baseline_creat <- NA
+
+    dataframe$kappa[dataframe$sex == T] <- 0.7
+    dataframe$kappa[dataframe$sex == F] <- 0.9
+
+    dataframe$alpha[dataframe$sex == T] <- -0.341
+    dataframe$alpha[dataframe$sex == F] <- -0.201
+
+    dataframe <- dataframe %>% mutate(
+      creat_over_kappa = 75 / (141*(1 + 0.018*sex)*0.993**age)
+    )
+
+
+    dataframe$baseline_creat[dataframe$creat_over_kappa < 1] <- dataframe$kappa*dataframe$creat_over_kappa**(-1/1.209)
+    dataframe$baseline_creat[dataframe$creat_over_kappa >= 1] <- dataframe$kappa*dataframe$creat_over_kappa**(-1/dataframe$alpha)
+
+    dataframe <- dataframe %>% dplyr::select(-creat_over_kappa, -kappa, -alpha)
+    return(dataframe)
+
+  } else {
+    dataframe.im <- dataframe %>% filter(inpatient == FALSE) %>%
+      filter(time <= admissionImputed - as.difftime(7, units = "days") & time >= admissionImputed - as.difftime(365, units = "days")) %>%
+      group_by(patient_id) %>%
+      mutate(baseline_creat = median(creatinine))
+
+    dataframe$baseline_creat <- dataframe.im$baseline_creat[match(dataframe$patient_id, dataframe.im$patient_id)]
+    dataframe$baseline_creat <- round(dataframe$baseline_creat, digits = 3)
+
+    return(dataframe)
+  }
+}
+
+

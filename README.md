@@ -1,10 +1,12 @@
-# akiFlagger
+# AKI Flagger <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/hex-AKI_FlaggeR_github.png?raw=true" alt="hex-AKI FlaggeR_github" width="200" align = "right"/>
+
+#### [Advisor](https://medicine.yale.edu/intmed/ctra/profile/francis_p_wilson/): Dr. Francis Perry Wilson, MD MSCE 
 
 ## Introduction
 
 Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked by an increase in the serum creatinine levels (amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of guidelines and standard definitions of AKI:
 
-* *Stage 1*: 50% increase in creatinine in < 7 days or 0.3 increase in creatinine in < 48 hours
+* *Stage 1*: 50% increase in creatinine in < 7 days or 0.3 mg/dL increase in creatinine in < 48 hours
 
 * *Stage 2*: 100% increase in (or doubling of) creatinine in < 7 days
 
@@ -28,7 +30,7 @@ import akiFlagger
 
 print(akiFlagger.__version__)
 
->> '1.0.0'
+>> '0.5.0'
 ```
 
 Alternatively, you can download the source and wheel files to build manually from https://pypi.org/project/akiFlagger/.
@@ -36,4 +38,4 @@ Alternatively, you can download the source and wheel files to build manually fro
 
 ## Getting started
 
-There is a [walk-through notebook](https://colab.research.google.com/github/isaranwrap/StandardizingAKI/blob/master/GettingStarted.ipynb) available on Github to introduce the necessary components and parameters of the flagger. The notebook can be accessed via Google Colab notebooks. The notebook has also been adapted in the [documentation](https://akiflagger.readthedocs.io/en/latest/). 
+There is a [walk-through notebook](https://colab.research.google.com/github/isaranwrap/StandardizingAKI/blob/master/notebooks/GettingStarted.ipynb) available on Github to introduce the necessary components and parameters of the flagger. The notebook can be accessed via Google Colab notebooks. The notebook has also been adapted in the [documentation](https://akiflagger.readthedocs.io/en/latest/). 
