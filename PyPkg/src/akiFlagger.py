@@ -344,7 +344,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         mrns = np.random.randint(10000, 20000, num_patients)
         admns = pd.to_datetime(np.random.randint(date_range[0], date_range[1], num_patients), unit = 's')
         encs = [np.random.randint(10000, 99999, np.random.randint(num_encounters_range[0],num_encounters_range[1])) for mrn, admn in zip(mrns, admns)]
-        creats = np.clip(np.random.normal(loc = 1, scale = creat_scale, size=num_patients), a_min = 0, a_max = None)
+        creats = np.clip(np.random.normal(loc = 1, scale = creat_scale, size=num_patients), a_min = 0, a_max = None) 
 
         #Combine the two dataframes
         d1 = pd.DataFrame([mrns, admns, creats]).T
