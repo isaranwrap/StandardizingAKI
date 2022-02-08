@@ -55,7 +55,7 @@ class AKIFlagger:
                  RM_window = True, HB_trumping = False, eGFR_impute = False, # Main parameters
                  cond1time = '48hours', cond2time = '168hours', pad1time = '0hours', pad2time = '0hours', # Rolling window sizes
                 sort_values = True, add_baseline_creat = False, add_min_creat = False, 
-                add_imputed_admission = False, add_imputed_encounter = False,
+                add_admission_col = False, add_imputed_encounter = False,
                 **defMapper): # Ancillary optional parameters (include output for intermediate calculations)
         
         # Columns necessary for calculation
@@ -86,7 +86,7 @@ class AKIFlagger:
         self.eGFR_impute = eGFR_impute
         
         # Extra options to specify what is included in the output
-        self.add_imputed_admission = add_imputed_admission
+        self.add_admission_col = add_admission_col
         self.add_imputed_encounter = add_imputed_encounter
         self.add_baseline_creat = add_baseline_creat
         self.add_min_creat = add_min_creat
@@ -194,7 +194,7 @@ class AKIFlagger:
             mask_rw = np.logical_or(np.logical_and(~mask2d, mask_empty), np.logical_and(~mask_bc, mask_empty)) # The full mask is of all these conditions: admit to +2d, missed flagger, and non-null baseline creatinine values
             aki[mask_rw] = np.logical_or(c1[mask_rw], c2[mask_rw])*1
 
-            if not self.add_imputed_admission:
+            if not self.add_admission_col:
                 df = df.drop(self.admission, axis = 1)
             if not self.add_imputed_encounter:
                 df = df.drop(self.encounter_id, axis = 1)
@@ -224,7 +224,11 @@ class AKIFlagger:
 
         tmp = dataframe.reset_index() # Reset index
         
-        # Admission column imputation
+        # Admission column imputation:
+        
+        # Admission is defined as the first timestamp where THIS occurs:
+        # two consecutive inpatient creatinine measurements <= 72 hours amart
+
         cond1 = tmp.groupby(self.patient_id)[self.time].diff(1).shift(-1) <= pd.Timedelta('72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
         cond2 = tmp[self.inpatient] & tmp.groupby(self.patient_id)[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
         tmp['c1c2'] = cond1 & cond2
