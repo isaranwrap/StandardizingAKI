@@ -75,7 +75,7 @@ returnAKIpatients_RMW <- function(dataframe, RM_window = TRUE, HB_trumping = FAL
 #' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
 #'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
 #' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
-#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
+#'   The vector (same format as \code{\link{akiFlagger::padding}}) is fed into a `difftime()` object.
 #' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
 #'   Defaults to \code{FALSE}.
 #'

@@ -28,7 +28,7 @@ returnAKIpatients_HBT(
 \code{integer} is the amount of time and \code{string} are the units of time. Defaults to \code{c(4L, "hours")}.}
 
 \item{window1, window2}{The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
-The vector (same format as \code{\link{padding}}) is fed into a \code{difftime()} object.}
+The vector (same format as \code{\link{akiFlagger::padding}}) is fed into a \code{difftime()} object.}
 
 \item{addIntermediateCols}{Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
 Defaults to \code{FALSE}.}
