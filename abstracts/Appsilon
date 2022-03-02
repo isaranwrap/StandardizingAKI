@@ -1,0 +1,12 @@
+Appsilon Abstract (250 word cap)
+INTRODUCTION
+Due to the complex etiology of its presentation, AKI has been defined in a variety of ways. A standardized definition is necessary to make accurate comparisons across captured patient populations, to refine clinical understanding of the syndrome for better prognosis, and to lower administrative costs associated with AKI. 
+ 
+METHODS 
+We streamline the standardization of AKI by presenting the AKIFlagger, an open-source computational tool built in Python, R, and a standalone web application which implements a standardized AKI definition based on KDIGO guidelines while allowing for variational definition of historical baseline. We applied the AKIFlagger to a dataset of patients hospitalized with COVID-19 with three functional approaches to defining AKI: (1) a rolling-window definition, (2) a historical baseline definition, and (3) imputation based on demographic information.
+ 
+RESULTS 
+In our dataset, we demonstrate that subtle changes in definition can have a large impact on which patient populations are captured: using a “historical baseline” definition of creatinine and allowing for imputed historical baseline creatinine values increases the size of captured patient populations by 20.7% and 57.1%, respectively, versus KDIGO standards.
+ 
+GENERAL IMPACT 
+Subtle differences in the definition of AKI can lead to drastic differences in which patient populations are captured by the definition. A standard definition of AKI is necessary for the field to accurately advance both clinical and basic science research. This standardized tool can be used by researchers to ensure definitions are uniform across studies.
