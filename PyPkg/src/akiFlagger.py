@@ -217,7 +217,16 @@ class AKIFlagger:
     
     def addAdmissionEncounterColumns(self, dataframe):
         '''
-        Returns the admission (and possible encounter) column(s) in case the patient data frame is missing the admission/enc column.
+        Returns the admission column. An admission date is defined as the *first* timestamp where 2 consecutive inpatient creatinine measurements occur within 72 hrs. Id est:
+        --> inpatient
+        --> <= 72 hours
+        If there are two inpatient measurements but they are separated by more than 3 months, that would be considered a separate admission. 
+        
+        Args: 
+            dataframe (pd.DataFrame): Patient dataframe
+        Returns:
+            dataframe (pd.DataFrame): 
+        
         '''
         self.admission = 'imputed_admission'
         self.encounter_id = 'imputed_encounter_id'
