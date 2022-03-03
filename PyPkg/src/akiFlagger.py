@@ -104,6 +104,7 @@ class AKIFlagger:
         * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 7 days (168 hours)
 
         More information can be found in the documentation at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
+        
         Args: 
             df (pd.DataFrame): Patient dataframe, should include some sort of patient and encounter identifier(s) and age, sex, race, serum creatinine and timestamps.
         Returns:
@@ -225,7 +226,7 @@ class AKIFlagger:
         Args: 
             dataframe (pd.DataFrame): Patient dataframe
         Returns:
-            dataframe (pd.DataFrame): 
+            dataframe (pd.DataFrame): Patient dataframe with admission column added in 
         
         '''
         self.admission = 'imputed_admission'
@@ -257,6 +258,14 @@ class AKIFlagger:
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
         The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
         *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)*.
+        
+        The new equation used is Inker et. Al, 2021: https://www.nejm.org/doi/full/10.1056/NEJMoa2102953
+        
+        Args: 
+            age (int): age of patient
+            female (int): sex of patient; defaults to female (i.e. sex = 1 is female)
+            black (int): race of patient; black or not black... working on removing this from the analysis.
+        
         '''
 
         kappa = (0.9 - 0.2*female)
@@ -276,6 +285,8 @@ class AKIFlagger:
     def addBaselineCreat(self, dataframe):
         '''
         Returns baseline creatinine used in intermediate calculation for back-calculating AKI. Baseline creatinine is defined as the MEDIAN of OUTPATIENT creatinine values from 365 to 7 days prior to admission.
+        Args: 
+            
         '''
         # Baseline creatinine is defined as the MEDIAN of the OUTPATIENT creatinine values from 365 to 7 days prior to admission
 

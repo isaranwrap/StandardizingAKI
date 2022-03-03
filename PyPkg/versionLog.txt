@@ -9,4 +9,4 @@ Version 0.3.x - Switched to single-column output for AKI column.
 Version 0.4.x - Removed encounter and admission as optional columns.
 
 Version 0.5.x - Renaming input variables to be more in align with GUI. 
-	0.5.0 - 
+	0.5.0 - RM_window, HB_trumping, eGFR_impute (keeping eGFR_impute)
