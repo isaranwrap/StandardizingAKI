@@ -1,0 +1,7 @@
+Determining the etiology of acute kidney injury is complex, in general. Seemingly arbitrary and subtle differences in choosing which creatinine increases (rises in creatinine) to pay attention to can have drastically different patients being captured. Generally, patients experience acute kidney injury have a variety of comorbidities and occur in an ICU setting, where the resources to deal with sharp decreases in kidney function are available; care-providers need an indication of which patients have that dysfunction in order to act accordingly. These four examples serve as a good basis for why such differences should be operationalized in some mathematically meaningful manner. 
+
+ 
+
+The data is sourced from the Yale New Haven Hospital system, all patient observations are from March  2020 until September 2021. Patients with creatinine values of greater than 4.0, with ESRD and other such restrictions are kept out of the analysis. 
+
+This is the example of a “vanilla” case of acute kidney injury. In this case, there is a sharp rise of creatinine within 48 hours of the admission. Here, time = 0 in days corresponds to the patient being admitted in a hospital setting. The guidelines set forth by KDIGO would flag the patient for the 0.3 rise in creatinine. 
