@@ -43,3 +43,20 @@ pDF1 = pDF1.drop('race', axis = 1)
 
 outcomes = pd.read_csv(outcomesPath)
 outcomes['time'] = pd.to_datetime(outcomes.time)
+
+
+# Step 0: Merge datasets
+
+# Combine outcomes with definition dataframe
+comb = pDF1.merge(outcomes) # Combine outcomes with definition dataframe
+print(comb.columns) # Resulting shape is 718220 x 12
+print('INITIAL COMBINED DATAFRAME: {}'.format(comb.shape))
+
+# Step 1: Convert definitions to boolean T/F
+for defin in AKIdefinitions:
+    comb[defin] = comb[defin].astype('bool')
+    
+# Step 2: Convert dataframe to one line per patient 
+olpp = comb.loc[comb.groupby("patient_id")['creatinine'].idxmax()] # OLPP
+print('ONE LINE PER PATIENT: {}'.format(olpp.shape)) # 40106 x 12
+olpp.head()
