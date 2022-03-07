@@ -18,14 +18,11 @@ library(tidyverse)
 library(zoo)
 library(DT)
 
-# source("plotAKIoverlap.R")
-# source("returnAKIpatients.R")
+source("plotAKIoverlap.R")
+source("returnAKIpatients.R")
 baseFolder <- file.path("/Users", "saranmedical-smile", "AKIFlagger")
 dataFolder <- file.path(baseFolder, "data")
 imageFolder <- file.path(baseFolder, "images")
-scriptsFolder <- file.path(baseFolder, "scripts")
-source(file.path(scriptsFolder, "plotAKIoverlap.R"))
-source(file.path(scriptsFolder, "returnAKIpatients.R"))
 
 saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
   return(write(jsonlite::toJSON(dataframe), file = outFP))
@@ -94,8 +91,10 @@ server <- function(input, output, session) {
       dataframe$BCI <- definitionBCI()$aki
       return(dataframe)
 
-    }
+    } else if (length(input$definitionSelector == 2)) {
+      message("two of the 3 have been selected")
 
+    }
     if ("RMW" %in% input$definitionSelector) {
       tableReactive <- tableIN() %>% returnAKIpatients_RMW(padding = c(input$padding, "hours"))
     } else if ("HBT" %in% input$definitionSelector) {
