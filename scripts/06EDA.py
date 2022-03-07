@@ -60,3 +60,27 @@ for defin in AKIdefinitions:
 olpp = comb.loc[comb.groupby("patient_id")['creatinine'].idxmax()] # OLPP
 print('ONE LINE PER PATIENT: {}'.format(olpp.shape)) # 40106 x 12
 olpp.head()
+
+printDescriptiveStatistics(dataFRAME = olpp,
+                           yTRUE = "death", yPRED = "RMW")
+
+# HAS AKI vs
+# HAS Kidney Dysfunction
+o0 = 'death'
+o1 = 'creatRise'
+o2 = 'creatRisefromAdmit'
+o3 = 'creatRisexPCTyTIME'
+
+           | HAS Kidney dysf |
+           |   N   |  Y  | 
+|HAS   | N | 32837 | 477 |
+    AKI| Y | 6102  | 690 | 
+
+So, prob(kidney dysf) is:
+
+= 
+First, 32837 + 477 + 6102 + 690 = 40106 patients
+
+Given that a person is flagged as having AKI: 
+the prob(death) is:
+(690 / (690 + 6102))
