@@ -15,47 +15,49 @@ library(shinyWidgets)
 library(data.table)
 library(lubridate)
 library(tidyverse)
+library(ggplot2)
 library(zoo)
 library(DT)
 
-source("plotAKIoverlap.R")
-source("returnAKIpatients.R")
 baseFolder <- file.path("/Users", "saranmedical-smile", "AKIFlagger")
 dataFolder <- file.path(baseFolder, "data")
 imageFolder <- file.path(baseFolder, "images")
+scriptsFolder <- file.path(baseFolder, "scripts")
+source(file.path(scriptsFolder, "plotAKIoverlap.R"))
+source(file.path(scriptsFolder, "returnAKIpatients.R"))
 
 saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
   return(write(jsonlite::toJSON(dataframe), file = outFP))
 }
 
 ui <- fluidPage(theme = shinytheme("sandstone"),
-  sidebarPanel(
-    headerPanel(paste("AKI Flagger", today())),
-    fileInput("file", "FILE",
-              accept = "text/csv"), # END FILE INPUT
-    img(src="hex-AKI FlaggeR_github.png", align = "right",
-        height = 64, width = 64), # Image Logo
-    checkboxGroupButtons("definitionSelector",
-                       "DEFINITION:",
-                       c("RMW", "HBT", "BCI"),
-                       selected = c("RMW")),
-                       #inline = TRUE), # END CHECKBOX INPUT
-    sliderInput("padding", "PADDING",
-                value = 4, min = -8, max = 8), # END SLIDER INPUT
-    actionButton("go", "Compute AKI", icon("calculator")), # END ACTION BUTTON
-    downloadButton('download',"Download the data"),
-    uiOutput('downloadData') # END DOWNLOAD BUTTON
-    ),
-  mainPanel(
-    DT::DTOutput("tableOUT")
-  ),
-  fluidRow(
-    wellPanel(
-      plotOutput("venn")
-    )
-    # wellPanel(img(src="hex-AKI FlaggeR_github.png",
-    #               height = 46, width = 46),) # Image Logo)
-  )
+                sidebarPanel(
+                  headerPanel(paste("AKI Flagger", today())),
+                  fileInput("file", "FILE",
+                            accept = "text/csv"), # END FILE INPUT
+                  img(src="hex-AKI FlaggeR_github.png", align = "right",
+                      height = 64, width = 64), # Image Logo
+                  checkboxGroupButtons("definitionSelector",
+                                       "DEFINITION:",
+                                       c("RMW", "HBT", "BCI"),
+                                       selected = c("RMW")),
+                  #inline = TRUE), # END CHECKBOX INPUT
+                  sliderInput("padding", "PADDING",
+                              value = 4, min = 0, max = 8), # END SLIDER INPUT
+                  actionButton("go", "Compute AKI", icon("calculator")), # END ACTION BUTTON
+                  downloadButton('download',"Download the data"),
+                  uiOutput('downloadData') # END DOWNLOAD BUTTON
+                ),
+                mainPanel(
+                  DT::DTOutput("tableOUT")
+                ),
+                fluidRow(
+                  wellPanel(
+                    plotOutput("venn")
+                  )
+                  # wellPanel(img(src="hex-AKI FlaggeR_github.png",
+                  #               height = 46, width = 46),) # Image Logo)
+                )
 )
 
 
@@ -101,7 +103,7 @@ server <- function(input, output, session) {
       tableReactive <- tableIN() %>% returnAKIpatients_HBT(padding = c(input$padding, "hours"))
     } else if ("BCI" %in% input$definitionSelector) {
       tableReactive <- tableIN() %>% returnAKIpatients_BCI(eGFR_impute = T,
-                                        padding = c(input$padding, "hours"))
+                                                           padding = c(input$padding, "hours"))
     }
     return(tableReactive)
   }
@@ -113,7 +115,8 @@ server <- function(input, output, session) {
   })
 
   output$venn <- renderPlot({
-    plotAKIoverlap(tableREACTIVE())
+
+    #plotAKIoverlap(tableREACTIVE())
   })
 
   output$download <- downloadHandler(
@@ -137,6 +140,7 @@ server <- function(input, output, session) {
 
 # Create Shiny object
 shinyApp(ui = ui, server = server)
+
 
 ## Back-up file; master file located in:
 ## ~/AKIFlagger/scripts
