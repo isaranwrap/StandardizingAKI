@@ -2,46 +2,17 @@ library(dplyr)
 library(stringr)
 library(data.table)
 
-#' Rolling Minimum Window (RMW) Definition
-#'
-#' @param dataframe Your input dataset, of class c(data.table, data.frame).
-#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
-#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
-#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
-#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
-#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
-#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
-#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
-#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
-#'   Defaults to \code{FALSE}.
-#'
-#' @return The input patient dataset with the AKI column added in.
-#'
-#' @import zoo
-#' @importFrom dplyr select
-#' @importFrom dplyr between
-#' @importFrom dplyr %>%
-#'
-#' @importFrom data.table fread
-#' @importFrom data.table first
-#' @importFrom data.table last
-#' @importFrom data.table copy
-#' @importFrom data.table shift
-#' @importFrom data.table :=
-#' @importFrom data.table .SD
-#' @importFrom data.table .GRP
-#'
-#' @export
-#'
-#' @examples
-#' returnAKIpatients_RMW(toy)
-returnAKIpatients_RMW <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
+returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
                                   padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
-                                  addIntermediateCols = FALSE) {
-  dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
+                                  addIntermediateCols = FALSE, returnMinimalInput = FALSE) {
 
   shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
   longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
+  consecutiveCreatinineFORAdmission <- 72 * 3600 #
+
+  if (returnMinimalInput) {
+  dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
+  }
 
   if (RM_window) {
 
@@ -62,57 +33,6 @@ returnAKIpatients_RMW <- function(dataframe, RM_window = TRUE, HB_trumping = FAL
     }
 
   }
-
-  return(dataframe)
-}
-
-#' Historical Baseline Trumping (HBT) Definition
-#'
-#' @param dataframe Your input dataset, of class c(data.table, data.frame).
-#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
-#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
-#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
-#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
-#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
-#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
-#'   The vector (same format as \code{\link{akiFlagger::padding}}) is fed into a `difftime()` object.
-#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
-#'   Defaults to \code{FALSE}.
-#'
-#' @return The input patient dataset with the AKI column added in.
-#'
-#' @import zoo
-#' @importFrom dplyr select
-#' @importFrom dplyr between
-#' @importFrom dplyr %>%
-#'
-#' @importFrom data.table fread
-#' @importFrom data.table first
-#' @importFrom data.table last
-#' @importFrom data.table copy
-#' @importFrom data.table shift
-#' @importFrom data.table :=
-#' @importFrom data.table .SD
-#' @importFrom data.table .GRP
-#'
-#' @export
-#'
-#' @examples
-#' returnAKIpatients_HBT(toy)
-returnAKIpatients_HBT <- function(dataframe, RM_window = TRUE, HB_trumping = TRUE, eGFR_impute = FALSE,
-                                  padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
-                                  addIntermediateCols = FALSE) {
-  if (eGFR_impute) {
-    dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
-  } else {
-    dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
-  }
-
-  # Parameters
-  shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
-  longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
-
-  consecutiveCreatinineFORAdmission <- 72 * 3600 #
 
   if (HB_trumping) {
 
@@ -176,58 +96,6 @@ returnAKIpatients_HBT <- function(dataframe, RM_window = TRUE, HB_trumping = TRU
     dataframe[mask.RMW, aki := stage1.condition1[mask.RMW]]
   }
 
-  if (!addIntermediateCols) {
-    dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d, -baseline_creat, -admissionImputed)
-  }
-
-  return(dataframe)
-}
-
-#' Historical Baseline Trumping (HBT) Definition
-#'
-#' @param dataframe Your input dataset, of class c(data.table, data.frame).
-#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
-#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
-#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
-#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
-#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
-#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
-#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
-#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
-#'   Defaults to \code{FALSE}.
-#'
-#' @return The input patient dataset with the AKI column added in.
-#'
-#' @import zoo
-#' @importFrom dplyr select
-#' @importFrom dplyr between
-#' @importFrom dplyr %>%
-#'
-#' @importFrom data.table fread
-#' @importFrom data.table first
-#' @importFrom data.table last
-#' @importFrom data.table copy
-#' @importFrom data.table shift
-#' @importFrom data.table :=
-#' @importFrom data.table .SD
-#' @importFrom data.table .GRP
-#'
-#' @export
-#'
-#' @examples
-#' returnAKIpatients_BCI(toy)
-returnAKIpatients_BCI <- function(dataframe, RM_window = TRUE, HB_trumping = TRUE, eGFR_impute = TRUE,
-                                  padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
-                                  addIntermediateCols = FALSE) {
-  patient_id <-
-  dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine, sex, age, race)
-
-  # Parameters
-  shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
-  longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
-
-  consecutiveCreatinineFORAdmission <- 72 * 3600 #
-
   if (eGFR_impute) {
 
     dataframe[, timeBetweenRows := data.table::shift(time, type = "lead") - time, by = patient_id] # Time difference between current row and next
@@ -298,7 +166,75 @@ returnAKIpatients_BCI <- function(dataframe, RM_window = TRUE, HB_trumping = TRU
   return(dataframe)
 }
 
-#' Run all THREE definitions for acute kidney injury (AKI); helper function.
+#' Rolling Minimum Window (RMW) Definition
+#'
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
+#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
+#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
+#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
+#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
+#'   Defaults to \code{FALSE}.
+#'
+#' @return The input patient dataset with the AKI column added in.
+#'
+#' @import zoo
+#' @importFrom dplyr select
+#' @importFrom dplyr between
+#' @importFrom dplyr %>%
+#'
+#' @importFrom data.table fread
+#' @importFrom data.table first
+#' @importFrom data.table last
+#' @importFrom data.table copy
+#' @importFrom data.table shift
+#' @importFrom data.table :=
+#' @importFrom data.table .SD
+#' @importFrom data.table .GRP
+#'
+#' @export
+#'
+#' @examples
+#' returnAKIpatients_RMW(toy)
+
+#' Historical Baseline Trumping (HBT) Definition
+#'
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
+#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
+#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
+#'   The vector (same format as \code{\link{akiFlagger::padding}}) is fed into a `difftime()` object.
+#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
+#'   Defaults to \code{FALSE}.
+#'
+#' @return The input patient dataset with the AKI column added in.
+#'
+#' @import zoo
+#' @importFrom dplyr select
+#' @importFrom dplyr between
+#' @importFrom dplyr %>%
+#'
+#' @importFrom data.table fread
+#' @importFrom data.table first
+#' @importFrom data.table last
+#' @importFrom data.table copy
+#' @importFrom data.table shift
+#' @importFrom data.table :=
+#' @importFrom data.table .SD
+#' @importFrom data.table .GRP
+#'
+#' @export
+#'
+#' @examples
+#' returnAKIpatients_HBT(toy)
+
+#' Helper function to run all THREE definitions for acute kidney injury (AKI)
 #'
 #' @param dataframe Your input dataset, of class c(data.table, data.frame).
 #' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
@@ -309,9 +245,9 @@ returnAKIpatients_BCI <- function(dataframe, RM_window = TRUE, HB_trumping = TRU
 #' @examples
 #' runAllDefinitions(toy)
 runAllDefinitions <- function(dataframe, padding = c(4, "hours")) {
-  dataframe.RMW <- returnAKIpatients_RMW(dataframe)
-  dataframe.HBT <- returnAKIpatients_HBT(dataframe)
-  dataframe.BCI <- returnAKIpatients_BCI(dataframe)
+  dataframe.RMW <- returnAKIpatients(dataframe, RM_window = TRUE)
+  dataframe.HBT <- returnAKIpatients_HBT(dataframe, HB_trumping = TRUE)
+  dataframe.BCI <- returnAKIpatients_BCI(dataframe, eGFR_impute = TRUE)
 
   dataframe$RMW <- dataframe.RMW$aki
   dataframe$HBT <- dataframe.HBT$aki
@@ -370,4 +306,12 @@ returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
   }
 }
 
+multipleDefinitions <- function(RM_window, HB_trumping, eGFR_impute) {
+  return(sum(c(RM_window, HB_trumping, eGFR_impute)) > 1)
+}
 
+if (multipleDefinitions(RM_window = NULL,
+                        HB_trumping = NULL,
+                        eGFR_impute = NULL)) {
+  akiColNames = c("aki", "aki", "aki")
+}
