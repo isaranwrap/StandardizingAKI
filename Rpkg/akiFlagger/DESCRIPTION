@@ -1,6 +1,6 @@
 Package: akiFlagger
 Title: Flags Acute Kidney Injury (AKI) 
-Version: 0.4.1
+Version: 1.0.0
 Authors@R: 
     c(
     person(given = "Ishan",
@@ -15,6 +15,10 @@ Authors@R:
            family = "Saran",
            role = "aut",
            email = "rishipsaran@gmail.com"),
+    person(given = "Tanush",
+           family = "Saran",
+           role = "aut",
+           email = "tanushpsaran@gmail.com"),
     person(given = "Aditya",
            family = "Biswas",
            role = "ctb",
