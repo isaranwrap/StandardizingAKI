@@ -22,21 +22,23 @@ test_that("Test RMW (rolling minimum window) on patient A", {
   expect_equal(aki$aki, c(0, 0, 0, 0, 1, 0))
 })
 
-# test_that("Test BCI (baseline creatinine imputation) on patient A; no ASR", {
-#   testDATA.patientA <- data.table::data.table(
-#     patient_id = replicate(6, 1),
-#     inpatient = c(F, F, F, T, T, T),
-#     admission = as.POSIXct(replicate(6, 1), origin = "2020-01-01 12:00:00", tz = "UTC"),
-#     time = c(as.POSIXct('2019-12-24 12:00:00'),
-#              as.POSIXct('2019-12-25 12:00:00'),
-#              as.POSIXct('2019-12-30 12:00:00'),
-#              as.POSIXct('2020-01-01 12:00:00'),
-#              as.POSIXct('2020-01-03 12:00:00'),
-#              as.POSIXct('2020-01-11 12:00:00')),
-#     creatinine = c(1, 1, 1, 1, 1.3, 1.3)
-#   )
-#   expect_error(returnAKIpatients(testDATA.patientA, eGFR_impute = TRUE), "Unknown or uninitialised column: `sex`.")#, "Can't subset columns that don't exist.")
-# })
+test_that("Test HBT (historical baseline trumping) on patient A", {
+  testDATA.patientA <- data.table::data.table(
+    patient_id = replicate(6, 1),
+    inpatient = c(F, F, F, T, T, T),
+    admission = as.POSIXct(replicate(6, 1), origin = "2020-01-01 12:00:00", tz = "UTC"),
+    time = c(as.POSIXct('2019-12-24 12:00:00'),
+             as.POSIXct('2019-12-25 12:00:00'),
+             as.POSIXct('2019-12-30 12:00:00'),
+             as.POSIXct('2020-01-01 12:00:00'),
+             as.POSIXct('2020-01-03 12:00:00'),
+             as.POSIXct('2020-01-11 12:00:00')),
+    creatinine = c(1, 1, 1, 1, 1.3, 1.3),
+    age = 26, sex = F, race = F # 26 yo white male
+  )
+  aki <- returnAKIpatients(testDATA.patientA, HB_trumping = TRUE)
+  expect_equal(aki$aki, c(0, 0, 0, 0, 1, 0))
+})
 
 test_that("Test BCI (baseline creatinine imputation) on patient A", {
   testDATA.patientA <- data.table::data.table(
@@ -55,3 +57,4 @@ test_that("Test BCI (baseline creatinine imputation) on patient A", {
   aki <- returnAKIpatients(testDATA.patientA, eGFR_impute = TRUE)
   expect_equal(aki$aki, c(0, 0, 0, 0, 0, 0))
 })
+
