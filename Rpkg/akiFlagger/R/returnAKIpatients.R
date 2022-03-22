@@ -1,7 +1,6 @@
 library(dplyr)
-library(stringr)
-library(data.table)
 
+# The parameters for the RMW/HBT/BCI definitions still exist; commented out
 returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
                                   padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
                                   addIntermediateCols = FALSE, returnMinimalInput = FALSE) {
