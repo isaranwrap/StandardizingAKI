@@ -1,6 +1,23 @@
 library(dplyr)
 
-# The parameters for the RMW/HBT/BCI definitions still exist; commented out
+#' Main logic for calculating and returning patients with AKI
+#'
+#' @param dataframe Your input dataset, of class c(data.table, data.frame).
+#' @param RM_window Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.
+#' @param HB_trumping Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.
+#' @param eGFR_impute Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.
+#' @param padding The amount of padding you would like to add to the rolling windows. Enter this as a c(`integer`, `string`) vector where
+#'   `integer` is the amount of time and `string` are the units of time. Defaults to \code{c(4L, "hours")}.
+#' @param window1,window2 The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
+#'   The vector (same format as \code{\link{padding}}) is fed into a `difftime()` object.
+#' @param addIntermediateCols Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
+#'   Defaults to \code{FALSE}.
+#' @param returnMinimalInput Boolean selector, whether to return a minimal version of the flagger input.
+#'
+#' @return
+#' @export
+#'
+#' @examples
 returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
                                   padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
                                   addIntermediateCols = FALSE, returnMinimalInput = FALSE) {
@@ -8,10 +25,6 @@ returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, 
   shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
   longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
   consecutiveCreatinineFORAdmission <- 72 * 3600 #
-
-  if (returnMinimalInput) {
-  dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
-  }
 
   if (RM_window) {
 
@@ -27,11 +40,7 @@ returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, 
 
     dataframe[, aki := stage1 + stage2 + stage3]
 
-    if (!addIntermediateCols) {
-      dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d)
     }
-
-  }
 
   if (HB_trumping) {
 
@@ -158,12 +167,21 @@ returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, 
     dataframe[mask.RMW, aki := stage1.condition1[mask.RMW]]
   }
 
-  if (!addIntermediateCols) {
-    dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d, -baseline_creat, -admissionImputed)
+  if (!addIntermediateCols & !RM_window) {
+   dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d, -baseline_creat, -admissionImputed)
+  } else if (!addIntermediateCols & RM_window) {
+    dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d)
+    print(dataframe)
   }
+
+  # if (returnMinimalInput) {
+  #dataframe <- dataframe %>% dplyr::select(patient_id, inpatient, time, creatinine)
+  #}
 
   return(dataframe)
 }
+
+
 
 #' Rolling Minimum Window (RMW) Definition
 #'
@@ -305,12 +323,12 @@ returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
   }
 }
 
-multipleDefinitions <- function(RM_window, HB_trumping, eGFR_impute) {
+helper.multipleDefinitions <- function(RM_window, HB_trumping, eGFR_impute) {
   return(sum(c(RM_window, HB_trumping, eGFR_impute)) > 1)
 }
 
-if (multipleDefinitions(RM_window = NULL,
-                        HB_trumping = NULL,
-                        eGFR_impute = NULL)) {
+if (helper.multipleDefinitions(RM_window = NULL,
+                               HB_trumping = NULL,
+                               eGFR_impute = NULL)) {
   akiColNames = c("aki", "aki", "aki")
 }
