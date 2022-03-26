@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '0.5.0' # master file
+__version__ = '1.0.3' # master file
 
 class AKIFlagger:
     ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -27,7 +27,7 @@ class AKIFlagger:
         
         age (string): **default 'age'.** Name of the column containing the age values; e.g. 'age'
         sex (string): **default 'sex'.** Name of the column containing the sex values; e.g. 'female'
-        race (string): **default 'race'.** Name of the column containing the race values; e.g. 'black'
+        race (string): deprecated; **default 'race'.** Name of the column containing the race values; e.g. 'black'
         
         HB_trumping (boolean): **default False.** Whether or not to have the historical baseline value trump the rolling 
             minimum value around admission time. 
@@ -126,7 +126,7 @@ class AKIFlagger:
         if self.eGFR_impute:
             assert (self.age in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
             assert (self.sex in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
-            assert (self.race in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!"
+            # assert (self.race in dataframe.columns), "If you are using the eGFR-based imputation method, you need to have an age, sex, and race column!" 2021 Update: No longer need race
 
         # At this point, just want to make sure that the sex column is female. If sex is specified to be male, then change it 
         if self.sex == 'male' or self.sex == 'MALE': 
@@ -254,12 +254,11 @@ class AKIFlagger:
         tmp = tmp.drop('c1c2', axis=1)
         return tmp
     
-    def eGFRbasedCreatImputation(self, age, female, black):
+    def _eGFRbasedCreatImputation(self, age, female, black): # Deprecated function, not in use internally (yet)
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
         The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
         *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)*.
-        
-        The new equation used is Inker et. Al, 2021: https://www.nejm.org/doi/full/10.1056/NEJMoa2102953
+    
         
         Args: 
             age (int): age of patient
@@ -270,14 +269,42 @@ class AKIFlagger:
 
         kappa = (0.9 - 0.2*female)
         alpha = (-0.411 + 0.082*female)
-        creat_over_kappa = 75/(141*(1 + 0.018*female)*(1 + 0.159*black)*0.993**age)
+        creat_over_kappa = 75/(141*(1 + 0.018*female)*(1 + 0.159*black)*0.993**age) # Old eq
 
         # Note that if creat/kappa is < 1 then the equation simplifies to creat_over_kappa = (creat/kappa)**(-1.209)
         # and if creat/kappa is > 1 then the equation simplifies to (creat/kappa)**alpha. Thus, we can replace the min(~)max(~)
         # statements with the following check:
         
         creat = kappa
-        creat[creat_over_kappa < 1] = kappa*creat_over_kappa**(-1/1.209)
+        creat[creat_over_kappa < 1] = kappa*creat_over_kappa**(-1/1.209) # old
+        creat[creat_over_kappa >=1] = kappa*creat_over_kappa**(1/alpha)
+
+        return creat
+
+    def eGFRbasedCreatImputation(self, age, female):
+        '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
+        The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
+        *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)*.
+        
+        The new equation used is described in Inker et. Al, 2021: https://www.nejm.org/doi/full/10.1056/NEJMoa2102953
+        
+        Args: 
+            age (int): age of patient
+            female (int): sex of patient; defaults to female (i.e. sex = 1 is female)
+            black (int): race of patient; black or not black... working on removing this from the analysis.
+        
+        '''
+
+        kappa = (0.9 - 0.2*female)
+        alpha = (-0.543 + 0.302*female)
+        creat_over_kappa = 75/(142*(1 + 0.012*female)*0.9938**age)
+
+        # Note that if creat/kappa is < 1 then the equation simplifies to creat_over_kappa = (creat/kappa)**(-1.209)
+        # and if creat/kappa is > 1 then the equation simplifies to (creat/kappa)**alpha. Thus, we can replace the min(~)max(~)
+        # statements with the following check:
+        
+        creat = kappa
+        creat[creat_over_kappa < 1] = kappa*creat_over_kappa**(-1/1.200)
         creat[creat_over_kappa >=1] = kappa*creat_over_kappa**(1/alpha)
 
         return creat
@@ -301,18 +328,18 @@ class AKIFlagger:
         # Subset age/sex/race if eGFR_impute flag is set to True
         if self.eGFR_impute:
             tmp = dataframe.loc[:, [self.encounter_id, self.inpatient, self.admission, self.creatinine,
-                                    self.age, self.sex, self.race]]
+                                    self.age, self.sex]]#, self.race]] # Updated 2021: No longer use race
 
         tmp = tmp.groupby(self.patient_id).apply(self._returnBaselineCreat)
 
         if self.eGFR_impute:
             imp = dataframe.loc[tmp[self.baseline_creat].isnull()]
             if self.sex == 'male':
-                tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], ~imp[self.sex], imp[self.race])
+                tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], ~imp[self.sex])#, imp[self.race])
             elif self.sex == 'female':
-                tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex], imp[self.race])
+                tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex])#, imp[self.race])
             else:
-                tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex], imp[self.race])
+                tmp.loc[tmp[self.baseline_creat].isnull(), self.baseline_creat] = self.eGFRbasedCreatImputation(imp[self.age], imp[self.sex])#, imp[self.race])
         
         if self.add_baseline_creat:
             dataframe[self.baseline_creat] = tmp.baseline_creat
