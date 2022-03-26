@@ -5,7 +5,7 @@ import datetime, random
 __version__ = '1.0.3' # master file
 
 class AKIFlagger:
-    ''' Main flagger to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
+    ''' Main logic to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 
         * *Stage 1:* 0.3 mg/dL increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
         * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)

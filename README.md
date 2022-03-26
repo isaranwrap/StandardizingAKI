@@ -1,4 +1,4 @@
-# AKI Flagger <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/hex-AKI_FlaggeR_github.png?raw=true" alt="hex-AKI FlaggeR_github" width="200" align = "right"/>
+# AKI Flagger <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/hex/07hexlogo.png?raw=true" alt="hex-AKI FlaggeR_github" width="200" align = "right"/>
 
 #### [Advisor](https://medicine.yale.edu/intmed/ctra/profile/francis_p_wilson/): Dr. Francis Perry Wilson, MD MSCE 
 
