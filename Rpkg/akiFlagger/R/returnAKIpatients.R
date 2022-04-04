@@ -18,6 +18,7 @@ library(dplyr)
 #' @export
 #'
 #' @examples
+#' returnAKIpatients(toy)
 returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, eGFR_impute = FALSE,
                                   padding = c(4L, "hours"), window1 = c(2L, "days"), window2 = c(7L, "days"),
                                   addIntermediateCols = FALSE, returnMinimalInput = FALSE) {
@@ -25,6 +26,13 @@ returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, 
   shortTIMEFRAME <- as.difftime(as.numeric(window1[1]), units = window1[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
   longTIMEFRAME  <-  as.difftime(as.numeric(window2[1]), units = window2[2]) + as.difftime(as.numeric(padding[1]), units = padding[2])
   consecutiveCreatinineFORAdmission <- 72 * 3600 #
+
+  inpatient <- time <- creatinine <- patient_id <- NULL
+  min_creat48 <- min_creat7d <- aki <- NULL
+  admissionConditions <- admissionMask <- admissionImputed <- NULL
+  baseline_creat <- sex <- age <- creat_over_kappa <- NULL
+  timeBetweenRows <- inpShiftedBack <- NULL
+  print(creatinine)
 
   if (RM_window) {
 
@@ -171,7 +179,6 @@ returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, 
    dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d, -baseline_creat, -admissionImputed)
   } else if (!addIntermediateCols & RM_window) {
     dataframe <- dataframe %>% dplyr::select(-min_creat48, -min_creat7d)
-    print(dataframe)
   }
 
   # if (returnMinimalInput) {
@@ -284,6 +291,7 @@ runAllDefinitions <- function(dataframe, padding = c(4, "hours")) {
 #' @examples
 #' returnBaselineCreat(toy, eGFR_impute = TRUE)
 returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
+  kappa <- alpha <- baseline_creat <- NULL
 
   if (eGFR_impute) {
     # Imputed based on updated CKD-EPI equation (Inker et. Al, 2021)
@@ -311,10 +319,10 @@ returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
     return(dataframe)
 
   } else {
-    dataframe.im <- dataframe %>% filter(inpatient == FALSE) %>%
-      filter(time <= admissionImputed - as.difftime(7, units = "days") & time >= admissionImputed - as.difftime(365, units = "days")) %>%
+    dataframe.im <- dataframe %>% dplyr::filter(inpatient == FALSE) %>%
+      dplyr::filter(time <= admissionImputed - as.difftime(7, units = "days") & time >= admissionImputed - as.difftime(365, units = "days")) %>%
       dplyr::group_by(patient_id) %>%
-        dplyr::mutate(baseline_creat = median(creatinine))
+        dplyr::mutate(baseline_creat = stats::median(creatinine))
 
     dataframe$baseline_creat <- dataframe.im$baseline_creat[match(dataframe$patient_id, dataframe.im$patient_id)]
     dataframe$baseline_creat <- round(dataframe$baseline_creat, digits = 3)

@@ -37,46 +37,66 @@ Type 'q()' to quit R.
 > base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 > base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 > cleanEx()
-> nameEx("returnAKIpatients_BCI")
-> ### * returnAKIpatients_BCI
+> nameEx("returnAKIpatients")
+> ### * returnAKIpatients
 > 
 > flush(stderr()); flush(stdout())
 > 
 > base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-> ### Name: returnAKIpatients_BCI
-> ### Title: Historical Baseline Trumping (HBT) Definition
-> ### Aliases: returnAKIpatients_BCI
+> ### Name: returnAKIpatients
+> ### Title: Main logic for calculating and returning patients with AKI
+> ### Aliases: returnAKIpatients
 > 
 > ### ** Examples
 > 
-> returnAKIpatients_BCI(toy)
-Error: Can't subset columns that don't exist.
-x Column `sex` doesn't exist.
+> returnAKIpatients(toy)
+NULL
+      patient_id inpatient                time creatinine aki
+   1:      12732     FALSE 2019-11-16 05:42:42       1.05   0
+   2:      12732     FALSE 2019-11-20 05:42:42       1.61   0
+   3:      12732     FALSE 2020-01-15 05:42:42       1.42   0
+   4:      12732     FALSE 2020-02-27 11:42:42       1.26   0
+   5:      12732      TRUE 2020-03-01 17:42:42       1.06   0
+  ---                                                        
+1074:      14305     FALSE 2019-12-18 07:35:50       0.97   0
+1075:      14305     FALSE 2020-01-19 13:35:50       0.90   0
+1076:      14305     FALSE 2020-01-30 01:35:50       0.78   0
+1077:      14305     FALSE 2020-03-22 01:35:50       1.01   0
+1078:      14305     FALSE 2020-04-10 07:35:50       1.33   0
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("returnAKIpatients", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("returnBaselineCreat")
+> ### * returnBaselineCreat
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: returnBaselineCreat
+> ### Title: Return the baseline creatinine, helper function
+> ### Aliases: returnBaselineCreat
+> 
+> ### ** Examples
+> 
+> returnBaselineCreat(toy, eGFR_impute = TRUE)
+Error in `dplyr::mutate()`:
+! Problem while computing `creat_over_kappa = 75/(141 * (1 + 0.018 *
+  sex) * 0.993^age)`.
+Caused by error:
+! object 'sex' not found
 Backtrace:
-     █
-  1. ├─akiFlagger::returnAKIpatients_BCI(toy)
-  2. │ └─`%>%`(...)
-  3. ├─dplyr::select(...)
-  4. └─dplyr:::select.data.frame(...)
-  5.   └─tidyselect::eval_select(expr(c(...)), .data)
-  6.     └─tidyselect:::eval_select_impl(...)
-  7.       ├─tidyselect:::with_subscript_errors(...)
-  8.       │ ├─base::tryCatch(...)
-  9.       │ │ └─base:::tryCatchList(expr, classes, parentenv, handlers)
- 10.       │ │   └─base:::tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 11.       │ │     └─base:::doTryCatch(return(expr), name, parentenv, handler)
- 12.       │ └─tidyselect:::instrument_base_errors(expr)
- 13.       │   └─base::withCallingHandlers(...)
- 14.       └─tidyselect:::vars_select_eval(...)
- 15.         └─tidyselect:::walk_data_tree(expr, data_mask, context_mask)
- 16.           └─tidyselect:::eval_c(expr, data_mask, context_mask)
- 17.             └─tidyselect:::reduce_sels(node, data_mask, context_mask, init = init)
- 18.               └─tidyselect:::walk_data_tree(new, data_mask, context_mask)
- 19.                 └─tidyselect:::as_indices_sel_impl(...)
- 20.                   └─tidyselect:::as_indices_impl(x, vars, strict = strict)
- 21.                     └─tidyselect:::chr_as_locations(x, vars)
- 22.                       └─vctrs::vec_as_location(x, n = length(vars), names = vars)
- 23.                         └─(function () ...
- 24.                           └─vctrs:::stop_subscript_oob(...)
- 25.                             └─vctrs:::stop_subscript(...)
+     ▆
+  1. ├─akiFlagger::returnBaselineCreat(toy, eGFR_impute = TRUE)
+  2. │ └─dataframe %>% ...
+  3. ├─dplyr::mutate(...)
+  4. ├─dplyr:::mutate.data.frame(...)
+  5. │ └─dplyr:::mutate_cols(.data, dplyr_quosures(...), caller_env = caller_env())
+  6. │   ├─base::withCallingHandlers(...)
+  7. │   └─mask$eval_all_mutate(quo)
+  8. └─base::.handleSimpleError(`<fn>`, "object 'sex' not found", base::quote(mask$eval_all_mutate(quo)))
+  9.   └─dplyr h(simpleError(msg, call))
+ 10.     └─rlang::abort(...)
 Execution halted

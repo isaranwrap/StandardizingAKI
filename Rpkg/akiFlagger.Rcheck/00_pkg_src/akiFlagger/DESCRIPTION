@@ -1,6 +1,6 @@
 Package: akiFlagger
 Title: Flags Acute Kidney Injury (AKI)
-Version: 0.4.1
+Version: 1.0.0
 Authors@R: 
     c(
     person(given = "Ishan",
@@ -15,6 +15,10 @@ Authors@R:
            family = "Saran",
            role = "aut",
            email = "rishipsaran@gmail.com"),
+    person(given = "Tanush",
+           family = "Saran",
+           role = "aut",
+           email = "tanushpsaran@gmail.com"),
     person(given = "Aditya",
            family = "Biswas",
            role = "ctb",
@@ -40,10 +44,11 @@ URL: https://github.com/isaranwrap/akiFlagger
 BugReports: https://github.com/isaranwrap/akiFlagger/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2022-02-16 22:12:11 UTC; saranmedical-smile
+Packaged: 2022-05-01 02:18:31 UTC; saranmedical-smile
 Author: Ishan Saran [aut, cre],
   Shivam Saran [aut],
   Rishi Saran [aut],
+  Tanush Saran [aut],
   Aditya Biswas [ctb],
   Yu Yamamoto [ctb],
   Francis Perry Wilson [ctb, ths]

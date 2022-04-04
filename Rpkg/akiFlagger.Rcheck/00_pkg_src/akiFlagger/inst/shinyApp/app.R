@@ -16,10 +16,12 @@ library(tidyverse)
 library(zoo)
 library(DT)
 
-#source("returnAKIpatients.R")
 baseFolder <- file.path("/Users", "saranmedical-smile", "AKIFlagger")
 dataFolder <- file.path(baseFolder, "data")
 imageFolder <- file.path(baseFolder, "images")
+scriptsFolder <- file.path(baseFolder, "scripts")
+source(file.path(scriptsFolder, "returnAKIpatients.R"))
+source(file.path(scriptsFolder, "plotAKIoverlap.R"))
 
 saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
   return(write(jsonlite::toJSON(dataframe), file = outFP))
@@ -30,7 +32,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
     headerPanel(paste("AKI Flagger", today())),
     fileInput("file", "FILE",
               accept = "text/csv"), # END FILE INPUT
-    img(src="hex-AKI FlaggeR_github.png", align = "right",
+    img(src="hexlogo.png", align = "right",
         height = 64, width = 64), # Image Logo
     checkboxGroupButtons("definitionSelector",
                        "DEFINITION:",

@@ -18,62 +18,24 @@ library('akiFlagger')
 base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
 base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
 cleanEx()
-nameEx("returnAKIpatients_BCI")
-### * returnAKIpatients_BCI
+nameEx("returnAKIpatients")
+### * returnAKIpatients
 
 flush(stderr()); flush(stdout())
 
 base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-### Name: returnAKIpatients_BCI
-### Title: Historical Baseline Trumping (HBT) Definition
-### Aliases: returnAKIpatients_BCI
+### Name: returnAKIpatients
+### Title: Main logic for calculating and returning patients with AKI
+### Aliases: returnAKIpatients
 
 ### ** Examples
 
-returnAKIpatients_BCI(toy)
+returnAKIpatients(toy)
 
 
 
 base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-base::cat("returnAKIpatients_BCI", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
-cleanEx()
-nameEx("returnAKIpatients_HBT")
-### * returnAKIpatients_HBT
-
-flush(stderr()); flush(stdout())
-
-base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-### Name: returnAKIpatients_HBT
-### Title: Historical Baseline Trumping (HBT) Definition
-### Aliases: returnAKIpatients_HBT
-
-### ** Examples
-
-returnAKIpatients_HBT(toy)
-
-
-
-base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-base::cat("returnAKIpatients_HBT", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
-cleanEx()
-nameEx("returnAKIpatients_RMW")
-### * returnAKIpatients_RMW
-
-flush(stderr()); flush(stdout())
-
-base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-### Name: returnAKIpatients_RMW
-### Title: Rolling Minimum Window (RMW) Definition
-### Aliases: returnAKIpatients_RMW
-
-### ** Examples
-
-returnAKIpatients_RMW(toy)
-
-
-
-base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-base::cat("returnAKIpatients_RMW", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+base::cat("returnAKIpatients", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
 cleanEx()
 nameEx("returnBaselineCreat")
 ### * returnBaselineCreat
@@ -101,11 +63,16 @@ flush(stderr()); flush(stdout())
 
 base::assign(".ptime", proc.time(), pos = "CheckExEnv")
 ### Name: runAllDefinitions
-### Title: Run all THREE definitions for acute kidney injury (AKI); helper
-###   function.
+### Title: Rolling Minimum Window (RMW) Definition
 ### Aliases: runAllDefinitions
 
 ### ** Examples
+
+returnAKIpatients_RMW(toy)
+Historical Baseline Trumping (HBT) Definition
+
+returnAKIpatients_HBT(toy)
+Helper function to run all THREE definitions for acute kidney injury (AKI)
 
 runAllDefinitions(toy)
 

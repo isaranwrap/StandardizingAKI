@@ -5,8 +5,21 @@
 *** moving datasets to lazyload DB
 ** inst
 ** byte-compile and prepare package for lazy loading
-Warning: package ‘dplyr’ was built under R version 4.0.2
+Warning: package ‘shiny’ was built under R version 4.0.2
+Warning: package ‘shinythemes’ was built under R version 4.0.2
+Warning: package ‘VennDiagram’ was built under R version 4.0.2
+Warning: package ‘futile.logger’ was built under R version 4.0.2
 Warning: package ‘data.table’ was built under R version 4.0.2
+Warning: package ‘lubridate’ was built under R version 4.0.2
+Warning: package ‘tidyverse’ was built under R version 4.0.2
+Warning: package ‘ggplot2’ was built under R version 4.0.2
+Warning: package ‘tibble’ was built under R version 4.0.2
+Warning: package ‘tidyr’ was built under R version 4.0.5
+Warning: package ‘readr’ was built under R version 4.0.5
+Warning: package ‘dplyr’ was built under R version 4.0.5
+Warning: package ‘forcats’ was built under R version 4.0.2
+Warning: package ‘zoo’ was built under R version 4.0.2
+Warning: package ‘DT’ was built under R version 4.0.2
 ** help
 *** installing help indices
 ** building package indices

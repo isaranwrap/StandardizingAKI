@@ -1,9 +1,7 @@
-returnAKIpatients_BCI   Historical Baseline Trumping (HBT) Definition
-returnAKIpatients_HBT   Historical Baseline Trumping (HBT) Definition
-returnAKIpatients_RMW   Rolling Minimum Window (RMW) Definition
+returnAKIpatients       Main logic for calculating and returning
+                        patients with AKI
 returnBaselineCreat     Return the baseline creatinine, helper function
-runAllDefinitions       Run all THREE definitions for acute kidney
-                        injury (AKI); helper function.
+runAllDefinitions       Rolling Minimum Window (RMW) Definition
 runGUI                  GUI Shiny App
 toy                     Toy dataset
 toy.demo                Toy dataset

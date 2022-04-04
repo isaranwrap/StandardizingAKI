@@ -18,7 +18,7 @@ test_that("Test RMW (rolling minimum window) on patient A", {
              as.POSIXct('2020-01-11 12:00:00')),
     creatinine = c(1, 1, 1, 1, 1.3, 1.3)
   )
-  aki <- returnAKIpatients(testDATA.patientA, RRM_window = TRUE)
+  aki <- returnAKIpatients(testDATA.patientA, RM_window = TRUE)
   expect_equal(aki$aki, c(0, 0, 0, 0, 1, 0))
 })
 
@@ -35,10 +35,10 @@ test_that("Test BCI (baseline creatinine imputation) on patient A; no ASR", {
              as.POSIXct('2020-01-11 12:00:00')),
     creatinine = c(1, 1, 1, 1, 1.3, 1.3)
   )
-  expect_error(returnAKIpatients(testDATA.patientA, eGFR_impute = TRUE), "Can't subset columns that don't exist.")
+  expect_error(returnAKIpatients(testDATA.patientA, eGFR_impute = TRUE), "Unknown or uninitialised column: `sex`.")#, "Can't subset columns that don't exist.")
 })
 
-test_that("Test BCI (baseline creatinine imputation) on patient A; ", {
+test_that("Test BCI (baseline creatinine imputation) on patient A", {
   testDATA.patientA <- data.table::data.table(
     patient_id = replicate(6, 1),
     inpatient = c(F, F, F, T, T, T),

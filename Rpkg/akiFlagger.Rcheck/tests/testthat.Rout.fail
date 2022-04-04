@@ -1,0 +1,85 @@
+
+R version 4.0.1 (2020-06-06) -- "See Things Now"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(testthat)
+Warning message:
+package 'testthat' was built under R version 4.0.2 
+> library(akiFlagger)
+> 
+> test_check("akiFlagger")
+NULL
+NULL
+NULL
+══ Warnings ════════════════════════════════════════════════════════════════════
+── Warning (test-returnAKIpatients.R:38:3): Test BCI (baseline creatinine imputation) on patient A; no ASR ──
+Unknown or uninitialised column: `sex`.
+Backtrace:
+  1. testthat::expect_error(...)
+       at test-returnAKIpatients.R:38:2
+  9. akiFlagger::returnBaselineCreat(., eGFR_impute = eGFR_impute)
+ 11. tibble:::`$.tbl_df`(dataframe, "sex")
+── Warning (test-returnAKIpatients.R:38:3): Test BCI (baseline creatinine imputation) on patient A; no ASR ──
+Unknown or uninitialised column: `sex`.
+Backtrace:
+  1. testthat::expect_error(...)
+       at test-returnAKIpatients.R:38:2
+  9. akiFlagger::returnBaselineCreat(., eGFR_impute = eGFR_impute)
+ 11. tibble:::`$.tbl_df`(dataframe, "sex")
+── Warning (test-returnAKIpatients.R:38:3): Test BCI (baseline creatinine imputation) on patient A; no ASR ──
+Unknown or uninitialised column: `sex`.
+Backtrace:
+  1. testthat::expect_error(...)
+       at test-returnAKIpatients.R:38:2
+  9. akiFlagger::returnBaselineCreat(., eGFR_impute = eGFR_impute)
+ 11. tibble:::`$.tbl_df`(dataframe, "sex")
+── Warning (test-returnAKIpatients.R:38:3): Test BCI (baseline creatinine imputation) on patient A; no ASR ──
+Unknown or uninitialised column: `sex`.
+Backtrace:
+  1. testthat::expect_error(...)
+       at test-returnAKIpatients.R:38:2
+  9. akiFlagger::returnBaselineCreat(., eGFR_impute = eGFR_impute)
+ 11. tibble:::`$.tbl_df`(dataframe, "sex")
+
+══ Failed tests ════════════════════════════════════════════════════════════════
+── Failure (test-returnAKIpatients.R:38:3): Test BCI (baseline creatinine imputation) on patient A; no ASR ──
+`returnAKIpatients(testDATA.patientA, eGFR_impute = TRUE)` threw an error with unexpected message.
+Expected match: "Unknown or uninitialised column: `sex`."
+Actual message: "Problem while computing `creat_over_kappa = 75/(141 * (1 + 0.018 * sex)\n* 0.993^age)`.\nℹ The error occurred in group 1: patient_id = 1.\nCaused by error:\n! object 'sex' not found"
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(...) at test-returnAKIpatients.R:38:2
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. ├─akiFlagger::returnAKIpatients(testDATA.patientA, eGFR_impute = TRUE)
+  7. │ └─... %>% dplyr::ungroup()
+  8. ├─dplyr::ungroup(.)
+  9. ├─akiFlagger::returnBaselineCreat(., eGFR_impute = eGFR_impute)
+ 10. │ └─dataframe %>% ...
+ 11. ├─dplyr::mutate(...)
+ 12. ├─dplyr:::mutate.data.frame(...)
+ 13. │ └─dplyr:::mutate_cols(.data, dplyr_quosures(...), caller_env = caller_env())
+ 14. │   ├─base::withCallingHandlers(...)
+ 15. │   └─mask$eval_all_mutate(quo)
+ 16. └─base::.handleSimpleError(`<fn>`, "object 'sex' not found", base::quote(mask$eval_all_mutate(quo)))
+ 17.   └─dplyr h(simpleError(msg, call))
+ 18.     └─rlang::abort(...)
+
+[ FAIL 1 | WARN 4 | SKIP 0 | PASS 4 ]
+Error: Test failures
+Execution halted
