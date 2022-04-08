@@ -49,7 +49,7 @@ base::assign(".ptime", proc.time(), pos = "CheckExEnv")
 
 ### ** Examples
 
-returnBaselineCreat(toy, eGFR_impute = TRUE)
+returnBaselineCreat(toy.demo, eGFR_impute = TRUE)
 
 
 
@@ -68,13 +68,13 @@ base::assign(".ptime", proc.time(), pos = "CheckExEnv")
 
 ### ** Examples
 
-returnAKIpatients_RMW(toy)
-Historical Baseline Trumping (HBT) Definition
+# returnAKIpatients_RMW(toy)
+# Historical Baseline Trumping (HBT) Definition
+#
+# returnAKIpatients_HBT(toy)
+# Helper function to run all THREE definitions for acute kidney injury (AKI)
 
-returnAKIpatients_HBT(toy)
-Helper function to run all THREE definitions for acute kidney injury (AKI)
-
-runAllDefinitions(toy)
+# runAllDefinitions(toy)
 
 
 

@@ -26,10 +26,6 @@ scriptsFolder <- file.path(baseFolder, "scripts/StandardizingAKI/scripts/")
 source(file.path(scriptsFolder, "plotAKIoverlap.R"))
 source(file.path(scriptsFolder, "returnAKIpatients.R"))
 
-saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
-  return(write(jsonlite::toJSON(dataframe), file = outFP))
-}
-
 ui <- fluidPage(theme = shinytheme("sandstone"),
                 sidebarPanel(
                   headerPanel(paste("AKI Flagger", today())),
@@ -108,11 +104,6 @@ server <- function(input, output, session) {
     return(tableReactive)
   }
   )
-
-  writeOut <- shiny::eventReactive(input$go, {
-    saveJSON(tableREACTIVE())
-    message(list.files(dataFolder))
-  })
 
   output$venn <- renderPlot({
 
