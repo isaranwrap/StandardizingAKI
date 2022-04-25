@@ -35,7 +35,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                   headerPanel(paste("AKI Flagger", today())),
                   fileInput("file", "FILE",
                             accept = "text/csv"), # END FILE INPUT
-                  img(src="/Users/saranmedical-smile/AKIFlagger/images/logos/07hexlogo.png", align = "right",
+                  img(src=file.path(imageFolder, "logos/hexlogo.png"), align = "right",
                       height = 64, width = 64), # Image Logo
                   checkboxGroupButtons("definitionSelector",
                                        "DEFINITION:",
