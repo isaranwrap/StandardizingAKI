@@ -1,4 +1,5 @@
 library(dplyr)
+library(tidyverse)
 
 #' Main logic for calculating and returning patients with AKI
 #'
@@ -289,7 +290,7 @@ runAllDefinitions <- function(dataframe, padding = c(4, "hours")) {
 #' @export
 #'
 #' @examples
-#' returnBaselineCreat(toy, eGFR_impute = TRUE)
+#' returnBaselineCreat(toy.demo, eGFR_impute = TRUE)
 returnBaselineCreat <- function(dataframe, eGFR_impute = F) {
   kappa <- alpha <- baseline_creat <- NULL
 
