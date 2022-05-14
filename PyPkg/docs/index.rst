@@ -5,7 +5,7 @@
     :format: html
     
 ========================================
-Welcome to the akiFlagger documentation!
+Welcome to the AKIFlagger documentation!
 ========================================
 
 .. image:: ../../logos/hex-AKI_FlaggeR_github.png

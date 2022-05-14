@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '1.0.3' # master file
+__version__ = '1.0.8' # master file
 
 class AKIFlagger:
     ''' Main logic to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
@@ -254,7 +254,7 @@ class AKIFlagger:
         tmp = tmp.drop('c1c2', axis=1)
         return tmp
     
-    def _eGFRbasedCreatImputation(self, age, female, black): # Deprecated function, not in use internally (yet)
+    def _eGFRbasedCreatImputation(self, age, female, black): # Deprecated function, not in use internally (anymore)
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
         The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
         *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)*.
@@ -296,7 +296,9 @@ class AKIFlagger:
         '''
 
         kappa = (0.9 - 0.2*female)
-        alpha = (-0.543 + 0.302*female)
+        alpha = (-0.302 + 0.061 *female)
+        #creat_over_kappa = 75 / (142*0.012*female*0.9938**age)
+        #alpha = (-0.543 + 0.302*female) # AA fix
         creat_over_kappa = 75/(142*(1 + 0.012*female)*0.9938**age)
 
         # Note that if creat/kappa is < 1 then the equation simplifies to creat_over_kappa = (creat/kappa)**(-1.209)
