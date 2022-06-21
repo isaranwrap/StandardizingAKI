@@ -237,7 +237,7 @@ class AKIFlagger:
         # Admission column imputation:
         
         # Admission is defined as the first timestamp where THIS occurs:
-        # two consecutive inpatient creatinine measurements <= 72 hours amart
+        # two consecutive inpatient creatinine measurements <= 72 hours apart
 
         cond1 = tmp.groupby(self.patient_id)[self.time].diff(1).shift(-1) <= pd.Timedelta('72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
         cond2 = tmp[self.inpatient] & tmp.groupby(self.patient_id)[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
@@ -449,3 +449,4 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
         if printMsg:
             print('Successfully generated toy data!\n')
         return df
+'
