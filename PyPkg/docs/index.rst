@@ -8,7 +8,7 @@
 Welcome to the AKIFlagger documentation!
 ========================================
 
-.. image:: ../../logos/hex-AKI_FlaggeR_github.png
+.. image:: ../../logos/hex/04hexlogo.png
 	:width: 200
 	:alt: AKI Flagger logo
 	:align: right
