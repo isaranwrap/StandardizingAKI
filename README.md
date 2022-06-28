@@ -3,7 +3,7 @@
 #### [Advisor](https://medicine.yale.edu/intmed/ctra/profile/francis_p_wilson/): Dr. Francis Perry Wilson, MD MSCE 
 
 ### Yale School of Medicine, Internal Medicine, Professor, Director of [Clinical and Translational Research Accelerator](https://medicine.yale.edu/intmed/ctra/)
-<img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/ysm/00ctra_logo.png?raw=true" alt="CTRA" width="300" align = "center"/>
+<img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/ysm/02ctra_logo.png?raw=true" alt="CTRA" width="300" align = "center"/>
 
 <br>
 
