@@ -1,4 +1,5 @@
 library(dplyr)
+library(data.table)
 library(tidyverse)
 
 #' Main logic for calculating and returning patients with AKI
