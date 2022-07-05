@@ -6,7 +6,7 @@ Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked 
 (amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of guidelines and standard definitions 
 of AKI:
 
-* *Stage 1:* 50% increase in creatinine in <= 7 days or 0.3 increase in creatinine in < 48 hours
+* *Stage 1:* 50% increase in creatinine in <= 7 days or 0.3 increase in creatinine in <= 48 hours
 * *Stage 2:* 100% increase in (or doubling of) creatinine in <= 48 hours
 * *Stage 3:* 200% increase in (or tripling of) creatinine in <= 48 hours
 

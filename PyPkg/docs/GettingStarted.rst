@@ -228,7 +228,7 @@ Actually, by default the toy dataset only has patient values :math:`\pm` 5 days 
 This is important: in the absence of available baseline creatinine values, the flagger defaults to a rolling minimum comparison. Indeed, most of the checking for AKI occurs outside of period of hospitalization.
 Normally, of course, patients won't have times restricted to just :math:`\pm` 5 days, but this is a good opportunity to showcase one of the flagger features: the **eGFR-based imputation of baseline creatinine**.
 
-The following equation is known as the `CKD-EPI equation <https://www.kidney.org/content/ckd-epi-creatinine-equation-2021>`_  
+The following equation is known as the `CKD-EPI equation <https://www.kidney.org/content/ckd-epi-creatinine-equation-2021>`_  .
 
 .. math::
     \begin{equation}
@@ -243,7 +243,7 @@ where:
 - :math:`\alpha` (unitless) is -0.241 for females and -0.302 for males
 - :math:`f` is 1 if female, 0 if male
 
-The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age, sex, and race to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
+The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age and sex of the patient to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
 
 .. option:: Python
 **Note:** The toy dataset doesn't come with demographic information by default, but simply passing ``include_demographic_info = True`` adds in a column for the age and sex variables.
