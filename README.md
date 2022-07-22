@@ -3,6 +3,7 @@
 #### [Advisor](https://medicine.yale.edu/intmed/ctra/profile/francis_p_wilson/): Dr. Francis Perry Wilson, MD MSCE 
 
 <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/ysm/02ctra_logo.png?raw=true" alt="CTRA" width="300" align = "center"/>
+
 ### Yale School of Medicine, Section of Nephrology, [Clinical and Translational Research Accelerator](https://medicine.yale.edu/intmed/ctra/)
 
 <br>
