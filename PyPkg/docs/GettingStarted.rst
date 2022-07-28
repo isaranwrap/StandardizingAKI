@@ -271,7 +271,7 @@ The idea is as follows: based on the above equation, we assume a GFR of 75 and t
 
 .. option:: R
 
-There are actually two toy datasets that come with the packages: ``toy`` and ``toy.demo``. ``toy.demo`` is the toy dataframe with columns for age, sex, and race. As such, all we have to do is run
+There are actually two toy datasets that come with the packages: ``toy`` and ``toy.demo``. ``toy.demo`` is the toy dataframe with demographic information added in. As such, all we have to do is run
 
 .. code-block:: R
 
