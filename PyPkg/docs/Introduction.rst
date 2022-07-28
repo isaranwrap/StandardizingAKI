@@ -19,7 +19,7 @@ Methods of calculating AKI
 .. role:: bolditalic
   :class: bolditalic
 
-There are two frameworks for retroactively determining if a patient has developed AKI: ``rolling-window`` and ``back-calculation``. 
+There are three algorithmic frameworks for retroactively determining if a patient has developed AKI: ``rolling minimum window``, ``historical baseline trumping`` and ``baseline creatinine imputation``. 
 
 .. option:: Rolling Minimum Window (default)
 

@@ -61,7 +61,7 @@ To ensure that it is working properly, you can open a Python session and test it
 
    akiFlagger.__version__
 
-   >> '1.0.10'
+   >> '1.1'
 
 .. option:: R
 
@@ -95,7 +95,7 @@ To begin with, we'll import the ``akiFlagger`` module.
 
     from akiFlagger import AKIFlagger, generate_toy_data
     
-    >> '1.0.10'
+    >> '1.1'
 
 .. option:: R
 .. code-block:: R
