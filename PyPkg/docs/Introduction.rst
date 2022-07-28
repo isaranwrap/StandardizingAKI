@@ -26,7 +26,6 @@ There are two frameworks for retroactively determining if a patient has develope
    The rolling minimum window definition of AKI is based on the change in creatinine in a 48 hour or 7 day `rolling window <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_ period.
    These are the stages mentioned in the KDIGO guidelines in the `Introduction` above. 
 
-.. option:: Back Calculation (2)
 .. option:: Historical Baseline Trumping 
 
    The idea with :bolditalic:`Historical baseline trumping` is to use the historical baseline creatinine value as the value to compare the current creatinine to when runnning the KDIGO criterion 
