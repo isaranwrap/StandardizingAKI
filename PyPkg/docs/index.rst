@@ -524,7 +524,7 @@ To add in the baseline creatinine, simply pass the flag ``add_baseline_creat = T
 More information
 ================
 
-For more information on the package, feel free to contact rishabh.p.saran@vanderbilt.edu or is439@yale.edu.
+For more information on the package, feel free to contact francis.p.wilson@yale.edu, abinet.aklilu@yale.edu or is439@yale.edu.
 
 Useful guides exist for more information about AKI, rolling windows, the back-calculation imputation method.
 
