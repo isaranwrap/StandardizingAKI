@@ -19,14 +19,15 @@ Methods of calculating AKI
 .. role:: bolditalic
   :class: bolditalic
 
-There are two methods to retroactively determine if a patient developed AKI: ``rolling-window`` and ``back-calculation``. 
+There are two methods to retroactively determine if a patient has developed AKI: ``rolling-window`` and ``back-calculation``. 
 
 .. option:: Rolling Window (default)
 
    The rolling window definition of AKI is based on the change in creatinine in a 48 hour or 7 day `rolling window <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_ period.
    These are the stages mentioned in the KDIGO guidelines in the `Introduction` above. 
 
-.. option:: Historical baseline trumping (back-calculate)
+.. option:: (back-calculate)
+.. option:: Historical baseline trumping 
 
    The idea with :bolditalic:`Historical baseline trumping` is to use the historical baseline creatinine value as the value to compare the current creatinine to when runnning the KDIGO criterion 
    *instead of* the rolling window value; i.e. the historical baseline *trumps* the rolling minimum value. 
@@ -38,6 +39,7 @@ There are two methods to retroactively determine if a patient developed AKI: ``r
    specifically from the time of admission to 7 days (+ padding) out. For any time outside of this, the rolling window is still in effect... but this allows you to capture patients
    whose hemodynamic balance might be messed up at the time of admission. 
 
+.. option:: Baseline creatinine imputation
    If there are no outpatient creatinine values measured for the patient from 365 t o 7 days prior to admission, it is possible to still impute a
    baseline creatinine value based on the patients demographics: namely their age, sex, and race. This is what the ``eGFR_impute`` option in the flagger does:
    *eGFR imputation* because it assumes an eGFR of 75 mL/min/1.73m^2 and estimates the creatinine from that. 
