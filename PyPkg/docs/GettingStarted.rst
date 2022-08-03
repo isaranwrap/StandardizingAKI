@@ -275,7 +275,7 @@ There are actually two toy datasets that come with the packages: ``toy`` and ``t
 
 .. code-block:: R
 
-    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = T)
+    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = F)
 
     head(out)
 
@@ -283,3 +283,22 @@ There are actually two toy datasets that come with the packages: ``toy`` and ``t
     :file: ../doc_csvs/r/egfr_out.csv
 
 That about does it for the basics! There are a slew of other features, some of which are listed in the `Additional Features` section. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
+
+Example: Baseline Creatinine Imputation
+---------------------------------------
+
+.. option:: Python
+
+.. code-block:: python
+    
+    flagger = AKIFlagger(HB_trumping = True, eGFR_impute = True, add_baseline_creat = True)
+
+    out = flagger.returnAKIpatients(toy)
+
+
+.. option:: R
+
+.. code-block:: R
+
+    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = T)
+    

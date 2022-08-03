@@ -275,8 +275,8 @@ You can look at aggregate counts if you wanted as follows (but don't take the nu
     >>    0    1    2    3 
         1001   44   19   14 
 
-Example: Back-calculation
--------------------------
+Example: Historical Baseline Trumping 
+-------------------------------------
 
 Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median outpatient creatinine values from 365 to 7 days prior to admission** to impute a baseline creatinine value. Then, we'll run the same KDIGO criterion (except for the 0.3 increase) comparing the creatinine value to baseline creatinine.
 
@@ -360,6 +360,24 @@ There are actually two toy datasets that come with the packages: ``toy`` and ``t
 
 .. csv-table::
     :file: ../doc_csvs/r/egfr_out.csv
+
+Example: Baseline Creatinine Imputation
+---------------------------------------
+
+.. option:: Python
+
+.. code-block:: python
+    
+    flagger = AKIFlagger(HB_trumping = True, eGFR_impute = True, add_baseline_creat = True)
+
+    out = flagger.returnAKIpatients(toy)
+
+
+.. option:: R
+
+.. code-block:: R
+
+    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = T)
 
 That about does it for the basics! There are a slew of other features, some of which are listed in the `Additional Features` section. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
 
