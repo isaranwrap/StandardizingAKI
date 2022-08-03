@@ -16,7 +16,7 @@ To begin with, we'll import the ``akiFlagger`` module.
 
     from akiFlagger import AKIFlagger, generate_toy_data
     
-    >> '1.0.0'
+    >> '1.0.8.0'
 
 .. option:: R
 .. code-block:: R
@@ -43,7 +43,7 @@ The flagger comes with a built-in generator of a toy dataset to demonstrate how 
     
        Toy dataset shape: (9094, 6)
 
-The toy dataset comes with columns for the patient identifier, the encounter identifier, whether the measurement was inpatient or outpatient, the creatinine measurement and time at which the measurement was taken. ``toy.head()`` should yield something like this:
+The toy dataset comes with columns for the patient identifier, whether the measurement was taken in an inpatient or outpatient setting, the creatinine measurement and time at which the measurement was taken. ``toy.head()`` should yield something like this:
 
 .. csv-table::
     :file: ../doc_csvs/python/toy_head.csv
@@ -63,7 +63,7 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     * *Back-calculate*: **patient_id**, **inpatient**, **time**, and **creatinine**
 
-    * *eGFR-imputed baseline creatinine*: **age**, **sex** (defaults to female), and **race** (defaults to black).
+    * *eGFR-imputed baseline creatinine*: **age**, and **sex** (which defaults to female).
 
     ------------
 

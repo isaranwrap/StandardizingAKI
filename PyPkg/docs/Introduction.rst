@@ -19,7 +19,7 @@ Methods of calculating AKI
 .. role:: bolditalic
   :class: bolditalic
 
-There are two methods to retroactively determine if a patient has developed AKI: ``rolling-window`` and ``back-calculation``. 
+There are two frameworks for retroactively determining if a patient has developed AKI: ``rolling-window`` and ``back-calculation``. 
 
 .. option:: Rolling Window (default)
 

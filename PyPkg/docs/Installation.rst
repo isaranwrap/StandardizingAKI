@@ -19,7 +19,7 @@ To ensure that it is working properly, you can open a Python session and test it
 
    akiFlagger.__version__
 
-   >> '1.0.0'
+   >> '1.0.8.0'
 
 .. option:: R
 
