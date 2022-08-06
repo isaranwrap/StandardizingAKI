@@ -11,11 +11,11 @@ param1 = 'test'
 baseFolder = r'/Users/saranmedical-smile/AKIFlagger/scripts/StandardizingAKI/PyPkg'
 pythonCSVsDirectory = os.path.join(baseFolder, "doc_csvs/python/")
 rCSVsDirectory = os.path.join(baseFolder, "doc_csvs/r/")
-
 fileNames = [f for f in os.listdir(os.path.join(baseFolder, pythonCSVsDirectory))]
 
 # General directory structures
-print(os.listdir(os.path.join(baseFolder, pythonCSVsDirectory)))
+print(fileNames)
+
 
 #file1 = 
 
@@ -24,3 +24,8 @@ egfr_out = pd.read_csv(os.path.join(baseFolder, pythonCSVsDirectory, fileNames[-
 
 
 # Remove black variable
+
+
+# Keeping a running tally of the modifications to the documentation (rst files, namely)
+# which are built into the readthedocs.io 
+
