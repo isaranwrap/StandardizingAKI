@@ -40,8 +40,8 @@ There are two frameworks for retroactively determining if a patient has develope
    whose hemodynamic balance might be messed up at the time of admission. 
 
 .. option:: Baseline creatinine imputation
-   If there are no outpatient creatinine values measured for the patient from 365 t o 7 days prior to admission, it is possible to still impute a
-   baseline creatinine value based on the patients demographics: namely their age, sex, and race. This is what the ``eGFR_impute`` option in the flagger does:
+   If there are no outpatient creatinine values measured for the patient from 365 to 7 days prior to admission, it is possible to still impute a
+   baseline creatinine value based on the patients demographics: namely their age and sex. This is what the ``eGFR_impute`` option in the flagger does:
    *eGFR imputation* because it assumes an eGFR of 75 mL/min/1.73m^2 and estimates the creatinine from that. 
 
    

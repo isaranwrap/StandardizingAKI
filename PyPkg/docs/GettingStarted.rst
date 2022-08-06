@@ -63,7 +63,7 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     * *Back-calculate*: **patient_id**, **inpatient**, **time**, and **creatinine**
 
-    * *eGFR-imputed baseline creatinine*: **age**, and **sex** (which defaults to female).
+    * *eGFR-imputed baseline creatinine*: **age** and **sex** (which defaults to female).
 
     ------------
 
