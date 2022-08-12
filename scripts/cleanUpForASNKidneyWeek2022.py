@@ -29,3 +29,7 @@ egfr_out = pd.read_csv(os.path.join(baseFolder, pythonCSVsDirectory, fileNames[-
 # Keeping a running tally of the modifications to the documentation (rst files, namely)
 # which are built into the readthedocs.io 
 
+# Minor modifications to Introduction & Installation ReStructured Text files, but the real changes are in GettingStarted.rst
+
+# How are we to remove the black variable systematically; from the documentation strings as well as the dataframes?
+
