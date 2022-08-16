@@ -228,21 +228,20 @@ Actually, by default the toy dataset only has patient values :math:`\pm` 5 days 
 This is important: in the absence of available baseline creatinine values, the flagger defaults to a rolling minimum comparison. Indeed, most of the checking for AKI occurs outside of period of hospitalization.
 Normally, of course, patients won't have times restricted to just :math:`\pm` 5 days, but this is a good opportunity to showcase one of the flagger features: the **eGFR-based imputation of baseline creatinine**.
 
-The following equation is known as the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating); developed via spline analysis by *Levey et. Al, 2009*. The full paper, along with the derived constants, can be found [here](https://pubmed.ncbi.nlm.nih.gov/19414839/>`_.
+The following equation is known as the `CKD-EPI equation <https://www.kidney.org/content/ckd-epi-creatinine-equation-2021>`_  
 
 .. math::
     \begin{equation}
-    GFR = 141 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)^{-1.209} \times 0.993^{Age} \times (1 + 0.018 f) \times ( 1 + 0.159 b)
+    GFR = 142 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)^{-1.200} \times 0.9938^{Age} \times (1 + 0.012 f)
     \end{equation}
 
 where:
 
 - :math:`GFR`  :math:`(\frac{mL/min}{1.73m^2})` is the glomerular filtration rate
 - :math:`S_{cr}`  :math:`(\frac{mg}{dL})` is the serum creatinine
-- :math:`\kappa` (unitless) is 0.7 for females and 0.9 for males
-- :math:`\alpha` (unitless) is -0.329 for females and -0.411 for males
+- :math:`\kappa` (unitless) is 0.7 for females and 0.9 for males 
+- :math:`\alpha` (unitless) is -0.241 for females and -0.302 for males
 - :math:`f` is 1 if female, 0 if male
-- :math:`b` is 1 if black, 0 if another race
 
 The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age, sex, and race to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
 
