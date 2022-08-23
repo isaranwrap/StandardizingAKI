@@ -438,7 +438,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
             df = df.set_index([patient_id, time], drop=False)
             
         if include_demographic_info:
-            df = df.loc[:,[patient_id, age, female, black, inpatient, time, creatinine]]
+            df = df.loc[:,[patient_id, age, female, inpatient, time, creatinine]] # Removed black variable; 2022-11-01
             if printMsg:
                 print('Successfully generated toy data!\n')
             return df
