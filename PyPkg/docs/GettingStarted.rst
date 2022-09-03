@@ -79,8 +79,8 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     If you have different names for your columns, you **must specify them.** 
 
-Example: Rolling-window
------------------------
+Example: Rolling Minimum Window
+-------------------------------
 
 The next code block runs the flagger and returns those patients who satisfy the AKI conditions according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ for change in creatinine values by the rolling-window definition, categorized as follows:
 
@@ -196,8 +196,8 @@ You can look at aggregate counts if you wanted as follows (but don't take the nu
     >>    0    1    2    3 
         1001   44   19   14 
 
-Example: Back-calculation
--------------------------
+Example: Historical Baseline Trumping
+-------------------------------------
 
 Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median outpatient creatinine values from 365 to 7 days prior to admission** to impute a baseline creatinine value. Then, we'll run the same KDIGO criterion (except for the 0.3 increase) comparing the creatinine value to baseline creatinine.
 
