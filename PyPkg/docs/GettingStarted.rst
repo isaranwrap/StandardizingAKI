@@ -59,11 +59,11 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     In order to calculate AKI, the flagger expects a dataset with certain columns in it. Depending on the type of computation you are interested in, your dataset will need to have different columns. Here's a brief rundown of the necessary columns. 
 
-    * *Rolling-window*: **patient_id**, **inpatient**, **time**, and **creatinine** 
+    * *Rolling Minimum Window*: **patient_id**, **inpatient**, **time**, and **creatinine** 
 
-    * *Back-calculate*: **patient_id**, **inpatient**, **time**, and **creatinine**
+    * *Historical Baseline Trumping*: **patient_id**, **inpatient**, **time**, and **creatinine**
 
-    * *eGFR-imputed baseline creatinine*: **age** and **sex** (which defaults to female).
+    * *Baseline Creatinine Imputation*: **age** and **sex** (which defaults to female).
 
     ------------
 
@@ -169,7 +169,7 @@ The flagger runs on a row-wise basis, meaning that each row is checked for the i
 .. warning::
 
     The patient dataset you input should have minimally these columns: ``patient_id``, ``inpatient``, ``time``, and ``creatinine``. If you are interested in demographic-based imputation, 
-    you'll also want to include the columns ``age``, ``sex``, and ``race``. 
+    you'll also want to include the ``age`` and ``sex`` columns. 
 
 We can take a look at what the flagger flagged as AKI. ``head(out[out$aki > 0])`` should give a list of some patients which were flagged. From that, we can subset the dataset on any given patient:
 
