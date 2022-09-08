@@ -28,7 +28,8 @@ print(fileNamesPy)
 example1 = pd.read_csv(filePaths[-4]) # ../example1.csv
 if 'RACE' in example1.columns:
     example1 = example1.drop('RACE', axis = 1)
-example1.to_csv(filePaths[-4])
+if example1
+example1.to_csv(filePaths[-4], index = False)
 
 # Remove black from dataFRAME and write OUT 
 for file in filePaths:
@@ -51,6 +52,11 @@ for file in filePathsR:
 
 # Rename fileNames and filePaths variables
 # Parameters II
+
+# Remove Unnamed: 0.1 column from example1.csv in python doc_csvs/ folder
+if 'Unnamed: 0' in example1.columns:
+    example1 = example1.drop('Unnamed: 0', axis=1)
+example1.to_csv(filePaths[-4])
 
 
 
