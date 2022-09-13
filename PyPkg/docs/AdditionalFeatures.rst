@@ -2,7 +2,7 @@
 Additional Features and Common Use Cases
 ========================================
 
-For most use cases, you will just need to specify `rolling-window` or `back-calculate` and the AKI-column will be returned. There are a slew of other features, some of which are listed below. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
+For most use cases, you will just need to specify the AKI definition methodology (i.e. `rolling minimum window`, `historical baseline trumping`, or `baseline creatinine imputation`) and the AKI-column will be returned. There are a slew of other features, some of which are listed below. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
 
 
 **→ Adding padding to the rolling window**
@@ -86,7 +86,7 @@ In order to pass it to the flagger, we need to shape our data in a way that the 
 .. csv-table::
     :file: ../doc_csvs/r/example1.csv
 
-**→ Adding in rolling-window minimum creatinines**
+**→ Adding in rolling window minimum creatinines**
 ==================================================
 
 To add in the baseline creatinine, simply pass the flag ``add_min_creat = True`` to the flagger. This will add in two columns which contain the minimum values in the rolling window, which is an intermediate column generated to calculate AKI; the flag adds in the column which the current creatinine is checked against.
@@ -108,7 +108,7 @@ To add in the baseline creatinine, simply pass the flag ``add_min_creat = True``
 .. option:: R
 .. code-block:: R
 
-    # Example 2: Adding in rolling-window minima
+    # Example 2: Adding in rolling window minima
 
     example2 <- returnAKIpatients(toy, add_min_creat = T)
 
