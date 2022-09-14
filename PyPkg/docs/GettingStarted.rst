@@ -73,7 +73,7 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     **inpatient/outpatient → 'inpatient'**
 
-    **creatinine →'creatinine'** 
+    **creatinine → 'creatinine'** 
         
     **time → 'time'** 
 
@@ -84,11 +84,11 @@ Example: Rolling Minimum Window
 
 The next code block runs the flagger and returns those patients who satisfy the AKI conditions according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ for change in creatinine values by the rolling-window definition, categorized as follows:
 
-*Stage 1:* **(1)** 50% ↑ in creatinine in < 7 days OR **(2)** 0.3 mg/dL ↑ in creatinine in  < 48 hours
+*Stage 1:* **(1)** 50% ↑ in creatinine in <= 7 days OR **(2)** 0.3 mg/dL ↑ in creatinine in  <= 48 hours
 
-*Stage 2:* 100\% ↑ (or doubling of) in creatinine in < 7 days
+*Stage 2:* 100\% ↑ (or doubling of) in creatinine in <= 7 days
 
-*Stage 3:* 200\% ↑ (or tripling of) in creatinine in < 7 days
+*Stage 3:* 200\% ↑ (or tripling of) in creatinine in <= 7 days
 
 .. option:: Python
 
