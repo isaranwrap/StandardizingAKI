@@ -51,9 +51,9 @@ As an additional example, the patient identifier will often come in as *'PAT_MRN
     # Example 1: Working with different column names 
 
     dataframe = toy.rename(columns = {'patient_id': 'PAT_MRN_ID', 'creatinine':'CREATININE', 'inpatient': 'INPATIENT', 'time': 'TIME'
-                                      'age': 'AGE', 'female': 'SEX', 'black': 'RACE'})
+                                      'age': 'AGE', 'female': 'SEX'})
 
-    flagger = AKIFlagger(patient_id = 'PAT_MRN_ID', inpatient = 'INPATIENT', time = 'TIME', creatinine = 'CREATININE', age = 'AGE', sex = 'SEX', race = 'RACE')
+    flagger = AKIFlagger(patient_id = 'PAT_MRN_ID', inpatient = 'INPATIENT', time = 'TIME', creatinine = 'CREATININE', age = 'AGE', sex = 'SEX')
 
     example1 = flagger.returnAKIpatients(dataframe)
 
@@ -131,7 +131,7 @@ To add in the baseline creatinine, simply pass the flag ``add_baseline_creat = T
 
     flagger = AKIFlagger(HB_trumping = True, eGFR_impute = True, #Specifying both calculation methods
                          add_baseline_creat = True, # Additional parameter to add in baseline creatinine values
-                         age = 'age', sex = 'female', race = 'black')
+                         age = 'age', sex = 'female')
 
     example3 = flagger.returnAKIpatients(toy)
 
