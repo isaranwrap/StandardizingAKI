@@ -3,8 +3,13 @@
 #### [Advisor](https://medicine.yale.edu/intmed/ctra/profile/francis_p_wilson/): Dr. Francis Perry Wilson, MD MSCE 
 
 ### Yale School of Medicine, Internal Medicine, Professor, Director of [Clinical and Translational Research Accelerator](https://medicine.yale.edu/intmed/ctra/)
+<img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/ysm/02ctra_logo.png?raw=true" alt="CTRA" width="300" align = "center"/>
 
-## Introduction
+<br>
+
+---
+
+### Introduction
 
 Acute Kidney Injury (AKI) is a sudden onset of kidney failure and damage marked by an increase in the serum creatinine levels (amongst other biomarkers) of the patient. Kidney Disease Improving Global Outcomes (KDIGO) has a set of guidelines and standard definitions of AKI:
 
