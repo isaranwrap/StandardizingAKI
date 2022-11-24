@@ -1,7 +1,7 @@
 
-R version 4.0.1 (2020-06-06) -- "See Things Now"
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
 Copyright (C) 2020 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin17.0 (64-bit)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -50,53 +50,7 @@ Type 'q()' to quit R.
 > ### ** Examples
 > 
 > returnAKIpatients(toy)
-NULL
-      patient_id inpatient                time creatinine aki
-   1:      12732     FALSE 2019-11-16 05:42:42       1.05   0
-   2:      12732     FALSE 2019-11-20 05:42:42       1.61   0
-   3:      12732     FALSE 2020-01-15 05:42:42       1.42   0
-   4:      12732     FALSE 2020-02-27 11:42:42       1.26   0
-   5:      12732      TRUE 2020-03-01 17:42:42       1.06   0
-  ---                                                        
-1074:      14305     FALSE 2019-12-18 07:35:50       0.97   0
-1075:      14305     FALSE 2020-01-19 13:35:50       0.90   0
-1076:      14305     FALSE 2020-01-30 01:35:50       0.78   0
-1077:      14305     FALSE 2020-03-22 01:35:50       1.01   0
-1078:      14305     FALSE 2020-04-10 07:35:50       1.33   0
-> 
-> 
-> 
-> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
-> base::cat("returnAKIpatients", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
-> cleanEx()
-> nameEx("returnBaselineCreat")
-> ### * returnBaselineCreat
-> 
-> flush(stderr()); flush(stdout())
-> 
-> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-> ### Name: returnBaselineCreat
-> ### Title: Return the baseline creatinine, helper function
-> ### Aliases: returnBaselineCreat
-> 
-> ### ** Examples
-> 
-> returnBaselineCreat(toy, eGFR_impute = TRUE)
-Error in `dplyr::mutate()`:
-! Problem while computing `creat_over_kappa = 75/(141 * (1 + 0.018 *
-  sex) * 0.993^age)`.
-Caused by error:
-! object 'sex' not found
-Backtrace:
-     ▆
-  1. ├─akiFlagger::returnBaselineCreat(toy, eGFR_impute = TRUE)
-  2. │ └─dataframe %>% ...
-  3. ├─dplyr::mutate(...)
-  4. ├─dplyr:::mutate.data.frame(...)
-  5. │ └─dplyr:::mutate_cols(.data, dplyr_quosures(...), caller_env = caller_env())
-  6. │   ├─base::withCallingHandlers(...)
-  7. │   └─mask$eval_all_mutate(quo)
-  8. └─base::.handleSimpleError(`<fn>`, "object 'sex' not found", base::quote(mask$eval_all_mutate(quo)))
-  9.   └─dplyr h(simpleError(msg, call))
- 10.     └─rlang::abort(...)
+Error in `[.data.frame`(dataframe, , `:=`(min_creat48, sapply(.SD[, time],  : 
+  unused argument (by = patient_id)
+Calls: returnAKIpatients -> [
 Execution halted

@@ -18,5 +18,5 @@ The dataframe inputted with the \code{baseline_creat} column added in
 Return the baseline creatinine, helper function
 }
 \examples{
-returnBaselineCreat(toy, eGFR_impute = TRUE)
+returnBaselineCreat(toy.demo, eGFR_impute = TRUE)
 }

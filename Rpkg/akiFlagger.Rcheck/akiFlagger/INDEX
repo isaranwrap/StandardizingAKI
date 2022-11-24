@@ -1,7 +1,8 @@
 returnAKIpatients       Main logic for calculating and returning
                         patients with AKI
 returnBaselineCreat     Return the baseline creatinine, helper function
-runAllDefinitions       Rolling Minimum Window (RMW) Definition
+runAllDefinitions       Helper function to run all THREE definitions
+                        for acute kidney injury (AKI)
 runGUI                  GUI Shiny App
 toy                     Toy dataset
 toy.demo                Toy dataset

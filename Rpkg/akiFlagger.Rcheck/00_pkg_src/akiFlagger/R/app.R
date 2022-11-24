@@ -19,28 +19,27 @@ library(ggplot2)
 library(zoo)
 library(DT)
 
-baseFolder <- file.path("/Users", "saranmedical-smile", "AKIFlagger")
+baseFolder <- file.path("/Users", "Praveens", "github", "StandardizingAKI")
 dataFolder <- file.path(baseFolder, "data")
-imageFolder <- file.path(baseFolder, "images")
-scriptsFolder <- file.path(baseFolder, "scripts/StandardizingAKI/scripts/")
+logoFolder <- file.path(baseFolder, "logos/hex")
+scriptsFolder <- file.path(baseFolder, "scripts")
 source(file.path(scriptsFolder, "plotAKIoverlap.R"))
 source(file.path(scriptsFolder, "returnAKIpatients.R"))
-
-saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
-  return(write(jsonlite::toJSON(dataframe), file = outFP))
-}
-
+#
+#
+#/Users/Praveens/github/StandardizingAKI/Rpkg/akiFlagger/www
 ui <- fluidPage(theme = shinytheme("sandstone"),
                 sidebarPanel(
                   headerPanel(paste("AKI Flagger", today())),
                   fileInput("file", "FILE",
                             accept = "text/csv"), # END FILE INPUT
-                  img(src=file.path(imageFolder, "logos/hexlogo.png"), align = "right",
+                  img(src=file.path(logoFolder, "07hexlogo.png"), align = "right",
                       height = 64, width = 64), # Image Logo
                   checkboxGroupButtons("definitionSelector",
                                        "DEFINITION:",
                                        c("RMW", "HBT", "BCI"),
                                        selected = c("RMW")),
+                  selectInput("happyIndex", label = "happyBoolean", choices = c("happy", "notHappy"), selected = "happy", multiple = T, selectize = T),
                   #inline = TRUE), # END CHECKBOX INPUT
                   sliderInput("padding", "PADDING",
                               value = 4, min = 0, max = 8), # END SLIDER INPUT
@@ -75,12 +74,12 @@ server <- function(input, output, session) {
     }
   })
 
-  definitionRMW <- reactive(tableIN() %>% returnAKIpatients_RMW(padding = c(input$padding, "hours")))
+  definitionRMW <- reactive(tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours")))
   definitionHBT <- reactive(
-    tableIN() %>% returnAKIpatients_HBT(padding = c(input$padding, "hours"))
+    tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), HB_trumping = TRUE)
   )
   definitionBCI <- reactive(
-    definitionBCI <- tableIN() %>% returnAKIpatients_BCI(padding = c(input$padding, "hours"))
+    definitionBCI <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), eGFR_impute = TRUE)
   )
 
   tableREACTIVE <- eventReactive(input$go, {
@@ -98,28 +97,23 @@ server <- function(input, output, session) {
 
     }
     if ("RMW" %in% input$definitionSelector) {
-      tableReactive <- tableIN() %>% returnAKIpatients_RMW(padding = c(input$padding, "hours"))
+      tableReactive <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), RM_window = T)
     } else if ("HBT" %in% input$definitionSelector) {
-      tableReactive <- tableIN() %>% returnAKIpatients_HBT(padding = c(input$padding, "hours"))
+      tableReactive <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), HB_trumping = T)
     } else if ("BCI" %in% input$definitionSelector) {
-      tableReactive <- tableIN() %>% returnAKIpatients_BCI(eGFR_impute = T,
-                                                           padding = c(input$padding, "hours"))
+      tableReactive <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), eGFR_impute = T)
+                                                           #padding = c(input$padding, "hours"))
     }
     return(tableReactive)
   }
   )
 
-  writeOut <- shiny::eventReactive(input$go, {
-    saveJSON(tableREACTIVE())
-    message(list.files(dataFolder))
-  })
-
-  output$venn <- renderPlot({
+  output$venn <- shiny::renderPlot({
 
     plotAKIoverlap(tableREACTIVE())
   })
 
-  output$download <- downloadHandler(
+  output$download <- shiny::downloadHandler(
     filename = function() {
       if (input$file$name == "") {
         paste("Untitled_aki", "csv", sep=".")

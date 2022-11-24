@@ -18,22 +18,20 @@ library(tidyverse)
 library(zoo)
 library(DT)
 
-source("plotAKIoverlap.R")
-source("returnAKIpatients.R")
+#source("plotAKIoverlap.R")
+#source("returnAKIpatients.R")
+source("/Users/Praveens/github/StandardizingAKI/scripts/plotAKIoverlap.R")
+source("/Users/Praveens/github/StandardizingAKI/scripts/returnAKIpatients.R")
 baseFolder <- file.path("/Users", "saranmedical-smile", "AKIFlagger")
 dataFolder <- file.path(baseFolder, "data")
 imageFolder <- file.path(baseFolder, "images")
-
-saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
-  return(write(jsonlite::toJSON(dataframe), file = outFP))
-}
 
 ui <- fluidPage(theme = shinytheme("sandstone"),
   sidebarPanel(
     headerPanel(paste("AKI Flagger", today())),
     fileInput("file", "FILE",
               accept = "text/csv"), # END FILE INPUT
-    img(src="hex-AKI FlaggeR_github.png", align = "right",
+    img(src="hexlogo.png", align = "right",
         height = 64, width = 64), # Image Logo
     checkboxGroupButtons("definitionSelector",
                        "DEFINITION:",
@@ -73,12 +71,15 @@ server <- function(input, output, session) {
     }
   })
 
-  definitionRMW <- reactive(tableIN() %>% returnAKIpatients_RMW(padding = c(input$padding, "hours")))
+  definitionRMW <- reactive(tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"),
+                                                            RM_window = T))
   definitionHBT <- reactive(
-    tableIN() %>% returnAKIpatients_HBT(padding = c(input$padding, "hours"))
+    tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"),
+                                    HB_trumping = T)
   )
   definitionBCI <- reactive(
-    definitionBCI <- tableIN() %>% returnAKIpatients_BCI(padding = c(input$padding, "hours"))
+    definitionBCI <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"),
+                                                     eGFR_impute = T)
   )
 
   tableREACTIVE <- eventReactive(input$go, {

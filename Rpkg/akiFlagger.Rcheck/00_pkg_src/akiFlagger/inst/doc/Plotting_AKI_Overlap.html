@@ -120,13 +120,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -334,18 +341,20 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<p>OK! So we run the AKI Flagger on our patient data set and that’s all good, but what now? The key point is to understand that the different definitions in the literature are all capturing subtely different phenotypes of the underlying etiology of kidney dysfunction. We’ll start off by loading our libraries. For the subsequent data analysis, we will want to import a few more libraries that can allow us to understand the differences between which patient populations are being captured. I’ll draw a few concepts from set theory in order to make some of the key points, because although the differences in gross outcomes (i.e. hard outcomes: death and dialysis) are substantial, to tease apart the differences in definitions requires some probing.</p>
+<p>OK! So we run the AKI Flagger on our patient data set and that’s all
+good, but what now? The key point is to understand that the different
+definitions in the literature are all capturing subtely different
+phenotypes of the underlying etiology of kidney dysfunction. We’ll start
+off by loading our libraries. For the subsequent data analysis, we will
+want to import a few more libraries that can allow us to understand the
+differences between which patient populations are being captured. I’ll
+draw a few concepts from set theory in order to make some of the key
+points, because although the differences in gross outcomes (i.e. hard
+outcomes: death and dialysis) are substantial, to tease apart the
+differences in definitions requires some probing.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;tidyverse&#39; was built under R version 4.0.2</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;ggplot2&#39; was built under R version 4.0.2</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;tibble&#39; was built under R version 4.0.2</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;tidyr&#39; was built under R version 4.0.5</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;readr&#39; was built under R version 4.0.5</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;dplyr&#39; was built under R version 4.0.5</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;forcats&#39; was built under R version 4.0.2</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(akiFlagger)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;data.table&#39; was built under R version 4.0.2</span></span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(akiFlagger)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code></pre></div>
 
 
 

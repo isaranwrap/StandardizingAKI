@@ -1,9 +1,12 @@
+# Import libraries
 import pandas as pd
 import numpy as np
 import datetime, random
 
+# Versioning
 __version__ = '1.0.8' # master file
 
+# Bulk logic (Main implementation switched from functional paradigm to class-based (i.e. OOP) in 2020) 
 class AKIFlagger:
     ''' Main logic to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 

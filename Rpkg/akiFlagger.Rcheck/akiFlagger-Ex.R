@@ -63,18 +63,13 @@ flush(stderr()); flush(stdout())
 
 base::assign(".ptime", proc.time(), pos = "CheckExEnv")
 ### Name: runAllDefinitions
-### Title: Rolling Minimum Window (RMW) Definition
+### Title: Helper function to run all THREE definitions for acute kidney
+###   injury (AKI)
 ### Aliases: runAllDefinitions
 
 ### ** Examples
 
-# returnAKIpatients_RMW(toy)
-# Historical Baseline Trumping (HBT) Definition
-#
-# returnAKIpatients_HBT(toy)
-# Helper function to run all THREE definitions for acute kidney injury (AKI)
-
-# runAllDefinitions(toy)
+runAllDefinitions(toy)
 
 
 
