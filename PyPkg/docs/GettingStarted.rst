@@ -16,7 +16,7 @@ To begin with, we'll import the ``akiFlagger`` module.
 
     from akiFlagger import AKIFlagger, generate_toy_data
     
-    >> '1.0.0'
+    >> '1.0.8.0'
 
 .. option:: R
 .. code-block:: R
@@ -43,7 +43,7 @@ The flagger comes with a built-in generator of a toy dataset to demonstrate how 
     
        Toy dataset shape: (9094, 6)
 
-The toy dataset comes with columns for the patient identifier, the encounter identifier, whether the measurement was inpatient or outpatient, the creatinine measurement and time at which the measurement was taken. ``toy.head()`` should yield something like this:
+The toy dataset comes with columns for the patient identifier, whether the measurement was taken in an inpatient or outpatient setting, the creatinine measurement and time at which the measurement was taken. ``toy.head()`` should yield something like this:
 
 .. csv-table::
     :file: ../doc_csvs/python/toy_head.csv
@@ -59,11 +59,11 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     In order to calculate AKI, the flagger expects a dataset with certain columns in it. Depending on the type of computation you are interested in, your dataset will need to have different columns. Here's a brief rundown of the necessary columns. 
 
-    * *Rolling-window*: **patient_id**, **inpatient**, **time**, and **creatinine** 
+    * *Rolling Minimum Window*: **patient_id**, **inpatient**, **time**, and **creatinine** 
 
-    * *Back-calculate*: **patient_id**, **inpatient**, **time**, and **creatinine**
+    * *Historical Baseline Trumping*: **patient_id**, **inpatient**, **time**, and **creatinine**
 
-    * *eGFR-imputed baseline creatinine*: **age**, **sex** (defaults to female), and **race** (defaults to black).
+    * *Baseline Creatinine Imputation*: **age** and **sex** (which defaults to female).
 
     ------------
 
@@ -73,22 +73,22 @@ The R package comes with a built-in dataset, `toy`. The toy dataset comes with c
 
     **inpatient/outpatient → 'inpatient'**
 
-    **creatinine →'creatinine'** 
+    **creatinine → 'creatinine'** 
         
     **time → 'time'** 
 
     If you have different names for your columns, you **must specify them.** 
 
-Example: Rolling-window
------------------------
+Example: Rolling Minimum Window
+-------------------------------
 
 The next code block runs the flagger and returns those patients who satisfy the AKI conditions according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ for change in creatinine values by the rolling-window definition, categorized as follows:
 
-*Stage 1:* **(1)** 50% ↑ in creatinine in < 7 days OR **(2)** 0.3 mg/dL ↑ in creatinine in  < 48 hours
+*Stage 1:* **(1)** 50% ↑ in creatinine in <= 7 days OR **(2)** 0.3 mg/dL ↑ in creatinine in  <= 48 hours
 
-*Stage 2:* 100\% ↑ (or doubling of) in creatinine in < 7 days
+*Stage 2:* 100\% ↑ (or doubling of) in creatinine in <= 7 days
 
-*Stage 3:* 200\% ↑ (or tripling of) in creatinine in < 7 days
+*Stage 3:* 200\% ↑ (or tripling of) in creatinine in <= 7 days
 
 .. option:: Python
 
@@ -169,7 +169,7 @@ The flagger runs on a row-wise basis, meaning that each row is checked for the i
 .. warning::
 
     The patient dataset you input should have minimally these columns: ``patient_id``, ``inpatient``, ``time``, and ``creatinine``. If you are interested in demographic-based imputation, 
-    you'll also want to include the columns ``age``, ``sex``, and ``race``. 
+    you'll also want to include the ``age`` and ``sex`` columns. 
 
 We can take a look at what the flagger flagged as AKI. ``head(out[out$aki > 0])`` should give a list of some patients which were flagged. From that, we can subset the dataset on any given patient:
 
@@ -196,8 +196,8 @@ You can look at aggregate counts if you wanted as follows (but don't take the nu
     >>    0    1    2    3 
         1001   44   19   14 
 
-Example: Back-calculation
--------------------------
+Example: Historical Baseline Trumping
+-------------------------------------
 
 Next, we'll run the flagger to "back-calculate" AKI; that is, using the **median outpatient creatinine values from 365 to 7 days prior to admission** to impute a baseline creatinine value. Then, we'll run the same KDIGO criterion (except for the 0.3 increase) comparing the creatinine value to baseline creatinine.
 
@@ -228,26 +228,25 @@ Actually, by default the toy dataset only has patient values :math:`\pm` 5 days 
 This is important: in the absence of available baseline creatinine values, the flagger defaults to a rolling minimum comparison. Indeed, most of the checking for AKI occurs outside of period of hospitalization.
 Normally, of course, patients won't have times restricted to just :math:`\pm` 5 days, but this is a good opportunity to showcase one of the flagger features: the **eGFR-based imputation of baseline creatinine**.
 
-The following equation is known as the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating); developed via spline analysis by *Levey et. Al, 2009*. The full paper, along with the derived constants, can be found [here](https://pubmed.ncbi.nlm.nih.gov/19414839/>`_.
+The following equation is known as the `CKD-EPI equation <https://www.kidney.org/content/ckd-epi-creatinine-equation-2021>`_  .
 
 .. math::
     \begin{equation}
-    GFR = 141 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)^{-1.209} \times 0.993^{Age} \times (1 + 0.018 f) \times ( 1 + 0.159 b)
+    GFR = 142 \times min(S_{cr} / \kappa, 1)^{\alpha} \times max(S_{cr} / \kappa, 1)^{-1.200} \times 0.9938^{Age} \times (1 + 0.012 f)
     \end{equation}
 
 where:
 
 - :math:`GFR`  :math:`(\frac{mL/min}{1.73m^2})` is the glomerular filtration rate
 - :math:`S_{cr}`  :math:`(\frac{mg}{dL})` is the serum creatinine
-- :math:`\kappa` (unitless) is 0.7 for females and 0.9 for males
-- :math:`\alpha` (unitless) is -0.329 for females and -0.411 for males
+- :math:`\kappa` (unitless) is 0.7 for females and 0.9 for males 
+- :math:`\alpha` (unitless) is -0.241 for females and -0.302 for males
 - :math:`f` is 1 if female, 0 if male
-- :math:`b` is 1 if black, 0 if another race
 
-The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age, sex, and race to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
+The idea is as follows: based on the above equation, we assume a GFR of 75 and then use the age and sex of the patient to determine an estimate for the baseline creatinine. Theory aside, simply pass ``eGFR_impute = True`` into the flagger and this will add values where the patient was missing outpatient values 365 to 7 days prior to admission.
 
 .. option:: Python
-**Note:** The toy dataset doesn't come with demographic information by default, but simply passing ``include_demographic_info = True`` adds in the age, race, and sex columns. We need to specify that sex is female & race is black in the flagger as well.
+**Note:** The toy dataset doesn't come with demographic information by default, but simply passing ``include_demographic_info = True`` adds in a column for the age and sex variables.
 
 .. code-block:: python
 
@@ -261,7 +260,7 @@ The idea is as follows: based on the above equation, we assume a GFR of 75 and t
 .. code-block:: python
 
     flagger = AKIFlagger(HB_trumping = True, eGFR_impute = True, add_baseline_creat = True,
-                         sex = 'female', race = 'black')
+                         sex = 'female')
 
     out = flagger.returnAKIpatients(toy)
 
@@ -272,11 +271,11 @@ The idea is as follows: based on the above equation, we assume a GFR of 75 and t
 
 .. option:: R
 
-There are actually two toy datasets that come with the packages: ``toy`` and ``toy.demo``. ``toy.demo`` is the toy dataframe with columns for age, sex, and race. As such, all we have to do is run
+There are actually two toy datasets that come with the packages: ``toy`` and ``toy.demo``. ``toy.demo`` is the toy dataframe with demographic information added in. As such, all we have to do is run
 
 .. code-block:: R
 
-    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = T)
+    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = F)
 
     head(out)
 
@@ -284,3 +283,22 @@ There are actually two toy datasets that come with the packages: ``toy`` and ``t
     :file: ../doc_csvs/r/egfr_out.csv
 
 That about does it for the basics! There are a slew of other features, some of which are listed in the `Additional Features` section. For a full listing of the features and appropriate use cases, see the `Documentation` at `akiflagger.readthedocs.io <https://akiflagger.readthedocs.io/en/latest/>`_.
+
+Example: Baseline Creatinine Imputation
+---------------------------------------
+
+.. option:: Python
+
+.. code-block:: python
+    
+    flagger = AKIFlagger(HB_trumping = True, eGFR_impute = True, add_baseline_creat = True)
+
+    out = flagger.returnAKIpatients(toy)
+
+
+.. option:: R
+
+.. code-block:: R
+
+    out <- returnAKIpatients(toy.demo, HB_trumping = T, eGFR_impute = T)
+    

@@ -8,7 +8,7 @@ Useful guides exist for more information about AKI, rolling windows, the back-ca
 
 * `AKI <https://www.kidney.org/atoz/content/AcuteKidneyInjury>`_
 * `KDIGO guidelines <https://kdigo.org/guidelines/acute-kidney-injury/>`_
-* `KDIGO standard definitions <http://www.european-renal-best-practice.org/sites/default/files/u33/ndt.gfs375.full_.pdf>`_
+* `KDIGO standard definitions <https://www.uptodate.com/contents/image?imageKey=NEPH%2F83168>`_
 * `Rolling window <https://www.mathworks.com/help/econ/rolling-window-estimation-of-state-space-models.html>`_
 * `Back-calculation <https://cjasn.asnjournals.org/content/5/7/1165>`_
 * `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_
