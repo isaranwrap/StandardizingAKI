@@ -26,10 +26,6 @@ scriptsFolder <- file.path(baseFolder, "scripts/StandardizingAKI/scripts/")
 source(file.path(scriptsFolder, "plotAKIoverlap.R"))
 source(file.path(scriptsFolder, "returnAKIpatients.R"))
 
-saveJSON <- function(dataframe, outFP = file.path(dataFolder, "appOUT.json")) {
-  return(write(jsonlite::toJSON(dataframe), file = outFP))
-}
-
 ui <- fluidPage(theme = shinytheme("sandstone"),
                 sidebarPanel(
                   headerPanel(paste("AKI Flagger", today())),
@@ -98,28 +94,23 @@ server <- function(input, output, session) {
 
     }
     if ("RMW" %in% input$definitionSelector) {
-      tableReactive <- tableIN() %>% returnAKIpatients_RMW(padding = c(input$padding, "hours"))
+      tableReactive <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), RM_window = T)
     } else if ("HBT" %in% input$definitionSelector) {
-      tableReactive <- tableIN() %>% returnAKIpatients_HBT(padding = c(input$padding, "hours"))
+      tableReactive <- tableIN() %>% returnAKIpatients(padding = c(input$padding, "hours"), HB_trumping = T)
     } else if ("BCI" %in% input$definitionSelector) {
-      tableReactive <- tableIN() %>% returnAKIpatients_BCI(eGFR_impute = T,
+      tableReactive <- tableIN() %>% returnAKIpatients(eGFR_impute = T,
                                                            padding = c(input$padding, "hours"))
     }
     return(tableReactive)
   }
   )
 
-  writeOut <- shiny::eventReactive(input$go, {
-    saveJSON(tableREACTIVE())
-    message(list.files(dataFolder))
-  })
-
-  output$venn <- renderPlot({
+  output$venn <- shiny::renderPlot({
 
     plotAKIoverlap(tableREACTIVE())
   })
 
-  output$download <- downloadHandler(
+  output$download <- shiny::downloadHandler(
     filename = function() {
       if (input$file$name == "") {
         paste("Untitled_aki", "csv", sep=".")

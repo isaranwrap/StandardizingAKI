@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 import datetime, random
 
-__version__ = '1.0.3' # master file
+__version__ = '1.1' # master file
 
 class AKIFlagger:
     ''' Main logic to detect patients with acute kidney injury (AKI). This flagger returns patients with AKI according to the `KDIGO guidelines <https://kdigo.org/guidelines/>`_ on changes in creatinine\*. The KDIGO guidelines are as follows:
 
-        * *Stage 1:* 0.3 mg/dL increase in serum creatinine in < 48 hours OR 50% increase in serum creatinine in < 7 days (168 hours)
-        * *Stage 2:* 100% increase in (or doubling of) serum creatinine in < 7 days (168 hours)
-        * *Stage 3:* 200% increase in (our tripling of) serum creatinine in < 7 days (168 hours)
+        * *Stage 1:* 0.3 mg/dL increase in serum creatinine in <= 48 hours OR 50% increase in serum creatinine in <= 7 days (168 hours)
+        * *Stage 2:* 100% increase in (or doubling of) serum creatinine in <= 7 days (168 hours)
+        * *Stage 3:* 200% increase in (our tripling of) serum creatinine in <= 7 days (168 hours)
 
         \*Except for the stage 3 condition of a creatinine value larger than 4.0 mg/dL. This `paper <http://www.european-renal-best-practice.org/sites/default/files/u33/ndt.gfs375.full_.pdf>`_ has the full specifications including
         inclusion criterion based on urinary output and renal replacement therapy.
@@ -27,12 +27,11 @@ class AKIFlagger:
         
         age (string): **default 'age'.** Name of the column containing the age values; e.g. 'age'
         sex (string): **default 'sex'.** Name of the column containing the sex values; e.g. 'female'
-        race (string): deprecated; **default 'race'.** Name of the column containing the race values; e.g. 'black'
         
         HB_trumping (boolean): **default False.** Whether or not to have the historical baseline value trump the rolling 
             minimum value around admission time. 
         eGFR_impute (boolean): **default False.** Whether or not to impute the missing baseline creatinine values with the
-            eGFR-imputation method; i.e. assuming an eGFR of 75 estimate baseline creatinine based on age, sex, and race.
+            eGFR-imputation method; i.e. assuming an eGFR of 75 estimate baseline creatinine based on age and sex. 
         
         cond1time (string): **default '48hours'.** The rolling-window time of the first KDIGO criterion condition.
             This string gets passed to pd.Timedelta(cond1time), so any acceptable time format for that function will work.
@@ -237,7 +236,7 @@ class AKIFlagger:
         # Admission column imputation:
         
         # Admission is defined as the first timestamp where THIS occurs:
-        # two consecutive inpatient creatinine measurements <= 72 hours amart
+        # two consecutive inpatient creatinine measurements <= 72 hours apart
 
         cond1 = tmp.groupby(self.patient_id)[self.time].diff(1).shift(-1) <= pd.Timedelta('72hours') # Time constraint check: ensure the inpatients grouped are w/ in 72 hours from each other
         cond2 = tmp[self.inpatient] & tmp.groupby(self.patient_id)[self.inpatient].shift(-1).astype('bool') # Chunk check: ensure that the True (inpatient) is followed by another True
@@ -254,7 +253,7 @@ class AKIFlagger:
         tmp = tmp.drop('c1c2', axis=1)
         return tmp
     
-    def _eGFRbasedCreatImputation(self, age, female, black): # Deprecated function, not in use internally (yet)
+    def _eGFRbasedCreatImputation(self, age, female, black): # Deprecated function, not in use internally (anymore)
         '''Imputes the baseline creatinine values for those patients missing outpatient creatinine measurements from 365 to 7 days prior to admission.
         The imputation is based on the `CKD-EPI equation <https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/estimating>`_ from the paper
         *A New Equation to Estimate Glomerular Filtration Rate (Levey et. Al, 2009)*.
@@ -291,12 +290,13 @@ class AKIFlagger:
         Args: 
             age (int): age of patient
             female (int): sex of patient; defaults to female (i.e. sex = 1 is female)
-            black (int): race of patient; black or not black... working on removing this from the analysis.
         
         '''
 
         kappa = (0.9 - 0.2*female)
-        alpha = (-0.543 + 0.302*female)
+        alpha = (-0.302 + 0.061 *female)
+        #creat_over_kappa = 75 / (142*0.012*female*0.9938**age)
+        #alpha = (-0.543 + 0.302*female) # AA fix
         creat_over_kappa = 75/(142*(1 + 0.012*female)*0.9938**age)
 
         # Note that if creat/kappa is < 1 then the equation simplifies to creat_over_kappa = (creat/kappa)**(-1.209)
@@ -438,7 +438,7 @@ def generate_toy_data(num_patients = 100, num_encounters_range = (1, 3), num_tim
             df = df.set_index([patient_id, time], drop=False)
             
         if include_demographic_info:
-            df = df.loc[:,[patient_id, age, female, black, inpatient, time, creatinine]]
+            df = df.loc[:,[patient_id, age, female, inpatient, time, creatinine]] # Removed black variable; 2022-11-01
             if printMsg:
                 print('Successfully generated toy data!\n')
             return df

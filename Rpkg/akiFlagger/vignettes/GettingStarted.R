@@ -6,4 +6,5 @@ knitr::opts_chunk$set(
 
 ## ----setup--------------------------------------------------------------------
 library(akiFlagger)
+library(tidyverse)
 

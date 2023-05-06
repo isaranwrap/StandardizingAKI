@@ -2,7 +2,7 @@
 % Please edit documentation in R/returnAKIpatients.R
 \name{runAllDefinitions}
 \alias{runAllDefinitions}
-\title{Rolling Minimum Window (RMW) Definition}
+\title{Helper function to run all THREE definitions for acute kidney injury (AKI)}
 \usage{
 runAllDefinitions(dataframe, padding = c(4, "hours"))
 }
@@ -11,35 +11,13 @@ runAllDefinitions(dataframe, padding = c(4, "hours"))
 
 \item{padding}{The amount of padding you would like to add to the rolling windows. Enter this as a c(\code{integer}, \code{string}) vector where
 \code{integer} is the amount of time and \code{string} are the units of time. Defaults to \code{c(4L, "hours")}.}
-
-\item{RM_window}{Boolean definition selector, whether you would like to implement the rolling-minimum window \href{https://akiflagger.readthedocs.io/}{(RMW)} definition.}
-
-\item{HB_trumping}{Boolean definition selector, whether you would like to implement the Historical Baseline Trumping \href{https://akiflagger.readthedocs.io/}{(HBT)} definition.}
-
-\item{eGFR_impute}{Boolean definition selector, whether you would like to implement the Baseline Creatinine Imputation \href{https://akiflagger.readthedocs.io/}{(BCI)} definition.}
-
-\item{window1, window2}{The amount of time in the shorter and longer rolling windows, respectively. The default values are 48 and 172 hours (2 and 7 days), respectively.
-The vector (same format as \code{\link{akiFlagger::padding}}) is fed into a \code{difftime()} object.}
-
-\item{addIntermediateCols}{Boolean selector, whether you would like to add in the intermediate columns generated during calculation; namely the minimum creatinine & the baseline creatinines.
-Defaults to \code{FALSE}.}
 }
 \value{
-The input patient dataset with the AKI column added in.
-
-The input patient dataset with the AKI column added in.
-
 The input patient dataset with the 3 AKI columns added in, titled \code{RMW}, \code{HBT} and \code{BCI}.
 }
 \description{
-Rolling Minimum Window (RMW) Definition
+Helper function to run all THREE definitions for acute kidney injury (AKI)
 }
 \examples{
-returnAKIpatients_RMW(toy)
-Historical Baseline Trumping (HBT) Definition
-
-returnAKIpatients_HBT(toy)
-Helper function to run all THREE definitions for acute kidney injury (AKI)
-
 runAllDefinitions(toy)
 }
