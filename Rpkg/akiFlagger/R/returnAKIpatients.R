@@ -270,8 +270,8 @@ returnAKIpatients <- function(dataframe, RM_window = TRUE, HB_trumping = FALSE, 
 #' runAllDefinitions(toy)
 runAllDefinitions <- function(dataframe, padding = c(4, "hours")) {
   dataframe.RMW <- returnAKIpatients(dataframe, RM_window = TRUE)
-  dataframe.HBT <- returnAKIpatients_HBT(dataframe, HB_trumping = TRUE)
-  dataframe.BCI <- returnAKIpatients_BCI(dataframe, eGFR_impute = TRUE)
+  dataframe.HBT <- returnAKIpatients(dataframe, HB_trumping = TRUE)
+  dataframe.BCI <- returnAKIpatients(dataframe, eGFR_impute = TRUE)
 
   dataframe$RMW <- dataframe.RMW$aki
   dataframe$HBT <- dataframe.HBT$aki
