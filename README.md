@@ -1,8 +1,11 @@
 <br>
+
+<h1 align="center"> AKI Flagger </h1>   
+
 <br>
 
 <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/logos/hex/07hexlogo.png?raw=true" alt="hex-AKI FlaggeR_github" width="200" align = "right"/>
-<img src="https://images.weserv.nl/?url=https://raw.githubusercontent.com/isaranwrap/StandardizingAKI/master/DrPerryWilson_YaleBlue.png&mask=circle&w=200&h=200" alt="CTRA" width="200" align="right">   
+<img src="https://images.weserv.nl/?url=https://raw.githubusercontent.com/isaranwrap/StandardizingAKI/master/DrPerryWilson_YaleBlue.png&mask=circle&w=200&h=200" alt="CTRA" width="200" align="left">   
 
 <!-- <img src="https://github.com/isaranwrap/StandardizingAKI/blob/master/DrPerryWilson_YaleBlue.png?raw=true" alt="CTRA" width="200" align = "right" style="border-radius: 50%; width: 200px; height: 200px;"/> -->
 
@@ -20,7 +23,7 @@
 
 <br>
 
-
+---
 ---
 
 ## Getting started
